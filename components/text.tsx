@@ -1,9 +1,22 @@
-import styles from '@/styles/global';
-import { Text as _Text, TextProps } from 'react-native';
+import styles, { fonts } from '@/styles/global';
+import { Text as _Text, TextProps as _TextProps } from 'react-native';
 
-export default function Text({ children, style, ...rest }: TextProps) {
+interface TextProps {
+    size?: number,
+    weight?: string
+}
+
+export default function Text({ size = 14, weight = 'light', children, style, ...rest }: TextProps & _TextProps) {
+
     return (
-        <_Text style={[styles.text, style]} {...rest}>
+        <_Text style={[
+            styles.text,
+            {
+                fontFamily: fonts.poppins[weight as keyof typeof fonts.poppins],
+                fontSize: size
+            },
+            style
+        ]} {...rest}>
             {children}
         </_Text>
     );

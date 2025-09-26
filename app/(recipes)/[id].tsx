@@ -1,85 +1,65 @@
+import Ingredient from '@/components/ingredient';
+import PageTitle from '@/components/page-title';
+import Text from '@/components/text';
+import TimeLabel from '@/components/time-label';
+import data from '@/dummy/data';
+import globalStyles from '@/styles/global';
+import { Image, useImage } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 
-const recipeData = {
-  '1': {
-    title: 'Chocolate Cake',
-    ingredients: ['2 cups flour', '1 cup sugar', '1/2 cup cocoa powder', '2 eggs'],
-    instructions: 'Mix dry ingredients, add wet ingredients, bake at 350°F for 30 minutes.',
-  },
-  '2': {
-    title: 'Pasta Carbonara',
-    ingredients: ['400g spaghetti', '200g pancetta', '4 eggs', 'Parmesan cheese'],
-    instructions: 'Cook pasta, fry pancetta, mix with egg and cheese mixture.',
-  },
-  '3': {
-    title: 'Chicken Curry',
-    ingredients: ['1 lb chicken', 'Curry powder', 'Coconut milk', 'Onions', 'Garlic'],
-    instructions: 'Sauté onions and garlic, add chicken and spices, simmer with coconut milk.',
-  },
+
+const styles = {
+    ...globalStyles,
+    ...StyleSheet.create({
+        timeLabels: {
+            flexDirection: 'row',
+            justifyContent: 'space-between'
+        }
+    })
 };
 
 export default function RecipeDetail() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  
-  const recipe = recipeData[id as keyof typeof recipeData];
-  
-  if (!recipe) {
+    const { id } = useLocalSearchParams<{ id: string }>();
+    const image = useImage('https://images.unsplash.com/photo-1603046891726-36bfd957e0bf?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', {
+        maxWidth: 800
+    });
+
+    const recipe = data.recipes.find((recipe) => recipe.id === Number(id));
+    const ingredients = recipe?.ingredients.map((ingredient) => ({
+        ...ingredient,
+        test: 'test',
+        pantryItem: data.pantry.find((pi) => pi.id === ingredient.pantryId)
+    }));
+
+    if (!recipe) {
+        return (
+            <View style={styles.container}>
+                <View style={styles.content}>
+                    <Text style={styles.h2}>Recipe not found</Text>
+                </View>
+            </View>
+        );
+    }
+
     return (
-      <View style={styles.container}>
-        <Text>Recipe not found</Text>
-      </View>
+        <ScrollView style={styles.container}>
+            <PageTitle>{recipe.name}</PageTitle>
+            <View style={[styles.content, styles.timeLabels]}>
+                <TimeLabel label={'prep time'} time={recipe.prepTime} />
+                <TimeLabel label={'cook time'} time={recipe.cookTime} />
+            </View>
+            <View style={styles.content}>
+                <Text style={styles.h2}>Ingredients</Text>
+                <View>
+                    {ingredients?.map((ingredient) => (
+                        <Ingredient key={ingredient.id} ingredient={ingredient} />
+                    ))}
+                </View>
+            </View>
+            <ScrollView style={styles.container}>
+                {image && <Image source={image} style={{ width: image.width / 2, height: image.height / 2 }} />}
+            </ScrollView>
+        </ScrollView>
     );
-  }
-
-  return (
-    <ScrollView style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>{recipe.title}</Text>
-        
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Ingredients:</Text>
-          {recipe.ingredients.map((ingredient, index) => (
-            <Text key={index} style={styles.ingredient}>• {ingredient}</Text>
-          ))}
-        </View>
-        
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Instructions:</Text>
-          <Text style={styles.instructions}>{recipe.instructions}</Text>
-        </View>
-      </View>
-    </ScrollView>
-  );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1
-  },
-  content: {
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  section: {
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  ingredient: {
-    fontSize: 16,
-    marginBottom: 5,
-    marginLeft: 10,
-  },
-  instructions: {
-    fontSize: 16,
-    lineHeight: 24,
-  },
-});

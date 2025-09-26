@@ -27,16 +27,29 @@ export const fontSizes = {
     small: 12,
     regular: 14,
     large: 18,
-    title: 24,
+    title: 36,
     heading: 32,
-    h1: 36
+    h1: 36,
+    h2: 24
+};
+
+export const fonts = {
+    poppins: {
+        light: 'Poppins_300Light',
+        regular: 'Poppins_400Regular',
+        medium: 'Poppins_500Medium',
+        bold: 'Poppins_700Bold'
+    },
+    caprasimo: 'Caprasimo_400Regular'
 };
 
 export default StyleSheet.create({
     // Containers
     container: {
-        flex: 1,
-        backgroundColor: colors.background,
+        flex: 1
+    },
+    content: {
+        paddingHorizontal: 16
     },
 
     // Typography
@@ -52,10 +65,18 @@ export default StyleSheet.create({
         fontFamily: 'Caprasimo_400Regular',
         fontSize: fontSizes.title,
         color: colors.text,
+        textTransform: 'lowercase'
     },
     h1: {
         fontFamily: 'Poppins_500Medium',
         fontSize: fontSizes.h1,
+        color: colors.text,
+        textTransform: 'lowercase'
+    },
+    h2: {
+        paddingVertical: 16,
+        fontFamily: 'Poppins_500Medium',
+        fontSize: fontSizes.h2,
         color: colors.text,
         textTransform: 'lowercase'
     },

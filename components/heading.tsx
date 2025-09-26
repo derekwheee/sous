@@ -23,20 +23,22 @@ const styles = {
 
 interface HeadingProps {
     title: string;
-    linkTo: Href;
-    linkText: string;
+    linkTo?: Href;
+    linkText?: string;
 }
 
 export default function Heading({ title, linkTo, linkText, ...rest }: HeadingProps & ViewProps) {
     return (
         <View style={styles.heading} {...rest}>
             <Text style={styles.h1}>{title}</Text>
-            <Link href={linkTo} style={{ marginLeft: 'auto' }}>
-                <View style={styles.linkWrapper}>
-                    <Text style={styles.link}>{linkText}</Text>
-                    <Feather name="chevron-right" size={16} color={colors.primary} style={styles.chevron} />
-                </View>
-            </Link>
+            {!!linkTo && (
+                <Link href={linkTo} style={{ marginLeft: 'auto' }}>
+                    <View style={styles.linkWrapper}>
+                        <Text style={styles.link}>{linkText}</Text>
+                        <Feather name="chevron-right" size={16} color={colors.primary} style={styles.chevron} />
+                    </View>
+                </Link>
+            )}
         </View>
     );
 }
