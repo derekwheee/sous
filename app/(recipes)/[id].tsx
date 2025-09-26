@@ -55,8 +55,7 @@ export default function RecipeDetail() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#fff',
+    flex: 1
   },
   content: {
     padding: 20,

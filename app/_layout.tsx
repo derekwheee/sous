@@ -1,8 +1,9 @@
 import HamburgerIcon from '@/components/hamburger';
 import Text from '@/components/text';
+import Theme from '@/styles/sous-theme';
 import { Caprasimo_400Regular } from '@expo-google-fonts/caprasimo';
 import { Poppins_300Light, Poppins_400Regular, Poppins_500Medium } from '@expo-google-fonts/poppins';
-import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Drawer } from 'expo-router/drawer';
 import { StatusBar } from 'expo-status-bar';
@@ -35,7 +36,7 @@ export default function RootLayout() {
     }
 
     return (
-        <ThemeProvider value={DefaultTheme}>
+        <ThemeProvider value={Theme}>
             <Drawer screenOptions={({ navigation }) => ({
                 headerLeft: () => (
                     <Pressable

@@ -31,8 +31,7 @@ export default function RecipeList() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#fff',
+    flex: 1
   },
   list: {
     padding: 16,
