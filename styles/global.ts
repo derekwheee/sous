@@ -10,8 +10,9 @@ export const colors = {
     textSecondary: '#666666',
     border: '#E5E5EA',
     success: '#59FF87',
-    warning: '#FF9500',
-    error: '#FF3B30',
+    warning: '#FFDB59',
+    error: '#FF7979',
+    indeterminate: '#E8E8E8'
 };
 
 export const sizes = {
@@ -30,7 +31,8 @@ export const fontSizes = {
     title: 36,
     heading: 32,
     h1: 36,
-    h2: 24
+    h2: 24,
+    h3: 20
 };
 
 export const fonts = {
@@ -80,10 +82,18 @@ export default StyleSheet.create({
         color: colors.text,
         textTransform: 'lowercase'
     },
+    h3: {
+        marginBottom: 16,
+        fontFamily: 'Poppins_500Medium',
+        fontSize: fontSizes.h3,
+        color: colors.text,
+        textTransform: 'lowercase'
+    },
     heading: {
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 16
+        marginBottom: 16,
+        paddingHorizontal: 16
     }
 });

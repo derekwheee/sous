@@ -1,8 +1,8 @@
 import Text from '@/components/text';
 import globalStyles, { colors } from '@/styles/global';
+import { PantryItem, Recipe } from '@/types/interfaces';
 import { Link } from 'expo-router';
 import { Pressable, PressableProps, StyleSheet, View } from 'react-native';
-
 
 const styles = {
     ...globalStyles,
@@ -34,21 +34,50 @@ const styles = {
     })
 };
 
-interface RecipeListingProps {
-    recipe: {
-        id: number,
-        name: string
-    }
+interface RecipeProps {
+    recipe: Recipe
 }
 
-export default function RecipeListing({ recipe, ...rest }: RecipeListingProps & PressableProps) {
+interface PantryProps {
+    pantry: PantryItem[]
+}
+
+export default function RecipeListing({ recipe, pantry, ...rest }: RecipeProps & PantryProps & PressableProps) {
+
+    const availableIngredients = getAvailableIngredients(recipe, pantry);
+
     return (
         <Link href={`/(recipes)/${recipe.id}`} asChild>
             <Pressable style={styles.wrapper} {...rest}>
-                <View style={styles.statusDot} />
+                <View style={[styles.statusDot, { backgroundColor: getStatusDotColor(availableIngredients.length, recipe.ingredients.length) }]} />
                 <Text style={styles.name}>{recipe.name}</Text>
-                <Text style={styles.ingredientsAvailable}>12 / 12</Text>
+                <Text style={styles.ingredientsAvailable}>
+                    {availableIngredients.length} / {recipe.ingredients.length}
+                </Text>
             </Pressable>
         </Link>
     );
+}
+
+function getStatusDotColor(available: number, total: number) {
+
+    if (total === 0) {
+        return colors.indeterminate;
+    }
+
+    if (available === total) {
+        return colors.success;
+    }
+
+    if (available >= (total / 2)) {
+        return colors.warning;
+    }
+
+    return colors.indeterminate;
+}
+
+function getAvailableIngredients(recipe: Recipe, pantry: PantryItem[]) {
+    return recipe.ingredients.filter((ingredient) => {
+        return pantry.some((item) => item.name === ingredient.item);
+    });
 }

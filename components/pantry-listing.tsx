@@ -1,5 +1,6 @@
 import Text from '@/components/text';
 import globalStyles, { colors } from '@/styles/global';
+import { PantryItem } from '@/types/interfaces';
 import { Link } from 'expo-router';
 import { Pressable, PressableProps, StyleSheet, View } from 'react-native';
 
@@ -31,19 +32,24 @@ const styles = {
 };
 
 interface PantryListingProps {
-    pantryItem: {
-        id: number,
-        name: string
-    }
+    pantryItem: PantryItem
 }
 
 export default function PantryListing({ pantryItem, ...rest }: PantryListingProps & PressableProps) {
     return (
         <Link href={`/(recipes)/${pantryItem.id}`} asChild>
             <Pressable style={styles.wrapper} {...rest}>
-                <View style={styles.statusDot} />
+                <View style={[styles.statusDot, { backgroundColor: getStatusDotColor(pantryItem.isInStock) }]} />
                 <Text style={styles.name}>{pantryItem.name}</Text>
             </Pressable>
         </Link>
     );
+}
+
+function getStatusDotColor(isInStock: boolean) {
+    if (isInStock) {
+        return colors.success;
+    }
+
+    return colors.indeterminate;
 }

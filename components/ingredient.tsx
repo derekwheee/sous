@@ -1,5 +1,6 @@
 import Text from '@/components/text';
 import globalStyles from '@/styles/global';
+import { Ingredient as IngredientType } from '@/types/interfaces';
 import Feather from '@expo/vector-icons/Feather';
 import { StyleSheet, View, ViewProps } from 'react-native';
 
@@ -20,24 +21,14 @@ const styles = {
 };
 
 interface IngredientProps {
-    ingredient: {
-        id: number,
-        quantity: string,
-        measurement: string,
-        pantryItem?: {
-            id: number,
-            name: string
-        }
-    }
+    ingredient: IngredientType
 }
 
 export default function Ingredient({ ingredient, ...rest }: IngredientProps & ViewProps) {
     return (
         <View style={styles.wrapper} {...rest}>
             <Feather name="plus-circle" style={styles.icon} size={24} color="#000000" />
-            {ingredient.quantity && (<Text size={16}>{ingredient.quantity}</Text>)}
-            {ingredient.measurement && (<Text size={16}>{ingredient.measurement}</Text>)}
-            {ingredient.pantryItem?.name && (<Text size={16}>{ingredient.pantryItem?.name}</Text>)}
+            {ingredient.sentence && (<Text size={16}>{ingredient.sentence}</Text>)}
         </View>
     );
 }
