@@ -14,7 +14,6 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 const styles = StyleSheet.create({
     tabBar: {
         backgroundColor: '#FFF',
-        height: 80,
         borderTopWidth: 2,
         borderTopColor: colors.primary
     },
@@ -44,14 +43,6 @@ export default function RootLayout() {
                     initialRouteName="(recipes)"
                     screenOptions={() => ({
                         headerShown: false,
-                        headerStyle: {
-                            height: 112,
-                            backgroundColor: '#FFD541',
-                        },
-                        headerTitleStyle: {
-                            fontFamily: 'Caprasimo_400Regular',
-                            fontSize: 36
-                        },
                         tabBarStyle: styles.tabBar,
                         tabBarLabelStyle: styles.tabLabel,
                         tabBarActiveTintColor: colors.primary,
@@ -61,7 +52,6 @@ export default function RootLayout() {
                     <Tabs.Screen
                         name="(recipes)"
                         options={{
-                            title: 'sous',
                             tabBarLabel: 'Recipes',
                             tabBarIcon: ({ color, size }) => <Feather name="book" size={size} color={color} />
                         }}
@@ -69,25 +59,22 @@ export default function RootLayout() {
                     <Tabs.Screen
                         name="(pantry)"
                         options={{
-                            title: 'sous',
                             tabBarLabel: 'Pantry',
                             tabBarIcon: ({ color, size }) => <Feather name="grid" size={size} color={color} />
                         }}
                     />
                     <Tabs.Screen
-                        name="(profile)"
+                        name="(lists)"
                         options={{
-                            title: 'sous',
-                            tabBarLabel: 'Profile',
-                            tabBarIcon: ({ color, size }) => <Feather name="smile" size={size} color={color} />
+                            tabBarLabel: 'Lists',
+                            tabBarIcon: ({ color, size }) => <Feather name="list" size={size} color={color} />
                         }}
                     />
                     <Tabs.Screen
-                        name="(settings)"
+                        name="(profile)"
                         options={{
-                            title: 'sous',
-                            tabBarLabel: 'Settings',
-                            tabBarIcon: ({ color, size }) => <Feather name="settings" size={size} color={color} />
+                            tabBarLabel: 'Profile',
+                            tabBarIcon: ({ color, size }) => <Feather name="smile" size={size} color={color} />
                         }}
                     />
                 </Tabs>

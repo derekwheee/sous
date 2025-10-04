@@ -1,6 +1,8 @@
-const API_HOST = process.env.API_HOST || 'https://rude-tigers-hang.loca.lt';
+const API_HOST = process.env.EXPO_PUBLIC_API_HOST;
 
-console.log('API_HOST:', API_HOST);
+if (!API_HOST) {
+    throw new Error('API_HOST is not defined');
+}
 
 const get = async (url) => {
     const response = await fetch(`${API_HOST}${url}`);

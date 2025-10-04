@@ -16,6 +16,9 @@ const styles = {
         },
         icon: {
             marginRight: 16
+        },
+        ingredientText: {
+            flexShrink: 1
         }
     })
 };
@@ -28,7 +31,7 @@ export default function Ingredient({ ingredient, ...rest }: IngredientProps & Vi
     return (
         <View style={styles.wrapper} {...rest}>
             <Feather name="plus-circle" style={styles.icon} size={24} color="#000000" />
-            {ingredient.sentence && (<Text size={16}>{ingredient.sentence}</Text>)}
+            {ingredient.sentence && (<Text size={16} style={styles.ingredientText}>{ingredient.sentence}</Text>)}
         </View>
     );
 }

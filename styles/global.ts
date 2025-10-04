@@ -93,6 +93,7 @@ export default StyleSheet.create({
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
+        marginTop: 32,
         marginBottom: 16,
         paddingHorizontal: 16
     }

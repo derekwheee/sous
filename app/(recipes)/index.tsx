@@ -33,11 +33,6 @@ export default function HomeScreen() {
         loadData();
     }, []);
 
-    if (loading) {
-        // TODO: Show a loading state
-        return null;
-    }
-
     return (
         <ScrollView style={styles.container}>
             <Heading
@@ -45,7 +40,7 @@ export default function HomeScreen() {
                 linkTo='/(recipes)/new'
                 linkText='create recipe'
             />
-            {recipes.map((recipe: Recipe) => (
+            {!loading && recipes.map((recipe: Recipe) => (
                 <RecipeListing key={recipe.id} recipe={recipe} pantry={pantry} />
             ))}
         </ScrollView>

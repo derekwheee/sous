@@ -8,7 +8,7 @@ const styles = {
         wrapper: {
             display: 'flex',
             flexDirection: 'row',
-            paddingTop: 4,
+            paddingTop: 32,
             paddingBottom: 32,
             paddingHorizontal: 16
         }
