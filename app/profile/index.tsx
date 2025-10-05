@@ -9,7 +9,7 @@ const recipes = [
 
 export default function RecipeList() {
   const renderRecipe = ({ item }: { item: typeof recipes[0] }) => (
-    <Link href={`/(recipes)/${item.id}`} asChild>
+    <Link href={`/recipes/${item.id}`} asChild>
       <TouchableOpacity style={styles.recipeCard}>
         <Text style={styles.recipeTitle}>{item.title}</Text>
         <Text style={styles.recipeDescription}>{item.description}</Text>

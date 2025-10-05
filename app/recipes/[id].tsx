@@ -1,12 +1,12 @@
+import { getRecipe } from '@/api/recipes';
 import Ingredient from '@/components/ingredient';
 import PageTitle from '@/components/page-title';
 import Text from '@/components/text';
 import TimeLabel from '@/components/time-label';
-import { getRecipe } from '@/fetch';
 import globalStyles, { fonts } from '@/styles/global';
 import { Recipe } from '@/types/interfaces';
+import { useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 const styles = {
@@ -36,26 +36,14 @@ const styles = {
 };
 
 export default function RecipeDetail() {
-    const { id } = useLocalSearchParams<{ id: string }>();
+    const id= Number(useLocalSearchParams<{ id: string }>().id);
 
-    const [recipe, setRecipe] = useState<Recipe | null>(null);
-    const [loading, setLoading] = useState(true);
+    const { isFetching, data: recipe } = useQuery<Recipe | null>({
+        queryKey: ['recipe', id],
+        queryFn: () => getRecipe(id)
+    });
 
-    useEffect(() => {
-        async function loadData() {
-            try {
-                setRecipe((await getRecipe(id)) || null);
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        loadData();
-    }, [id]);
-
-    if (loading) {
+    if (isFetching) {
         // TODO: Show a loading state
         return null;
     }

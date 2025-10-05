@@ -31,3 +31,22 @@ export interface Recipe {
     ingredients: Ingredient[];
     instructions: string[];
 }
+
+export interface CreateRecipe {
+    name: string;
+    prepTime: string;
+    cookTime: string;
+    deleteAt?: string;
+    ingredients: string[];
+    instructions: string[];
+}
+
+export interface PatchRecipe {
+    id: number;
+    name?: string;
+    prepTime?: string;
+    cookTime?: string;
+    deleteAt?: string;
+    ingredients?: Ingredient[];
+    instructions?: string[];
+}

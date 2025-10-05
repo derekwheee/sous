@@ -1,7 +1,7 @@
+import { createRecipe, importRecipe } from '@/api/recipes';
 import Heading from '@/components/heading';
 import Text from '@/components/text';
 import TextInput from '@/components/text-input';
-import { createRecipe, importRecipe } from '@/fetch';
 import globalStyles, { colors } from '@/styles/global';
 import Feather from '@expo/vector-icons/Feather';
 import { useHeaderHeight } from '@react-navigation/elements';
@@ -140,7 +140,7 @@ export default function CreateNewRecipe(props: any) {
         }
 
         if (res.id) {
-            router.push(`/(recipes)/${res.id}`);
+            router.push(`/recipes/${res.id}`);
         }
 
         setIsSaving(false);

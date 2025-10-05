@@ -1,16 +1,21 @@
-import data from '@/dummy/data';
+import { getPantryItem } from '@/api/pantry';
+import { PantryItem } from '@/types/interfaces';
+import { useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams } from 'expo-router';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function RecipeDetail() {
-    const { id } = useLocalSearchParams<{ id: string }>();
+    const id = Number(useLocalSearchParams<{ id: string }>().id);
 
-    const pantryItem = data.pantry.find((item) => item.id === Number(id))
+    const { isFetching, data: pantryItem } = useQuery<PantryItem | null>({
+        queryKey: ['pantryItem', id],
+        queryFn: () => getPantryItem(id)
+    });
 
     if (!pantryItem) {
         return (
             <View style={styles.container}>
-                <Text>Recipe not found</Text>
+                <Text>Pantry item not found</Text>
             </View>
         );
     }

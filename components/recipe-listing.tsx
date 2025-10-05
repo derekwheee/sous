@@ -47,7 +47,7 @@ export default function RecipeListing({ recipe, pantry, ...rest }: RecipeProps &
     const availableIngredients = getAvailableIngredients(recipe, pantry);
 
     return (
-        <Link href={`/(recipes)/${recipe.id}`} asChild>
+        <Link href={`/recipes/${recipe.id}`} asChild>
             <Pressable style={styles.wrapper} {...rest}>
                 <View style={[styles.statusDot, { backgroundColor: getStatusDotColor(availableIngredients.length, recipe.ingredients.length) }]} />
                 <Text style={styles.name}>{recipe.name}</Text>

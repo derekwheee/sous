@@ -37,7 +37,7 @@ interface PantryListingProps {
 
 export default function PantryListing({ pantryItem, ...rest }: PantryListingProps & PressableProps) {
     return (
-        <Link href={`/(recipes)/${pantryItem.id}`} asChild>
+        <Link href={`/pantry/${pantryItem.id}`} asChild>
             <Pressable style={styles.wrapper} {...rest}>
                 <View style={[styles.statusDot, { backgroundColor: getStatusDotColor(pantryItem.isInStock) }]} />
                 <Text style={styles.name}>{pantryItem.name}</Text>
