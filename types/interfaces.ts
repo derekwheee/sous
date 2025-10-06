@@ -2,8 +2,19 @@ export interface PantryItem {
     id: number;
     name: string;
     isInStock: boolean;
+    isFavorite: boolean;
+    isInShoppingList: boolean;
     createdAt: string;
     updatedAt: string;
+    deleteAt?: string;
+}
+
+export interface PatchPantryItem {
+    id: number;
+    name?: string;
+    isInStock?: boolean;
+    isFavorite?: boolean;
+    isInShoppingList?: boolean;
     deleteAt?: string;
 }
 

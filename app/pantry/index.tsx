@@ -1,11 +1,11 @@
-
-import { getPantry } from '@/api/pantry';
+import { getPantry, updatePantryItem } from '@/api/pantry';
 import Heading from '@/components/heading';
 import PantryListing from '@/components/pantry-listing';
 import globalStyles from '@/styles/global';
-import { PantryItem } from '@/types/interfaces';
+import { PantryItem, PatchPantryItem } from '@/types/interfaces';
 import { useQuery } from '@tanstack/react-query';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
+import ItemDialog from './_components/item-dialog';
 
 const styles = {
     ...globalStyles,
@@ -14,10 +14,7 @@ const styles = {
     })
 };
 
-const Spacer = ({ height = 16 }) => <View style={{ height }} />;
-
-export default function PantryList() {
-
+export default function Index() {
     const {
         isFetching: isPantryLoading,
         error: pantryError,
@@ -28,6 +25,15 @@ export default function PantryList() {
     });
 
     const isLoading = isPantryLoading;
+
+    const handleSaveChanges = async (patch: PatchPantryItem, cb?: Function) => {
+
+        const res = await updatePantryItem(patch);
+
+        if (res) {
+            cb?.();
+        }
+    };
 
     return (
         <ScrollView style={styles.container}>
@@ -40,8 +46,14 @@ export default function PantryList() {
                 <></>
             )}
             {!isLoading && pantry?.map((pantryItem: PantryItem) => (
-                <PantryListing key={pantryItem.id} pantryItem={pantryItem} />
+                <ItemDialog
+                    key={pantryItem.id}
+                    pantryItem={pantryItem}
+                    onPressSave={handleSaveChanges}
+                >
+                    <PantryListing pantryItem={pantryItem} />
+                </ItemDialog>
             ))}
         </ScrollView>
-    );
+    )
 }

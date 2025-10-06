@@ -30,11 +30,12 @@ interface TextInputProps {
     label?: string
 }
 
-export default function TextInput({ label, onChangeText, value, style, ...rest }: TextInputProps & ViewProps & _TextInputProps) {
+export default function TextInput({ label, onChangeText, value, style, id, ...rest }: TextInputProps & ViewProps & _TextInputProps) {
     return (
         <View style={[styles.wrapper, style]} {...rest}>
             {label && (<Text size={16} weight='regular'>{label}</Text>)}
             <_TextInput
+                id={id}
                 style={styles.input}
                 onChangeText={onChangeText}
                 value={value}

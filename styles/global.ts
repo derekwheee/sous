@@ -96,5 +96,35 @@ export default StyleSheet.create({
         marginTop: 32,
         marginBottom: 16,
         paddingHorizontal: 16
+    },
+    dialogHeading: {
+        fontFamily: fonts.poppins.medium,
+        fontSize: fontSizes.h2,
+        color: colors.text,
+        textTransform: 'lowercase'
+    },
+    dialogDescription: {
+        fontFamily: fonts.poppins.regular,
+        fontSize: fontSizes.regular
+    },
+    button: {
+        backgroundColor: colors.primary,
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    buttonDisabled: {
+        backgroundColor: colors.indeterminate
+    },
+    buttonText: {
+        color: '#fff',
+        fontFamily: fonts.poppins.medium,
+        fontSize: fontSizes.regular,
+        textTransform: 'lowercase'
+    },
+    buttonTextDisabled: {
+        color: '#999'
     }
 });

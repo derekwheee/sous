@@ -11,7 +11,6 @@ const makeRequest = async (url: string, options: RequestInit = {}) => {
 
         return await response.json();
     } catch (err) {
-        console.error(`Error fetching ${API_HOST}${url}`);
         console.error(err);
         return null;
     }
