@@ -25,9 +25,16 @@ interface HeadingProps {
     title: string;
     linkTo?: Href;
     linkText?: string;
+    action?: React.JSX.Element;
 }
 
-export default function Heading({ title, linkTo, linkText, ...rest }: HeadingProps & ViewProps) {
+export default function Heading({
+    title,
+    linkTo,
+    linkText,
+    action,
+    ...rest
+}: HeadingProps & ViewProps) {
     return (
         <View style={styles.heading} {...rest}>
             <Text style={styles.h1}>{title}</Text>
@@ -39,6 +46,7 @@ export default function Heading({ title, linkTo, linkText, ...rest }: HeadingPro
                     </View>
                 </Link>
             )}
+            {!!action && action}
         </View>
     );
 }

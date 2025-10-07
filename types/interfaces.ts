@@ -7,15 +7,18 @@ export interface PantryItem {
     createdAt: string;
     updatedAt: string;
     deleteAt?: string;
+    categoryId?: number;
+    category?: ItemCategory;
 }
 
-export interface PatchPantryItem {
-    id: number;
+export interface UpsertPantryItem {
+    id?: number;
     name?: string;
     isInStock?: boolean;
     isFavorite?: boolean;
     isInShoppingList?: boolean;
     deleteAt?: string;
+    categoryId?: number;
 }
 
 export interface Ingredient {
@@ -60,4 +63,25 @@ export interface PatchRecipe {
     deleteAt?: string;
     ingredients?: Ingredient[];
     instructions?: string[];
+}
+
+export interface ItemCategory {
+        id: number,
+        name: string,
+        sortOrder: number,
+        icon?: string,
+        createdAt: string,
+        updatedAt: string,
+        deletedAt?: string,
+        pantryItems: PantryItem[]
+}
+
+export interface UpsertItemCategory {
+        id?: number,
+        name?: string,
+        sortOrder: number,
+        icon?: string,
+        createdAt?: string,
+        updatedAt?: string,
+        deletedAt?: string
 }

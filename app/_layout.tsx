@@ -76,9 +76,9 @@ export default function RootLayout() {
                                     }}
                                 />
                                 <Tabs.Screen
-                                    name="lists"
+                                    name="list"
                                     options={{
-                                        tabBarLabel: 'Lists',
+                                        tabBarLabel: 'List',
                                         tabBarIcon: ({ color, size }) => <Feather name="list" size={size} color={color} />
                                     }}
                                 />

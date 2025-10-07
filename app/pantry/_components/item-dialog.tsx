@@ -1,7 +1,7 @@
 import Text from '@/components/text';
 import TextInput from '@/components/text-input';
 import globalStyles, { colors } from '@/styles/global';
-import { PantryItem, PatchPantryItem } from '@/types/interfaces';
+import { PantryItem, UpsertPantryItem } from '@/types/interfaces';
 import { X } from '@tamagui/lucide-icons';
 import { useState } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
@@ -42,20 +42,23 @@ const SaveItemButton = ({
 };
 
 export default function ItemDialog({
-    pantryItem,
+    pantryItem = {
+        name: '',
+        isInStock: false
+    } as PantryItem,
     onPressSave,
     children,
     ...props
 }: {
-    pantryItem: PantryItem,
-    onPressSave: (patch: PatchPantryItem, cb?: Function) => void,
+    pantryItem?: PantryItem,
+    onPressSave: (patch: UpsertPantryItem, cb?: Function) => void,
 } & DialogProps) {
 
     const [isDirty, setIsDirty] = useState(false);
     const [name, setName] = useState(pantryItem.name);
     const [isInStock, setIsInStock] = useState(pantryItem.isInStock);
 
-    const patch: PatchPantryItem = {
+    const patch: UpsertPantryItem = {
         id: pantryItem.id,
         name,
         isInStock
@@ -133,10 +136,10 @@ export default function ItemDialog({
                     >
                         <Dialog.Title>
                             <XStack style={{ width: '100%' }} justifyContent="space-between" alignItems="center">
-                                <Text style={styles.dialogHeading}>{`Edit Item`}</Text>
+                                <Text style={styles.dialogHeading}>{!!pantryItem?.id ? 'Edit Item' : 'Add Item'}</Text>
                                 <Dialog.Close displayWhenAdapted asChild>
                                     <SaveItemButton
-                                        disabled={!isDirty}
+                                        disabled={!isDirty || !name.trim()}
                                         onPressSave={(cb) => onPressSave(patch, cb)}
                                     />
                                 </Dialog.Close>

@@ -1,11 +1,15 @@
 import { getPantry } from '@/api/pantry';
 import { getRecipes } from '@/api/recipes';
 import Heading from '@/components/heading';
+import Loading from '@/components/loading';
 import RecipeListing from '@/components/recipe-listing';
+import SearchBar from '@/components/search';
 import globalStyles from '@/styles/global';
 import { PantryItem, Recipe } from '@/types/interfaces';
+import { getAvailableIngredients } from '@/util/recipe';
 import { useQuery } from '@tanstack/react-query';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { useState } from 'react';
+import { RefreshControl, ScrollView, StyleSheet } from 'react-native';
 
 const styles = {
     ...globalStyles,
@@ -13,8 +17,6 @@ const styles = {
 
     })
 };
-
-const Spacer = ({ height = 16 }) => <View style={{ height }} />;
 
 export default function HomeScreen() {
     const {
@@ -29,11 +31,16 @@ export default function HomeScreen() {
     const {
         isFetching: isPantryLoading,
         error: pantryError,
-        data: pantry = []
+        data: pantry = [],
+        refetch: refetchRecipes
     } = useQuery<PantryItem[]>({
         queryKey: ['pantry'],
         queryFn: getPantry
     });
+
+    const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+    const [searchTerm, setSearchTerm] = useState<string>('');
+
 
     if (recipeError) {
         console.log('Error fetching recipes:', recipeError);
@@ -45,19 +52,52 @@ export default function HomeScreen() {
 
     const isLoading = isRecipeLoadingerror || isPantryLoading;
 
+    const sortedRecipes = recipes?.sort((a, b) => {
+        const aRatio = getAvailableIngredients(a, pantry).length / (a.ingredients.length || 1);
+        const bRatio = getAvailableIngredients(b, pantry).length / (b.ingredients.length || 1);
+        if (aRatio === bRatio) {
+            return a.name.localeCompare(b.name);
+        }
+        return bRatio - aRatio;
+    });
+
+    const filteredRecipes = searchTerm
+        ? sortedRecipes?.filter((recipe) =>
+            recipe.name.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+        : sortedRecipes;
+
     return (
-        <ScrollView style={styles.container}>
+        <>
+            <Loading isLoading={isLoading && !filteredRecipes?.length} />
             <Heading
                 title='Recipes'
                 linkTo='/recipes/new'
                 linkText='create recipe'
             />
-            {isLoading && (
-                <></>
-            )}
-            {!isLoading && recipes?.map((recipe: Recipe) => (
-                <RecipeListing key={recipe.id} recipe={recipe} pantry={pantry} />
-            ))}
-        </ScrollView>
+            <SearchBar
+                value={searchTerm}
+                onChangeText={setSearchTerm}
+                inputProps={{
+                    placeholder: 'search recipes...'
+                }}
+            />
+            <ScrollView
+                style={styles.container}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={isRefreshing}
+                        onRefresh={() => {
+                            setIsRefreshing(true);
+                            refetchRecipes().finally(() => setIsRefreshing(false));
+                        }}
+                    />
+                }
+            >
+                {filteredRecipes?.map((recipe: Recipe) => (
+                    <RecipeListing key={recipe.id} recipe={recipe} pantry={pantry} />
+                ))}
+            </ScrollView>
+        </>
     );
 }
