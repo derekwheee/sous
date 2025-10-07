@@ -7,7 +7,6 @@ const styles = {
     ...StyleSheet.create({
         wrapper: {
             display: 'flex',
-            // flexGrow: 1,
             width: '100%',
             flexShrink: 1,
             marginBottom: 32
@@ -39,7 +38,6 @@ export default function TextInput({ label, onChangeText, value, style, id, ...re
                 style={styles.input}
                 onChangeText={onChangeText}
                 value={value}
-                placeholder="recipe name"
                 placeholderTextColor="#ccc"
                 autoCapitalize='none'
                 {...rest}

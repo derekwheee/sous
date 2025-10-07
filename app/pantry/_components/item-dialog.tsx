@@ -1,7 +1,8 @@
+import Select from '@/components/select-input';
 import Text from '@/components/text';
 import TextInput from '@/components/text-input';
 import globalStyles, { colors } from '@/styles/global';
-import { PantryItem, UpsertPantryItem } from '@/types/interfaces';
+import { ItemCategory, PantryItem, UpsertPantryItem } from '@/types/interfaces';
 import { X } from '@tamagui/lucide-icons';
 import { useState } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
@@ -13,7 +14,8 @@ import {
     Sheet,
     Switch,
     Unspaced,
-    XStack
+    XStack,
+    YStack
 } from 'tamagui';
 
 const styles = {
@@ -46,22 +48,30 @@ export default function ItemDialog({
         name: '',
         isInStock: false
     } as PantryItem,
+    categories = [] as ItemCategory[],
     onPressSave,
     children,
     ...props
 }: {
     pantryItem?: PantryItem,
+    categories?: ItemCategory[],
     onPressSave: (patch: UpsertPantryItem, cb?: Function) => void,
 } & DialogProps) {
 
     const [isDirty, setIsDirty] = useState(false);
     const [name, setName] = useState(pantryItem.name);
-    const [isInStock, setIsInStock] = useState(pantryItem.isInStock);
+    const [category, setCategory] = useState(pantryItem.category?.name);
+    const [isFavorite, setIsFavorite] = useState(!!pantryItem.isFavorite);
+    const [isInStock, setIsInStock] = useState(!!pantryItem.isInStock);
+    const [isInShoppingList, setIsInShoppingList] = useState(!!pantryItem.isInShoppingList);
 
     const patch: UpsertPantryItem = {
         id: pantryItem.id,
         name,
-        isInStock
+        isInStock,
+        isFavorite,
+        isInShoppingList,
+        categoryId: categories.find(cat => cat.name === category)?.id
     };
 
     const change = (fn: Function) => {
@@ -82,9 +92,7 @@ export default function ItemDialog({
                     animation="medium"
                     zIndex={200000}
                     modal
-                    moveOnKeyboardChange
-                    snapPoints={[300]}
-                    snapPointsMode='constant'
+                    snapPoints={[90]}
                 >
                     <Sheet.Frame padding="$4">
                         <Adapt.Contents />
@@ -147,29 +155,72 @@ export default function ItemDialog({
                         </Dialog.Title>
                         <Dialog.Description />
 
-                        <TextInput
-                            autoFocus
-                            id="name"
-                            label='Name'
-                            value={name}
-                            onChangeText={(...args) => change(() => setName(...args))}
-                        />
-                        <XStack alignItems="center" gap="$4">
-                            <Switch
-                                id='isInStock'
-                                size='$2'
-                                onCheckedChange={(checked) => change(() => setIsInStock(!!checked))}
-                                checked={isInStock}
-                            >
-                                <Switch.Thumb
-                                    animation="quicker"
-                                    style={{
-                                        backgroundColor: isInStock ? colors.primary : '#ccc'
-                                    }}
-                                />
-                            </Switch>
-                            <Text size={16} weight='regular'>In Stock</Text>
-                        </XStack>
+                        <YStack>
+                            <TextInput
+                                id="name"
+                                label='Name'
+                                value={name}
+                                onChangeText={(...args) => change(() => setName(...args))}
+                            />
+                            <Select
+                                label="Category"
+                                placeholder="Category..."
+                                value={category}
+                                onValueChange={(value) => change(() => setCategory(value))}
+                                selectLabel="select a category"
+                                selectItems={categories.map(cat => ({ label: `${cat.icon} ${cat.name}`, value: cat.name }))}
+                            />
+                        </YStack>
+                        <YStack gap="$2">
+                            <XStack alignItems="center" gap="$4">
+                                <Switch
+                                    id='isFavorite'
+                                    size='$2'
+                                    onCheckedChange={(checked) => change(() => setIsFavorite(!!checked))}
+                                    checked={isFavorite}
+                                >
+                                    <Switch.Thumb
+                                        animation="quicker"
+                                        style={{
+                                            backgroundColor: isFavorite ? colors.primary : '#ccc'
+                                        }}
+                                    />
+                                </Switch>
+                                <Text size={16} weight='regular'>Staple Ingredient</Text>
+                            </XStack>
+                            <XStack alignItems="center" gap="$4">
+                                <Switch
+                                    id='isInStock'
+                                    size='$2'
+                                    onCheckedChange={(checked) => change(() => setIsInStock(!!checked))}
+                                    checked={isInStock}
+                                >
+                                    <Switch.Thumb
+                                        animation="quicker"
+                                        style={{
+                                            backgroundColor: isInStock ? colors.primary : '#ccc'
+                                        }}
+                                    />
+                                </Switch>
+                                <Text size={16} weight='regular'>In Stock</Text>
+                            </XStack>
+                            <XStack alignItems="center" gap="$4">
+                                <Switch
+                                    id='isInShoppingList'
+                                    size='$2'
+                                    onCheckedChange={(checked) => change(() => setIsInShoppingList(!!checked))}
+                                    checked={isInShoppingList}
+                                >
+                                    <Switch.Thumb
+                                        animation="quicker"
+                                        style={{
+                                            backgroundColor: isInShoppingList ? colors.primary : '#ccc'
+                                        }}
+                                    />
+                                </Switch>
+                                <Text size={16} weight='regular'>In Shopping List</Text>
+                            </XStack>
+                        </YStack>
 
                         <Unspaced>
                             <Dialog.Close asChild>

@@ -5,6 +5,7 @@ import TextInput from '@/components/text-input';
 import globalStyles, { colors } from '@/styles/global';
 import Feather from '@expo/vector-icons/Feather';
 import { useHeaderHeight } from '@react-navigation/elements';
+import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -86,6 +87,7 @@ interface ImportedRecipe {
 }
 
 export default function CreateNewRecipe(props: any) {
+    const queryClient = useQueryClient();
     const router = useRouter();
     const headerHeight = useHeaderHeight();
     const [isSaving, setIsSaving] = useState(false);
@@ -132,6 +134,8 @@ export default function CreateNewRecipe(props: any) {
     const handleSaveRecipe = async () => {
         setIsSaving(true);
         const res = await createRecipe(recipe);
+
+        queryClient.invalidateQueries({ queryKey: ['recipes', 'pantry'] });
 
         if (res.error) {
             console.log(res.error);

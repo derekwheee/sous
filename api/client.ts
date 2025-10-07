@@ -6,11 +6,16 @@ if (!API_HOST) {
 }
 
 const makeRequest = async (url: string, options: RequestInit = {}) => {
+    let response;
+
     try {
-        const response = await fetch(`${API_HOST}${url}`, options);
+        response = await fetch(`${API_HOST}${url}`, options);
 
         return await response.json();
     } catch (err) {
+        if (response) {
+            console.log(response);
+        }
         console.error(err);
         return null;
     }

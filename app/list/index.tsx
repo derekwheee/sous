@@ -1,14 +1,16 @@
 import { getItemCategories } from '@/api/item-categories';
 import { upsertPantryItem } from '@/api/pantry';
+import ItemDialog from '@/app/pantry/_components/item-dialog';
 import Heading from '@/components/heading';
 import Loading from '@/components/loading';
 import Text from '@/components/text';
+import { useHeader } from '@/hooks/use-header';
 import globalStyles, { colors, fonts } from '@/styles/global';
-import { ItemCategory } from '@/types/interfaces';
+import { ItemCategory, PantryItem, UpsertPantryItem } from '@/types/interfaces';
 import Feather from '@expo/vector-icons/Feather';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createRef, useCallback, useRef, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import Reanimated, {
@@ -62,17 +64,6 @@ const styles = {
             height: '100%',
             backgroundColor: colors.primary
         },
-        newItemButton: {
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: 16,
-            backgroundColor: colors.primary
-        },
-        newItemButtonText: {
-            fontFamily: fonts.poppins.regular,
-            fontSize: 16,
-            color: 'white'
-        },
         search: {
             flexDirection: 'row',
             alignItems: 'center',
@@ -88,6 +79,17 @@ const styles = {
 };
 
 export default function ListIndex() {
+    const [isAddingItems, setIsAddingItems] = useState<boolean>(false);
+    const [swipeHeight, setSwipeHeight] = useState<number>(0);
+    const [newItemText, setNewItemText] = useState<string>('');
+    const newItemInputRef = useRef<TextInput>(null);
+    
+    const { HeaderSpacer } = useHeader({
+        rightAction: () => setIsAddingItems(!isAddingItems),
+        rightActionText: isAddingItems ? 'done' : 'add items',
+        rightActionIcon: isAddingItems ? 'check' : 'plus'
+    });
+    const queryClient = useQueryClient();
     const {
         isFetching,
         error,
@@ -98,14 +100,7 @@ export default function ListIndex() {
         queryFn: getItemCategories
     });
 
-    const [isAddingItems, setIsAddingItems] = useState<boolean>(false);
-    const [swipeHeight, setSwipeHeight] = useState<number>(0);
-    const [newItemText, setNewItemText] = useState<string>('');
-    const newItemInputRef = useRef<TextInput>(null);
-
     const isLoading = isFetching;
-    // const filteredItemCategories = itemCategories.filter((category) => category.pantryItems.length > 0 && category.pantryItems.some(item => item.isInShoppingList));
-
     const filteredItemCategories = itemCategories.reduce<any[]>((acc, cat) => {
         const items = cat?.pantryItems;
         if (!items || items.length === 0) return acc;
@@ -160,12 +155,12 @@ export default function ListIndex() {
 
     const handleRemoveItem = async (id: number) => {
         await upsertPantryItem({ id, isInShoppingList: false });
-        await refetch();
+        queryClient.invalidateQueries({ queryKey: ['pantry', 'list'] });
     };
 
     const handleAddItem = async (id: number) => {
         await upsertPantryItem({ id, isInShoppingList: true });
-        await refetch();
+        queryClient.invalidateQueries({ queryKey: ['pantry', 'list'] });
     };
 
     const handleCreateItem = async (name: string, categoryId?: number) => {
@@ -175,16 +170,27 @@ export default function ListIndex() {
         }
 
         await upsertPantryItem({ name, isInShoppingList: true, categoryId });
+        queryClient.invalidateQueries({ queryKey: ['pantry', 'list'] });
 
         setNewItemText('');
         newItemInputRef.current?.blur();
+    };
 
-        await refetch();
+    const handleEditItem = async (patch: UpsertPantryItem, cb?: Function) => {
+
+        const res = await upsertPantryItem(patch);
+        queryClient.invalidateQueries({ queryKey: ['pantry', 'list'] });
+
+
+        if (res) {
+            cb?.();
+        }
     };
 
     return (
         <>
             <Loading isLoading={isLoading && !filteredItemCategories?.length} />
+            <HeaderSpacer />
             <Heading
                 title='Shopping List'
             />
@@ -206,7 +212,15 @@ export default function ListIndex() {
                     }} />
                 </View>
             )}
-            <ScrollView style={styles.container}>
+            <ScrollView
+                style={styles.container}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={isLoading}
+                        onRefresh={refetch}
+                    />
+                }
+            >
                 <GestureHandlerRootView>
                     {filteredItemCategories?.map((itemCategory: ItemCategory) => (
                         <View key={itemCategory.id}>
@@ -241,9 +255,11 @@ export default function ListIndex() {
                                             RightAction(
                                                 prog,
                                                 trans,
-                                                pantryItem.id,
+                                                pantryItem,
+                                                itemCategories,
                                                 swipeHeight,
                                                 proposeRemoveItem,
+                                                handleEditItem,
                                                 swipeRef
                                             )
                                         }
@@ -258,14 +274,6 @@ export default function ListIndex() {
                     ))}
                 </GestureHandlerRootView>
             </ScrollView>
-            <Pressable
-                style={styles.newItemButton}
-                onPress={() => {
-                    setIsAddingItems(!isAddingItems);
-                }}
-            >
-                <Text style={styles.newItemButtonText}>{isAddingItems ? 'done' : 'add items'}</Text>
-            </Pressable>
         </>
     )
 }
@@ -273,9 +281,11 @@ export default function ListIndex() {
 function RightAction(
     prog: SharedValue<number>,
     drag: SharedValue<number>,
-    id: number,
+    pantryItem: PantryItem,
+    itemCategories: ItemCategory[],
     width: number,
     proposeRemoveItem: (id: number, ref?: any) => void,
+    handleEditItem: (patch: UpsertPantryItem, cb?: Function) => void,
     swipeRef?: React.RefObject<any>
 ) {
 
@@ -288,10 +298,16 @@ function RightAction(
     return (
         <Reanimated.View style={styleAnimation}>
             <View style={{ flexDirection: 'row' }}>
-                <Pressable onPress={() => console.log('Edit item', id)}>
-                    <Feather name="edit-2" size={24} color="#fff" style={styles.editAction} />
-                </Pressable>
-                <Pressable onPress={() => proposeRemoveItem(id, swipeRef?.current)}>
+                <ItemDialog
+                    pantryItem={pantryItem}
+                    categories={itemCategories}
+                    onPressSave={handleEditItem}
+                >
+                    <Pressable>
+                        <Feather name="edit-2" size={24} color="#fff" style={styles.editAction} />
+                    </Pressable>
+                </ItemDialog>
+                <Pressable onPress={() => proposeRemoveItem(pantryItem.id, swipeRef?.current)}>
                     <Feather name="trash-2" size={24} color="#fff" style={styles.deleteAction} />
                 </Pressable>
             </View>

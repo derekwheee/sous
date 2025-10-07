@@ -9,7 +9,6 @@ import { PortalProvider } from '@tamagui/portal';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
 import { Tabs } from 'expo-router/tabs';
-import { StatusBar } from 'expo-status-bar';
 import { StyleSheet } from 'react-native';
 import 'react-native-gesture-handler';
 import 'react-native-reanimated';
@@ -90,8 +89,6 @@ export default function RootLayout() {
                                     }}
                                 />
                             </Tabs>
-
-                            <StatusBar style='dark' />
                         </SafeAreaProvider>
                     </ThemeProvider >
                 </QueryClientProvider>

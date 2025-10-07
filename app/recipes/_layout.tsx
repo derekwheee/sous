@@ -2,23 +2,7 @@ import { Stack } from 'expo-router';
 
 export default function RecipesLayout() {
     return (
-        <Stack
-
-            screenOptions={() => ({
-                headerTitle: 'sous',
-                headerStyle: {
-                    height: 112,
-                    backgroundColor: '#FFD541',
-                },
-                headerTitleStyle: {
-                    fontFamily: 'Caprasimo_400Regular',
-                    fontSize: 36
-                },
-                headerBackground: () => null,
-                headerBackButtonMenuEnabled: false,
-                headerBackButtonDisplayMode: 'minimal'
-            })}
-        >
+        <Stack>
             <Stack.Screen
                 name="index"
                 options={{

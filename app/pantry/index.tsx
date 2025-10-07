@@ -1,3 +1,4 @@
+import { getItemCategories } from '@/api/item-categories';
 import { getPantry, upsertPantryItem } from '@/api/pantry';
 import Heading from '@/components/heading';
 import Loading from '@/components/loading';
@@ -5,9 +6,9 @@ import PantryListing from '@/components/pantry-listing';
 import Search from '@/components/search';
 import Text from '@/components/text';
 import globalStyles, { colors } from '@/styles/global';
-import { PantryItem, UpsertPantryItem } from '@/types/interfaces';
+import { ItemCategory, PantryItem, UpsertPantryItem } from '@/types/interfaces';
 import { Feather } from '@expo/vector-icons';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, StyleSheet } from 'react-native';
 import ItemDialog from './_components/item-dialog';
@@ -28,6 +29,7 @@ const styles = {
 };
 
 export default function Index() {
+    const queryClient = useQueryClient();
     const {
         isFetching: isPantryLoading,
         error: pantryError,
@@ -38,17 +40,26 @@ export default function Index() {
         queryFn: getPantry
     });
 
+    const {
+        isFetched: isItemCategoriesLoading,
+        data: itemCategories = []
+    } = useQuery<ItemCategory[]>({
+        queryKey: ['itemCategories'],
+        queryFn: getItemCategories
+    });
+
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
     const [searchTerm, setSearchTerm] = useState<string>('');
 
-    const isLoading = isPantryLoading;
+    const isLoading = isPantryLoading || isItemCategoriesLoading;
 
     const handleSaveChanges = async (patch: UpsertPantryItem, cb?: Function) => {
 
         const res = await upsertPantryItem(patch);
 
+        queryClient.invalidateQueries({ queryKey: ['pantry', 'list'] });
+
         if (res) {
-            await refetchPantry();
             cb?.();
         }
     };
@@ -71,6 +82,7 @@ export default function Index() {
                 title='Pantry'
                 action={(
                     <ItemDialog
+                        categories={itemCategories}
                         onPressSave={handleSaveChanges}
                     >
                         <Pressable style={styles.newItemButton}>
@@ -99,13 +111,11 @@ export default function Index() {
                     />
                 }
             >
-                {isLoading && !filteredPantry?.length && (
-                    <></>
-                )}
                 {filteredPantry?.map((pantryItem: PantryItem) => (
                     <ItemDialog
                         key={pantryItem.id}
                         pantryItem={pantryItem}
+                        categories={itemCategories}
                         onPressSave={handleSaveChanges}
                     >
                         <PantryListing pantryItem={pantryItem} />

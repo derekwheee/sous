@@ -4,6 +4,7 @@ import Heading from '@/components/heading';
 import Loading from '@/components/loading';
 import RecipeListing from '@/components/recipe-listing';
 import SearchBar from '@/components/search';
+import { useHeader } from '@/hooks/use-header';
 import globalStyles from '@/styles/global';
 import { PantryItem, Recipe } from '@/types/interfaces';
 import { getAvailableIngredients } from '@/util/recipe';
@@ -19,6 +20,11 @@ const styles = {
 };
 
 export default function HomeScreen() {
+    const { HeaderSpacer } = useHeader({
+        rightAction: () => {},
+        rightActionText: 'add recipe',
+        rightActionIcon: 'plus'
+    });
     const {
         isFetching: isRecipeLoadingerror,
         error: recipeError,
@@ -70,6 +76,7 @@ export default function HomeScreen() {
     return (
         <>
             <Loading isLoading={isLoading && !filteredRecipes?.length} />
+            <HeaderSpacer />
             <Heading
                 title='Recipes'
                 linkTo='/recipes/new'

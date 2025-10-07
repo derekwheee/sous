@@ -3,6 +3,7 @@ import Ingredient from '@/components/ingredient';
 import PageTitle from '@/components/page-title';
 import Text from '@/components/text';
 import TimeLabel from '@/components/time-label';
+import { useHeader } from '@/hooks/use-header';
 import globalStyles, { fonts } from '@/styles/global';
 import { Recipe } from '@/types/interfaces';
 import { useQuery } from '@tanstack/react-query';
@@ -36,7 +37,9 @@ const styles = {
 };
 
 export default function RecipeDetail() {
-    const id= Number(useLocalSearchParams<{ id: string }>().id);
+    const id = Number(useLocalSearchParams<{ id: string }>().id);
+
+    const { HeaderSpacer } = useHeader();
 
     const { isFetching, data: recipe } = useQuery<Recipe | null>({
         queryKey: ['recipe', id],
@@ -59,31 +62,34 @@ export default function RecipeDetail() {
     }
 
     return (
-        <ScrollView style={styles.container}>
-            <PageTitle>{recipe.name}</PageTitle>
-            <View style={[styles.content, styles.timeLabels]}>
-                <TimeLabel label={'prep time'} time={recipe.prepTime} />
-                <TimeLabel label={'cook time'} time={recipe.cookTime} />
-            </View>
-            <View style={styles.content}>
-                <Text style={styles.h2}>Ingredients</Text>
-                <View>
-                    {recipe.ingredients?.map((ingredient) => (
-                        <Ingredient key={ingredient.id} ingredient={ingredient} />
-                    ))}
+        <>
+            <HeaderSpacer />
+            <ScrollView style={styles.container}>
+                <PageTitle>{recipe.name}</PageTitle>
+                <View style={[styles.content, styles.timeLabels]}>
+                    <TimeLabel label={'prep time'} time={recipe.prepTime} />
+                    <TimeLabel label={'cook time'} time={recipe.cookTime} />
                 </View>
-            </View>
-            <View style={styles.content}>
-                <Text style={styles.h2}>Instructions</Text>
-                <View style={{ flex: 1 }}>
-                    {recipe.instructions?.map((instruction, i) => (
-                        <View key={i} style={styles.instructionContainer}>
-                            <Text style={styles.instructionIndex}>{i + 1}</Text>
-                            <Text style={styles.instructionText}>{instruction}</Text>
-                        </View>
-                    ))}
+                <View style={styles.content}>
+                    <Text style={styles.h2}>Ingredients</Text>
+                    <View>
+                        {recipe.ingredients?.map((ingredient) => (
+                            <Ingredient key={ingredient.id} ingredient={ingredient} />
+                        ))}
+                    </View>
                 </View>
-            </View>
-        </ScrollView>
+                <View style={styles.content}>
+                    <Text style={styles.h2}>Instructions</Text>
+                    <View style={{ flex: 1 }}>
+                        {recipe.instructions?.map((instruction, i) => (
+                            <View key={i} style={styles.instructionContainer}>
+                                <Text style={styles.instructionIndex}>{i + 1}</Text>
+                                <Text style={styles.instructionText}>{instruction}</Text>
+                            </View>
+                        ))}
+                    </View>
+                </View>
+            </ScrollView>
+        </>
     );
 }
