@@ -1,5 +1,17 @@
-import { View } from 'react-native';
+import globalStyles from '@/styles/global';
+import { StyleSheet, View } from 'react-native';
 
-export default function HeaderSpacer({ height }: { height: number }) {
-    return <View style={{ height }} />;
+const styles = {
+    ...globalStyles,
+    ...StyleSheet.create({
+        spacer: {
+            height: 100
+        }
+    })
+};
+
+export default function HeaderSpacer() {
+    return (
+        <View style={styles.spacer} />
+    );
 }

@@ -1,16 +1,14 @@
-import { getPantry } from '@/api/pantry';
-import { getRecipes } from '@/api/recipes';
 import Heading from '@/components/heading';
-import Loading from '@/components/loading';
 import RecipeListing from '@/components/recipe-listing';
-import SearchBar from '@/components/search';
-import { useHeader } from '@/hooks/use-header';
-import globalStyles from '@/styles/global';
+import Screen from '@/components/screen';
+import { useApi } from '@/hooks/use-api';
+import globalStyles, { colors } from '@/styles/global';
 import { PantryItem, Recipe } from '@/types/interfaces';
 import { getAvailableIngredients } from '@/util/recipe';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
-import { RefreshControl, ScrollView, StyleSheet } from 'react-native';
+import { useNavigation, useRouter } from 'expo-router';
+import { useLayoutEffect, useState } from 'react';
+import { RefreshControl, StyleSheet } from 'react-native';
 
 const styles = {
     ...globalStyles,
@@ -19,12 +17,10 @@ const styles = {
     })
 };
 
-export default function HomeScreen() {
-    const { HeaderSpacer } = useHeader({
-        rightAction: () => {},
-        rightActionText: 'add recipe',
-        rightActionIcon: 'plus'
-    });
+export default function RecipeScreen() {
+
+    const { getRecipes, getPantry } = useApi();
+
     const {
         isFetching: isRecipeLoadingerror,
         error: recipeError,
@@ -44,9 +40,20 @@ export default function HomeScreen() {
         queryFn: getPantry
     });
 
+    const navigation = useNavigation();
+    const router = useRouter();
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
     const [searchTerm, setSearchTerm] = useState<string>('');
 
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerSearchBarOptions: {
+                placeholder: 'search recipes...',
+                tintColor: colors.primary,
+                onChangeText: (event: any) => setSearchTerm(event.nativeEvent.text)
+            },
+        });
+    }, [navigation]);
 
     if (recipeError) {
         console.log('Error fetching recipes:', recipeError);
@@ -74,37 +81,29 @@ export default function HomeScreen() {
         : sortedRecipes;
 
     return (
-        <>
-            <Loading isLoading={isLoading && !filteredRecipes?.length} />
-            <HeaderSpacer />
+        <Screen
+            isLoading={isLoading && !filteredRecipes?.length}
+            refreshControl={
+                <RefreshControl
+                    refreshing={isRefreshing}
+                    onRefresh={() => {
+                        setIsRefreshing(true);
+                        refetchRecipes().finally(() => setIsRefreshing(false));
+                    }}
+                />
+            }
+        >
             <Heading
                 title='Recipes'
-                linkTo='/recipes/new'
-                linkText='create recipe'
+                actions={[{
+                    label: 'new recipe',
+                    icon: 'plus',
+                    onPress: () => router.push('/recipes/new')
+                }]}
             />
-            <SearchBar
-                value={searchTerm}
-                onChangeText={setSearchTerm}
-                inputProps={{
-                    placeholder: 'search recipes...'
-                }}
-            />
-            <ScrollView
-                style={styles.container}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={isRefreshing}
-                        onRefresh={() => {
-                            setIsRefreshing(true);
-                            refetchRecipes().finally(() => setIsRefreshing(false));
-                        }}
-                    />
-                }
-            >
-                {filteredRecipes?.map((recipe: Recipe) => (
-                    <RecipeListing key={recipe.id} recipe={recipe} pantry={pantry} />
-                ))}
-            </ScrollView>
-        </>
+            {filteredRecipes?.map((recipe: Recipe) => (
+                <RecipeListing key={recipe.id} recipe={recipe} pantry={pantry} />
+            ))}
+        </Screen>
     );
 }

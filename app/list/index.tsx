@@ -1,16 +1,14 @@
-import { getItemCategories } from '@/api/item-categories';
-import { upsertPantryItem } from '@/api/pantry';
 import ItemDialog from '@/app/pantry/_components/item-dialog';
 import Heading from '@/components/heading';
-import Loading from '@/components/loading';
+import Screen from '@/components/screen';
 import Text from '@/components/text';
-import { useHeader } from '@/hooks/use-header';
+import { useApi } from '@/hooks/use-api';
 import globalStyles, { colors, fonts } from '@/styles/global';
 import { ItemCategory, PantryItem, UpsertPantryItem } from '@/types/interfaces';
 import Feather from '@expo/vector-icons/Feather';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { createRef, useCallback, useRef, useState } from 'react';
-import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, Pressable, RefreshControl, StyleSheet, TextInput, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import Reanimated, {
@@ -78,18 +76,13 @@ const styles = {
     })
 };
 
-export default function ListIndex() {
+export default function ListScreen() {
     const [isAddingItems, setIsAddingItems] = useState<boolean>(false);
     const [swipeHeight, setSwipeHeight] = useState<number>(0);
     const [newItemText, setNewItemText] = useState<string>('');
     const newItemInputRef = useRef<TextInput>(null);
-    
-    const { HeaderSpacer } = useHeader({
-        rightAction: () => setIsAddingItems(!isAddingItems),
-        rightActionText: isAddingItems ? 'done' : 'add items',
-        rightActionIcon: isAddingItems ? 'check' : 'plus'
-    });
-    const queryClient = useQueryClient();
+
+    const { getItemCategories, upsertPantryItem } = useApi();
     const {
         isFetching,
         error,
@@ -155,12 +148,10 @@ export default function ListIndex() {
 
     const handleRemoveItem = async (id: number) => {
         await upsertPantryItem({ id, isInShoppingList: false });
-        queryClient.invalidateQueries({ queryKey: ['pantry', 'list'] });
     };
 
     const handleAddItem = async (id: number) => {
         await upsertPantryItem({ id, isInShoppingList: true });
-        queryClient.invalidateQueries({ queryKey: ['pantry', 'list'] });
     };
 
     const handleCreateItem = async (name: string, categoryId?: number) => {
@@ -170,7 +161,6 @@ export default function ListIndex() {
         }
 
         await upsertPantryItem({ name, isInShoppingList: true, categoryId });
-        queryClient.invalidateQueries({ queryKey: ['pantry', 'list'] });
 
         setNewItemText('');
         newItemInputRef.current?.blur();
@@ -179,8 +169,6 @@ export default function ListIndex() {
     const handleEditItem = async (patch: UpsertPantryItem, cb?: Function) => {
 
         const res = await upsertPantryItem(patch);
-        queryClient.invalidateQueries({ queryKey: ['pantry', 'list'] });
-
 
         if (res) {
             cb?.();
@@ -188,11 +176,27 @@ export default function ListIndex() {
     };
 
     return (
-        <>
-            <Loading isLoading={isLoading && !filteredItemCategories?.length} />
-            <HeaderSpacer />
+        <Screen
+            isLoading={isLoading && !filteredItemCategories?.length}
+            refreshControl={
+                <RefreshControl
+                    refreshing={isLoading}
+                    onRefresh={refetch}
+                />
+            }
+        >
             <Heading
                 title='Shopping List'
+                actions={[
+                    {
+                        icon: 'list.bullet',
+                        onPress: () => {}
+                    },
+                    {
+                        icon: isAddingItems ? 'checkmark' : 'plus',
+                        onPress: () => setIsAddingItems(!isAddingItems)
+                    }
+                ]}
             />
             {isAddingItems && (
                 <View style={styles.search}>
@@ -212,69 +216,59 @@ export default function ListIndex() {
                     }} />
                 </View>
             )}
-            <ScrollView
-                style={styles.container}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={isLoading}
-                        onRefresh={refetch}
-                    />
-                }
-            >
-                <GestureHandlerRootView>
-                    {filteredItemCategories?.map((itemCategory: ItemCategory) => (
-                        <View key={itemCategory.id}>
-                            <View style={styles.categoryWrapper}>
-                                <Text style={styles.categoryText}>{itemCategory.icon}</Text>
-                                <Text style={styles.categoryText}>{itemCategory.name}</Text>
-                            </View>
-                            {itemCategory.pantryItems.map((pantryItem: any) => {
-                                if (!swipeRefs.current.has(pantryItem.id)) {
-                                    swipeRefs.current.set(pantryItem.id, createRef<any>());
-                                }
-                                const swipeRef = swipeRefs.current.get(pantryItem.id);
-
-                                if (pantryItem.canBeAdded) {
-                                    return (
-                                        <Pressable
-                                            key={pantryItem.id}
-                                            style={styles.listItemWrapper}
-                                            onPress={() => handleAddItem(pantryItem.id)}
-                                        >
-                                            <Text style={[styles.listItemText, styles.listItemTextDimmed]}>{pantryItem.name}</Text>
-                                            <Feather name="plus" size={24} color={colors.primary} />
-                                        </Pressable>
-                                    );
-                                }
-
-                                return (
-                                    <Swipeable
-                                        key={pantryItem.id}
-                                        ref={swipeRef}
-                                        renderRightActions={(prog, trans) =>
-                                            RightAction(
-                                                prog,
-                                                trans,
-                                                pantryItem,
-                                                itemCategories,
-                                                swipeHeight,
-                                                proposeRemoveItem,
-                                                handleEditItem,
-                                                swipeRef
-                                            )
-                                        }
-                                    >
-                                        <View onLayout={updateHeight} style={styles.listItemWrapper}>
-                                            <Text style={styles.listItemText}>{pantryItem.name}</Text>
-                                        </View>
-                                    </Swipeable>
-                                );
-                            })}
+            <GestureHandlerRootView>
+                {filteredItemCategories?.map((itemCategory: ItemCategory) => (
+                    <View key={itemCategory.id}>
+                        <View style={styles.categoryWrapper}>
+                            <Text style={styles.categoryText}>{itemCategory.icon}</Text>
+                            <Text style={styles.categoryText}>{itemCategory.name}</Text>
                         </View>
-                    ))}
-                </GestureHandlerRootView>
-            </ScrollView>
-        </>
+                        {itemCategory.pantryItems.map((pantryItem: any) => {
+                            if (!swipeRefs.current.has(pantryItem.id)) {
+                                swipeRefs.current.set(pantryItem.id, createRef<any>());
+                            }
+                            const swipeRef = swipeRefs.current.get(pantryItem.id);
+
+                            if (pantryItem.canBeAdded) {
+                                return (
+                                    <Pressable
+                                        key={pantryItem.id}
+                                        style={styles.listItemWrapper}
+                                        onPress={() => handleAddItem(pantryItem.id)}
+                                    >
+                                        <Text style={[styles.listItemText, styles.listItemTextDimmed]}>{pantryItem.name}</Text>
+                                        <Feather name="plus" size={24} color={colors.primary} />
+                                    </Pressable>
+                                );
+                            }
+
+                            return (
+                                <Swipeable
+                                    key={pantryItem.id}
+                                    ref={swipeRef}
+                                    renderRightActions={(prog, trans) =>
+                                        RightAction(
+                                            prog,
+                                            trans,
+                                            pantryItem,
+                                            itemCategories,
+                                            swipeHeight,
+                                            proposeRemoveItem,
+                                            handleEditItem,
+                                            swipeRef
+                                        )
+                                    }
+                                >
+                                    <View onLayout={updateHeight} style={styles.listItemWrapper}>
+                                        <Text style={styles.listItemText}>{pantryItem.name}</Text>
+                                    </View>
+                                </Swipeable>
+                            );
+                        })}
+                    </View>
+                ))}
+            </GestureHandlerRootView>
+        </Screen>
     )
 }
 

@@ -23,7 +23,7 @@ const styles = {
         triggerText: {
             padding: 0,
             fontFamily: fonts.poppins.regular,
-            fontSize: 20,
+            fontSize: 16,
             color: colors.text
         },
         itemText: {
@@ -76,7 +76,7 @@ export default function SelectInput({
                 </Select.Trigger>
 
                 <Adapt platform="touch">
-                    <Sheet zIndex={300000} modal>
+                    <Sheet zIndex={2000000} modal>
                         <Sheet.Frame>
                             <Adapt.Contents />
                         </Sheet.Frame>

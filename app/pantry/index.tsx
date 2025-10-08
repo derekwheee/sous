@@ -1,35 +1,24 @@
-import { getItemCategories } from '@/api/item-categories';
-import { getPantry, upsertPantryItem } from '@/api/pantry';
 import Heading from '@/components/heading';
-import Loading from '@/components/loading';
 import PantryListing from '@/components/pantry-listing';
-import Search from '@/components/search';
-import Text from '@/components/text';
+import Screen from '@/components/screen';
+import { useApi } from '@/hooks/use-api';
 import globalStyles, { colors } from '@/styles/global';
 import { ItemCategory, PantryItem, UpsertPantryItem } from '@/types/interfaces';
-import { Feather } from '@expo/vector-icons';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, StyleSheet } from 'react-native';
+import { useQuery } from '@tanstack/react-query';
+import { useNavigation } from 'expo-router';
+import { useLayoutEffect, useState } from 'react';
+import { Pressable, RefreshControl, StyleSheet } from 'react-native';
 import ItemDialog from './_components/item-dialog';
 
 const styles = {
     ...globalStyles,
     ...StyleSheet.create({
-        newItemButton: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 8,
-            marginLeft: 'auto'
-        },
-        newItemButtonText: {
-            color: colors.primary
-        }
+
     })
 };
 
-export default function Index() {
-    const queryClient = useQueryClient();
+export default function PantryScreen() {
+    const { getPantry, getItemCategories, upsertPantryItem } = useApi();
     const {
         isFetching: isPantryLoading,
         error: pantryError,
@@ -48,16 +37,27 @@ export default function Index() {
         queryFn: getItemCategories
     });
 
+    const navigation = useNavigation();
+
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerSearchBarOptions: {
+                placeholder: 'search pantry...',
+                tintColor: colors.primary,
+                onChangeText: (event: any) => setSearchTerm(event.nativeEvent.text)
+            },
+        });
+    }, [navigation]);
+
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
     const [searchTerm, setSearchTerm] = useState<string>('');
+    const [showNewItemDialog, setShowNewItemDialog] = useState<boolean>(false);
 
     const isLoading = isPantryLoading || isItemCategoriesLoading;
 
     const handleSaveChanges = async (patch: UpsertPantryItem, cb?: Function) => {
 
         const res = await upsertPantryItem(patch);
-
-        queryClient.invalidateQueries({ queryKey: ['pantry', 'list'] });
 
         if (res) {
             cb?.();
@@ -69,59 +69,53 @@ export default function Index() {
             return a.name.localeCompare(b.name);
         }
         return a.isInStock ? -1 : 1;
+    }).filter((item) => {
+        return !item.category?.isNonFood && (item.isInStock || item.isFavorite);
     });
 
     const filteredPantry = searchTerm ?
-        sortedPantry.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase())) :
+        sortedPantry.filter((item) => item.name.toLowerCase().includes(searchTerm.toLowerCase())) :
         sortedPantry;
 
     return (
-        <>
-            <Loading isLoading={isLoading && !filteredPantry?.length} />
+        <Screen
+            isLoading={isLoading && !filteredPantry?.length}
+            refreshControl={
+                <RefreshControl
+                    refreshing={isRefreshing}
+                    onRefresh={() => {
+                        setIsRefreshing(true);
+                        refetchPantry().finally(() => setIsRefreshing(false));
+                    }}
+                />
+            }
+        >
             <Heading
                 title='Pantry'
-                action={(
-                    <ItemDialog
-                        categories={itemCategories}
-                        onPressSave={handleSaveChanges}
-                    >
-                        <Pressable style={styles.newItemButton}>
-                            <Text style={styles.newItemButtonText}>add pantry item</Text>
-                            <Feather name="chevron-right" size={16} color={colors.primary} />
-                        </Pressable>
-                    </ItemDialog>
-                )}
+                actions={[{
+                    label: 'Add Item',
+                    icon: 'plus',
+                    onPress: () => setShowNewItemDialog(true)
+                }]}
             />
-            <Search
-                value={searchTerm}
-                onChangeText={setSearchTerm}
-                inputProps={{
-                    placeholder: 'search pantry...'
-                }}
-            />
-            <ScrollView
-                style={styles.container}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={isRefreshing}
-                        onRefresh={() => {
-                            setIsRefreshing(true);
-                            refetchPantry().finally(() => setIsRefreshing(false));
-                        }}
-                    />
-                }
+            <ItemDialog
+                open={showNewItemDialog}
+                onOpenChange={setShowNewItemDialog}
+                categories={itemCategories}
+                onPressSave={handleSaveChanges}
             >
-                {filteredPantry?.map((pantryItem: PantryItem) => (
-                    <ItemDialog
-                        key={pantryItem.id}
-                        pantryItem={pantryItem}
-                        categories={itemCategories}
-                        onPressSave={handleSaveChanges}
-                    >
-                        <PantryListing pantryItem={pantryItem} />
-                    </ItemDialog>
-                ))}
-            </ScrollView>
-        </>
+                <Pressable />
+            </ItemDialog>
+            {filteredPantry?.map((pantryItem: PantryItem) => (
+                <ItemDialog
+                    key={pantryItem.id}
+                    pantryItem={pantryItem}
+                    categories={itemCategories}
+                    onPressSave={handleSaveChanges}
+                >
+                    <PantryListing pantryItem={pantryItem} />
+                </ItemDialog>
+            ))}
+        </Screen>
     )
 }

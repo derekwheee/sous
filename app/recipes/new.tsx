@@ -1,14 +1,13 @@
-import { createRecipe, importRecipe } from '@/api/recipes';
 import Heading from '@/components/heading';
+import Screen from '@/components/screen';
 import Text from '@/components/text';
 import TextInput from '@/components/text-input';
+import { useApi } from '@/hooks/use-api';
 import globalStyles, { colors } from '@/styles/global';
 import Feather from '@expo/vector-icons/Feather';
-import { useHeaderHeight } from '@react-navigation/elements';
-import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 const styles = {
     ...globalStyles,
@@ -87,9 +86,8 @@ interface ImportedRecipe {
 }
 
 export default function CreateNewRecipe(props: any) {
-    const queryClient = useQueryClient();
+    const { createRecipe, importRecipe } = useApi();
     const router = useRouter();
-    const headerHeight = useHeaderHeight();
     const [isSaving, setIsSaving] = useState(false);
     const [showImport, setShowImport] = useState(false);
     const [importUrl, setImportUrl] = useState('');
@@ -134,8 +132,6 @@ export default function CreateNewRecipe(props: any) {
     const handleSaveRecipe = async () => {
         setIsSaving(true);
         const res = await createRecipe(recipe);
-
-        queryClient.invalidateQueries({ queryKey: ['recipes', 'pantry'] });
 
         if (res.error) {
             console.log(res.error);
@@ -194,111 +190,105 @@ export default function CreateNewRecipe(props: any) {
 
     // TODO: Add onSubmitEditing to each TextInput to move to next input
     return (
-        <>
-            <KeyboardAvoidingView
-                style={{ flex: 1 }}
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                keyboardVerticalOffset={headerHeight}
-            >
-                <ScrollView>
-                    <Heading title='New Recipe' />
-                    <View style={[styles.content, styles.importContainer]}>
-                        <Pressable onPress={() => setShowImport(!showImport)} style={styles.importToggle}>
-                            <Feather name='external-link' size={16} color='#fff' />
-                            <Text style={{ color: '#fff' }}>Import Recipe From URL</Text>
-                        </Pressable>
-                        {showImport && (
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <TextInput
-                                    onChangeText={setImportUrl}
-                                    value={importUrl}
-                                    placeholder=""
-                                    style={{ marginBottom: 0 }}
-                                />
-                                <Pressable onPress={handleImportRecipe} style={styles.importSubmit}>
-                                    <Feather name="search" size={24} color='#FFF' />
-                                </Pressable>
-                            </View>
-                        )}
-                    </View>
-                    <View style={styles.content}>
+        <Screen>
+            <Heading title='New Recipe' />
+            <View style={[styles.content, styles.importContainer]}>
+                <Pressable onPress={() => setShowImport(!showImport)} style={styles.importToggle}>
+                    <Feather name='external-link' size={16} color='#fff' />
+                    <Text style={{ color: '#fff' }}>Import Recipe From URL</Text>
+                </Pressable>
+                {showImport && (
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <TextInput
-                            label="name"
-                            onChangeText={setName}
-                            value={name}
-                            placeholder="hot tamales"
+                            onChangeText={setImportUrl}
+                            value={importUrl}
+                            placeholder=""
+                            style={{ marginBottom: 0 }}
                         />
-                        <TextInput
-                            label="prep time"
-                            onChangeText={setPrepTime}
-                            value={prepTime}
-                            placeholder="1 hour"
-                        />
-                        <TextInput
-                            label="cook time"
-                            onChangeText={setCookTime}
-                            value={cookTime}
-                            placeholder="20 mins"
-                        />
-                        <TextInput
-                            label="servings"
-                            onChangeText={setServings}
-                            value={servings}
-                            placeholder="4"
-                        />
-                        <Text style={styles.h3}>ingredients</Text>
-                        {ingredients.map((ingredient, i) => (
-                            <View key={i} style={styles.ingredientContainer}>
-                                <TextInput
-                                    key={i}
-                                    label=""
-                                    onChangeText={(text) => handleChangeIngredient(i, text)}
-                                    value={ingredient}
-                                    placeholder="e.g. 1 cup of flour"
-                                    style={{ marginBottom: 0 }}
-                                />
-                                <Pressable onPress={() => handleRemoveIngredient(i)} style={styles.removeButton}>
-                                    <Feather name="minus" size={24} color={colors.error} />
-                                </Pressable>
-                            </View>
-                        ))}
-                        <Pressable onPress={handleAddIngredient} style={styles.addButton}>
-                            <Text style={styles.addButtonText}>+ Add Ingredient</Text>
-                        </Pressable>
-                        <Text style={styles.h3}>instructions</Text>
-                        {instructions.map((instruction, i) => (
-                            <View key={i} style={styles.ingredientContainer}>
-                                <TextInput
-                                    key={i}
-                                    label=""
-                                    onChangeText={(text) => handleChangeInstruction(i, text)}
-                                    value={instruction}
-                                    placeholder="e.g. Mix all ingredients"
-                                    style={{ marginBottom: 0 }}
-                                />
-                                <Pressable onPress={() => handleRemoveInstruction(i)} style={styles.removeButton}>
-                                    <Feather name="minus" size={24} color={colors.error} />
-                                </Pressable>
-                            </View>
-                        ))}
-                        <Pressable onPress={handleAddInstruction} style={styles.addButton}>
-                            <Text style={styles.addButtonText}>+ Add Instruction</Text>
+                        <Pressable onPress={handleImportRecipe} style={styles.importSubmit}>
+                            <Feather name="search" size={24} color='#FFF' />
                         </Pressable>
                     </View>
-                </ScrollView>
-            </KeyboardAvoidingView>
+                )}
+            </View>
+            <View style={styles.content}>
+                <TextInput
+                    label="name"
+                    onChangeText={setName}
+                    value={name}
+                    placeholder="hot tamales"
+                />
+                <TextInput
+                    label="prep time"
+                    onChangeText={setPrepTime}
+                    value={prepTime}
+                    placeholder="1 hour"
+                />
+                <TextInput
+                    label="cook time"
+                    onChangeText={setCookTime}
+                    value={cookTime}
+                    placeholder="20 mins"
+                />
+                <TextInput
+                    label="servings"
+                    onChangeText={setServings}
+                    value={servings}
+                    placeholder="4"
+                />
+                <Text style={styles.h3}>ingredients</Text>
+                {ingredients.map((ingredient, i) => (
+                    <View key={i} style={styles.ingredientContainer}>
+                        <TextInput
+                            key={i}
+                            label=""
+                            onChangeText={(text) => handleChangeIngredient(i, text)}
+                            value={ingredient}
+                            placeholder="e.g. 1 cup of flour"
+                            style={{ marginBottom: 0 }}
+                        />
+                        <Pressable onPress={() => handleRemoveIngredient(i)} style={styles.removeButton}>
+                            <Feather name="minus" size={24} color={colors.error} />
+                        </Pressable>
+                    </View>
+                ))}
+                <Pressable onPress={handleAddIngredient} style={styles.addButton}>
+                    <Text style={styles.addButtonText}>+ Add Ingredient</Text>
+                </Pressable>
+                <Text style={styles.h3}>instructions</Text>
+                {instructions.map((instruction, i) => (
+                    <View key={i} style={styles.ingredientContainer}>
+                        <TextInput
+                            key={i}
+                            multiline
+                            numberOfLines={2}
+                            label=""
+                            onChangeText={(text) => handleChangeInstruction(i, text)}
+                            value={instruction}
+                            placeholder="e.g. Mix all ingredients"
+                            style={{ marginBottom: 0 }}
+                        />
+                        <Pressable onPress={() => handleRemoveInstruction(i)} style={styles.removeButton}>
+                            <Feather name="minus" size={24} color={colors.error} />
+                        </Pressable>
+                    </View>
+                ))}
+                <Pressable onPress={handleAddInstruction} style={styles.addButton}>
+                    <Text style={styles.addButtonText}>+ Add Instruction</Text>
+                </Pressable>
+            </View>
+        </Screen>
 
-            <Pressable
-                onPress={handleSaveRecipe}
-                style={[
-                    styles.saveRecipeButton,
-                    canBeSaved && !isSaving ? {} : styles.saveRecipeButtonDisabled
-                ]}
-                disabled={!canBeSaved || isSaving}
-            >
-                {/* TODO: Display loading indicator when isSaving is true */}
-                <Text style={styles.saveRecipeButtonText}>Save Recipe</Text>
-            </Pressable>
-        </>
+        // <Pressable
+        //     onPress={handleSaveRecipe}
+        //     style={[
+        //         styles.saveRecipeButton,
+        //         canBeSaved && !isSaving ? {} : styles.saveRecipeButtonDisabled
+        //     ]}
+        //     disabled={!canBeSaved || isSaving}
+        // >
+        //     {/* TODO: Display loading indicator when isSaving is true */}
+        //     <Text style={styles.saveRecipeButtonText}>Save Recipe</Text>
+        // </Pressable>
     );
 }

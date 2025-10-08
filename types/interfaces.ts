@@ -70,6 +70,7 @@ export interface ItemCategory {
         name: string,
         sortOrder: number,
         icon?: string,
+        isNonFood: boolean,
         createdAt: string,
         updatedAt: string,
         deletedAt?: string,
@@ -81,6 +82,7 @@ export interface UpsertItemCategory {
         name?: string,
         sortOrder: number,
         icon?: string,
+        isNonFood?: boolean,
         createdAt?: string,
         updatedAt?: string,
         deletedAt?: string

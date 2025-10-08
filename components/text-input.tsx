@@ -19,7 +19,7 @@ const styles = {
             padding: 16,
             backgroundColor: '#eee',
             fontFamily: fonts.poppins.regular,
-            fontSize: 20,
+            fontSize: 16,
             color: colors.text
         }
     })

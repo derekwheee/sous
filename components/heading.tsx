@@ -1,44 +1,65 @@
+import Text from '@/components/text';
 import globalStyles, { colors } from '@/styles/global';
-import Feather from '@expo/vector-icons/Feather';
-import { Href, Link } from 'expo-router';
-import { StyleSheet, Text, View, ViewProps } from 'react-native';
+import { SymbolView } from 'expo-symbols';
+import { Pressable, StyleSheet, View, ViewProps } from 'react-native';
 
 const styles = {
     ...globalStyles,
     ...StyleSheet.create({
-        linkWrapper: {
-            display: 'flex',
+        actionChipWrapper: {
             flexDirection: 'row',
+            gap: 8,
             marginLeft: 'auto'
         },
-        chevron: {
-            marginLeft: 8
+        actionChip: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 8,
+            padding: 8,
+            borderRadius: 24,
+            backgroundColor: colors.primary
         },
-        link: {
-            ...globalStyles.link,
-            fontSize: 14
+        actionChipText: {
+            paddingLeft: 4,
+            color: 'white'
         }
     })
 };
 
 interface HeadingProps {
     title: string;
-    linkTo?: Href;
-    linkText?: string;
-    action?: React.JSX.Element;
+    actions?: {
+        label?: string;
+        icon: any;
+        onPress: () => void;
+    }[];
 }
 
 export default function Heading({
     title,
-    linkTo,
-    linkText,
-    action,
+    actions,
     ...rest
 }: HeadingProps & ViewProps) {
     return (
         <View style={styles.heading} {...rest}>
             <Text style={styles.h1}>{title}</Text>
-            {!!linkTo && (
+            {actions && actions.length > 0 && (
+                <View style={styles.actionChipWrapper}>
+                    {actions.map(({ label, icon, onPress }, i) => (
+                        <Pressable key={i} style={styles.actionChip} onPress={onPress}>
+                            {label && <Text style={styles.actionChipText}>{label}</Text>}
+                            <SymbolView
+                                name={icon}
+                                style={{ width: 20, height: 20 }}
+                                type="palette"
+                                tintColor={'white'}
+                            />
+                        </Pressable>
+                    ))}
+                </View>
+            )}
+
+            {/* {!!linkTo && (
                 <Link href={linkTo} style={{ marginLeft: 'auto' }}>
                     <View style={styles.linkWrapper}>
                         <Text style={styles.link}>{linkText}</Text>
@@ -46,7 +67,7 @@ export default function Heading({
                     </View>
                 </Link>
             )}
-            {!!action && action}
+            {!!action && action} */}
         </View>
     );
 }
