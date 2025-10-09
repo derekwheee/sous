@@ -5,6 +5,7 @@ import { useApi } from '@/hooks/use-api';
 import globalStyles, { colors } from '@/styles/global';
 import { PantryItem, Recipe } from '@/types/interfaces';
 import { getAvailableIngredients } from '@/util/recipe';
+import { useUser } from '@clerk/clerk-expo';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigation, useRouter } from 'expo-router';
 import { useLayoutEffect, useState } from 'react';
@@ -27,7 +28,7 @@ export default function RecipeScreen() {
         data: recipes
     } = useQuery<Recipe[]>({
         queryKey: ['recipes'],
-        queryFn: getRecipes
+        queryFn: () => getRecipes()
     });
 
     const {
@@ -37,9 +38,10 @@ export default function RecipeScreen() {
         refetch: refetchRecipes
     } = useQuery<PantryItem[]>({
         queryKey: ['pantry'],
-        queryFn: getPantry
+        queryFn: () => getPantry()
     });
 
+    const { user } = useUser();
     const navigation = useNavigation();
     const router = useRouter();
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
@@ -82,7 +84,7 @@ export default function RecipeScreen() {
 
     return (
         <Screen
-            isLoading={isLoading && !filteredRecipes?.length}
+            isLoading={isLoading && !filteredRecipes}
             refreshControl={
                 <RefreshControl
                     refreshing={isRefreshing}

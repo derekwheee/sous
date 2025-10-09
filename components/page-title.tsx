@@ -19,6 +19,8 @@ const styles = {
             marginLeft: 'auto'
         },
         actionChip: {
+            width: 40,
+            height: 40,
             flexDirection: 'row',
             alignItems: 'center',
             gap: 8,
@@ -51,7 +53,7 @@ export default function PageTitle({
             <Text style={styles.title}>{children}</Text>
             {actions && actions.length > 0 && (
                 <View style={styles.actionChipWrapper}>
-                    {actions.map(({ label, icon, nudge,onPress }, i) => (
+                    {actions.map(({ label, icon, nudge, onPress }, i) => (
                         <Pressable key={i} style={styles.actionChip} onPress={onPress}>
                             {label && <Text style={styles.actionChipText}>{label}</Text>}
                             <SymbolView

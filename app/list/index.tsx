@@ -90,7 +90,7 @@ export default function ListScreen() {
         refetch
     } = useQuery<ItemCategory[]>({
         queryKey: ['list'],
-        queryFn: getItemCategories
+        queryFn: () => getItemCategories()
     });
 
     const isLoading = isFetching;
@@ -177,7 +177,7 @@ export default function ListScreen() {
 
     return (
         <Screen
-            isLoading={isLoading && !filteredItemCategories?.length}
+            isLoading={isLoading && !filteredItemCategories}
             refreshControl={
                 <RefreshControl
                     refreshing={isLoading}

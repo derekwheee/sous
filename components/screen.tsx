@@ -1,7 +1,14 @@
 import HeaderSpacer from '@/components/header-spacer';
 import Loading from '@/components/loading';
 import globalStyles from '@/styles/global';
-import { KeyboardAvoidingView, Platform, ScrollView, ScrollViewProps, StyleSheet, View } from 'react-native';
+import {
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    ScrollViewProps,
+    StyleSheet,
+    View
+} from 'react-native';
 
 const styles = {
     ...globalStyles,

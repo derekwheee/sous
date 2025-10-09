@@ -65,6 +65,7 @@ export default StyleSheet.create({
         color: colors.primary
     },
     title: {
+        flexShrink: 1,
         fontFamily: 'Caprasimo_400Regular',
         fontSize: fontSizes.title,
         color: colors.text,

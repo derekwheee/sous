@@ -31,8 +31,10 @@ interface HeadingProps {
     actions?: {
         label?: string;
         icon: any;
+        nudge?: number;
         onPress: () => void;
     }[];
+    nudge?: number;
 }
 
 export default function Heading({
@@ -45,12 +47,12 @@ export default function Heading({
             <Text style={styles.h1}>{title}</Text>
             {actions && actions.length > 0 && (
                 <View style={styles.actionChipWrapper}>
-                    {actions.map(({ label, icon, onPress }, i) => (
+                    {actions.map(({ label, icon, nudge, onPress }, i) => (
                         <Pressable key={i} style={styles.actionChip} onPress={onPress}>
                             {label && <Text style={styles.actionChipText}>{label}</Text>}
                             <SymbolView
                                 name={icon}
-                                style={{ width: 20, height: 20 }}
+                                style={{ width: 20, height: 20, position: 'relative', top: nudge ?? 0 }}
                                 type="palette"
                                 tintColor={'white'}
                             />

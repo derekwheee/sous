@@ -22,19 +22,19 @@ export default function PantryScreen() {
     const {
         isFetching: isPantryLoading,
         error: pantryError,
-        data: pantry = [],
+        data: pantry,
         refetch: refetchPantry
     } = useQuery<PantryItem[]>({
         queryKey: ['pantry'],
-        queryFn: getPantry
+        queryFn: () => getPantry()
     });
 
     const {
         isFetched: isItemCategoriesLoading,
-        data: itemCategories = []
+        data: itemCategories
     } = useQuery<ItemCategory[]>({
         queryKey: ['itemCategories'],
-        queryFn: getItemCategories
+        queryFn: () => getItemCategories()
     });
 
     const navigation = useNavigation();
@@ -64,7 +64,7 @@ export default function PantryScreen() {
         }
     };
 
-    const sortedPantry = pantry.sort((a, b) => {
+    const sortedPantry = pantry?.sort((a, b) => {
         if (a.isInStock === b.isInStock) {
             return a.name.localeCompare(b.name);
         }
@@ -74,12 +74,12 @@ export default function PantryScreen() {
     });
 
     const filteredPantry = searchTerm ?
-        sortedPantry.filter((item) => item.name.toLowerCase().includes(searchTerm.toLowerCase())) :
+        sortedPantry?.filter((item) => item.name.toLowerCase().includes(searchTerm.toLowerCase())) :
         sortedPantry;
 
     return (
         <Screen
-            isLoading={isLoading && !filteredPantry?.length}
+            isLoading={isLoading && !filteredPantry}
             refreshControl={
                 <RefreshControl
                     refreshing={isRefreshing}
@@ -98,24 +98,28 @@ export default function PantryScreen() {
                     onPress: () => setShowNewItemDialog(true)
                 }]}
             />
-            <ItemDialog
-                open={showNewItemDialog}
-                onOpenChange={setShowNewItemDialog}
-                categories={itemCategories}
-                onPressSave={handleSaveChanges}
-            >
-                <Pressable />
-            </ItemDialog>
-            {filteredPantry?.map((pantryItem: PantryItem) => (
-                <ItemDialog
-                    key={pantryItem.id}
-                    pantryItem={pantryItem}
-                    categories={itemCategories}
-                    onPressSave={handleSaveChanges}
-                >
-                    <PantryListing pantryItem={pantryItem} />
-                </ItemDialog>
-            ))}
+            {itemCategories?.length && (
+                <>
+                    <ItemDialog
+                        open={showNewItemDialog}
+                        onOpenChange={setShowNewItemDialog}
+                        categories={itemCategories}
+                        onPressSave={handleSaveChanges}
+                    >
+                        <Pressable />
+                    </ItemDialog>
+                    {filteredPantry?.map((pantryItem: PantryItem) => (
+                        <ItemDialog
+                            key={pantryItem.id}
+                            pantryItem={pantryItem}
+                            categories={itemCategories}
+                            onPressSave={handleSaveChanges}
+                        >
+                            <PantryListing pantryItem={pantryItem} />
+                        </ItemDialog>
+                    ))}
+                </>
+            )}
         </Screen>
     )
 }

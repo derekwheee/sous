@@ -54,7 +54,7 @@ export default function ItemDialog({
     ...props
 }: {
     pantryItem?: PantryItem,
-    categories?: ItemCategory[],
+    categories: ItemCategory[],
     onPressSave: (patch: UpsertPantryItem, cb?: Function) => void,
 } & DialogProps) {
 
