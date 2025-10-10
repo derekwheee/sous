@@ -77,8 +77,6 @@ export default function RootLayout() {
     if (!process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY) {
         throw new Error('Missing authentication token');
     }
-    const router = useRouter();
-    const segments = useSegments();
 
     useEffect(() => {
         Appearance.setColorScheme('light');

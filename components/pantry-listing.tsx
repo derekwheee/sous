@@ -1,8 +1,8 @@
 import Text from '@/components/text';
 import globalStyles, { colors } from '@/styles/global';
 import { PantryItem } from '@/types/interfaces';
+import { SymbolView } from 'expo-symbols';
 import { Pressable, PressableProps, StyleSheet, View } from 'react-native';
-
 
 const styles = {
     ...globalStyles,
@@ -24,17 +24,36 @@ const styles = {
             backgroundColor: colors.success
         },
         name: {
+            flexGrow: 1,
             fontSize: 16,
             textTransform: 'lowercase'
         }
     })
 };
 
-export default function PantryListing({ pantryItem, style = {}, ...rest }: { pantryItem: PantryItem, style?: any } & PressableProps) {
+export default function PantryListing({
+    pantryItem,
+    onToggleFavorite,
+    style = {},
+    ...rest
+}: {
+    pantryItem: PantryItem,
+    onToggleFavorite: ({ id, isFavorite }: { id: number, isFavorite: boolean }) => void,
+    style?: any
+} & PressableProps) {
     return (
         <Pressable style={[styles.wrapper, style]} {...rest}>
             <View style={[styles.statusDot, { backgroundColor: getStatusDotColor(pantryItem.isInStock) }]} />
             <Text style={styles.name}>{pantryItem.name}</Text>
+            <Pressable
+                onPress={() => onToggleFavorite({ id: pantryItem.id, isFavorite: !pantryItem.isFavorite })}
+            >
+                <SymbolView
+                    name={pantryItem.isFavorite ? 'star.fill' : 'star'}
+                    size={24}
+                    tintColor={pantryItem.isFavorite ? colors.sous : '#ccc'}
+                />
+            </Pressable>
         </Pressable>
     );
 }

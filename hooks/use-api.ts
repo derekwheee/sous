@@ -38,21 +38,27 @@ export function useApi() {
             keys: Keys = []
         ) => apiClient.get(keys, '/recipes/scrape?url=' + encodeURIComponent(url)),
         // Pantry
-        getPantry: (
+        getPantries: (
             keys: Keys = []
         ) => apiClient.get(keys, '/pantry'),
-        getPantryItem: (
-            id: number,
-            keys: Keys = []
-        ) => apiClient.get(keys, `/pantry/${id}`),
         upsertPantryItem: (
             item: object,
-            keys: Keys = ['pantry', 'list']
+            keys: Keys = ['pantry', 'list', 'itemCategories']
         ) => apiClient.post(keys, '/pantry', item),
+        getPantryItems: (
+            pantryId: number,
+            keys: Keys = []
+        ) => apiClient.get(keys, `/pantry/${pantryId}/items`),
+        getPantryItem: (
+            id: number,
+            pantryId: number,
+            keys: Keys = []
+        ) => apiClient.get(keys, `/pantry/${pantryId}/items/${id}`),
         // ItemCategories
         getItemCategories: (
+            pantryId: number,
             keys: Keys = []
-        ) => apiClient.get(keys, '/item-categories'),
+        ) => apiClient.get(keys, `/pantry/${pantryId}/categories`),
     }
 }
 

@@ -103,35 +103,11 @@ export default function CreateNewRecipe(props: any) {
         }
 
         const res: ImportedRecipe = await importRecipe(url);
-        const parseTimes = (time: string) => {
-
-            if (time.match(/PT\d+\w+/)) {
-                const [, minutes, flag] = /(\d+)(\w+)/.exec(time) || [];
-                let parsed = '';
-
-                if (flag === 'M') {
-                    const mins = Number(minutes);
-                    const hours = Math.floor(mins / 60);
-                    const remMinutes = mins % 60;
-
-                    if (hours > 0) {
-                        parsed += `${hours} hour${hours > 1 ? 's ' : ' '}`;
-                    }
-                    if (remMinutes > 0) {
-                        parsed += `${remMinutes} min${remMinutes > 1 ? 's' : ''}`;
-                    }
-
-                    return parsed.trim();
-                }
-            }
-
-            return time;
-        };
 
         if (res && !res.error) {
             setName(res.name || '');
-            setPrepTime(parseTimes(res.prepTime) || '');
-            setCookTime(parseTimes(res.cookTime) || '');
+            setPrepTime(res.prepTime || '');
+            setCookTime(res.cookTime || '');
             setServings(res.recipeYield || '');
             setIngredients(res.ingredients || ['']);
             setInstructions(res.instructions || ['']);

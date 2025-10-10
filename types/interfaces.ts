@@ -1,3 +1,13 @@
+export interface Pantry {
+    id: number;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
+    deleteAt?: string;
+    pantryItems: PantryItem[];
+    itemCategories: ItemCategory[];
+}
+
 export interface PantryItem {
     id: number;
     name: string;

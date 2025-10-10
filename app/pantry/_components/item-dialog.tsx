@@ -4,6 +4,7 @@ import TextInput from '@/components/text-input';
 import globalStyles, { colors } from '@/styles/global';
 import { ItemCategory, PantryItem, UpsertPantryItem } from '@/types/interfaces';
 import { X } from '@tamagui/lucide-icons';
+import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 import {
@@ -61,16 +62,16 @@ export default function ItemDialog({
     const [isDirty, setIsDirty] = useState(false);
     const [name, setName] = useState(pantryItem.name);
     const [category, setCategory] = useState(pantryItem.category?.name);
-    const [isFavorite, setIsFavorite] = useState(!!pantryItem.isFavorite);
     const [isInStock, setIsInStock] = useState(!!pantryItem.isInStock);
     const [isInShoppingList, setIsInShoppingList] = useState(!!pantryItem.isInShoppingList);
+    const [isFavorite, setIsFavorite] = useState(!!pantryItem.isFavorite);
 
     const patch: UpsertPantryItem = {
         id: pantryItem.id,
         name,
         isInStock,
-        isFavorite,
         isInShoppingList,
+        isFavorite,
         categoryId: categories.find(cat => cat.name === category)?.id
     };
 
@@ -154,14 +155,29 @@ export default function ItemDialog({
                             </XStack>
                         </Dialog.Title>
                         <Dialog.Description />
-
                         <YStack>
-                            <TextInput
-                                id="name"
-                                label='Name'
-                                value={name}
-                                onChangeText={(...args) => change(() => setName(...args))}
-                            />
+                            {/* TODO: Figure out why I can click away to lose focus */}
+                            <XStack gap="$2" alignItems="center">
+                                <TextInput
+                                    id="name"
+                                    label='Name'
+                                    value={name}
+                                    onChangeText={(...args) => change(() => setName(...args))}
+                                />
+                                <Pressable
+                                    onPress={() => change(() => setIsFavorite(!isFavorite))}
+                                    style={{ 
+                                        position: 'relative',
+                                        top: -4
+                                     }}
+                                >
+                                    <SymbolView
+                                        name={isFavorite ? 'star.fill' : 'star'}
+                                        size={32}
+                                        tintColor={isFavorite ? colors.sous : '#ccc'}
+                                    />
+                                </Pressable>
+                            </XStack>
                             <Select
                                 label="Category"
                                 placeholder="Category..."
@@ -172,22 +188,6 @@ export default function ItemDialog({
                             />
                         </YStack>
                         <YStack gap="$2">
-                            <XStack alignItems="center" gap="$4">
-                                <Switch
-                                    id='isFavorite'
-                                    size='$2'
-                                    onCheckedChange={(checked) => change(() => setIsFavorite(!!checked))}
-                                    checked={isFavorite}
-                                >
-                                    <Switch.Thumb
-                                        animation="quicker"
-                                        style={{
-                                            backgroundColor: isFavorite ? colors.primary : '#ccc'
-                                        }}
-                                    />
-                                </Switch>
-                                <Text size={16} weight='regular'>Staple Ingredient</Text>
-                            </XStack>
                             <XStack alignItems="center" gap="$4">
                                 <Switch
                                     id='isInStock'

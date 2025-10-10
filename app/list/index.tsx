@@ -4,9 +4,10 @@ import Screen from '@/components/screen';
 import Text from '@/components/text';
 import { useApi } from '@/hooks/use-api';
 import globalStyles, { colors, fonts } from '@/styles/global';
-import { ItemCategory, PantryItem, UpsertPantryItem } from '@/types/interfaces';
+import { ItemCategory, Pantry, PantryItem, UpsertPantryItem } from '@/types/interfaces';
+import { standardMutation } from '@/util/query';
 import Feather from '@expo/vector-icons/Feather';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createRef, useCallback, useRef, useState } from 'react';
 import { Alert, Pressable, RefreshControl, StyleSheet, TextInput, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -82,39 +83,56 @@ export default function ListScreen() {
     const [newItemText, setNewItemText] = useState<string>('');
     const newItemInputRef = useRef<TextInput>(null);
 
-    const { getItemCategories, upsertPantryItem } = useApi();
+    const queryClient = useQueryClient();
+    const { getPantries, upsertPantryItem, getItemCategories } = useApi();
+
     const {
-        isFetching,
-        error,
-        data: itemCategories = [],
-        refetch
+            data: pantries,
+            refetch: refetchPantries
+        } = useQuery<Pantry[]>({
+            queryKey: ['pantry'],
+            queryFn: () => getPantries()
+        });
+
+    const {
+        data: categoryList
     } = useQuery<ItemCategory[]>({
-        queryKey: ['list'],
-        queryFn: () => getItemCategories()
+        queryKey: ['itemCategories'],
+        queryFn: () => getItemCategories(pantries![0].id),
+        enabled: !!pantries && pantries.length > 0
     });
 
-    const isLoading = isFetching;
-    const filteredItemCategories = itemCategories.reduce<any[]>((acc, cat) => {
-        const items = cat?.pantryItems;
-        if (!items || items.length === 0) return acc;
+    const { mutate: savePantryItem } = useMutation(
+        standardMutation<any, UpsertPantryItem>(
+            (patch: UpsertPantryItem) => upsertPantryItem(patch),
+            queryClient,
+            ['pantry']
+        )
+    );
 
-        const pantryItems = items.reduce<any[]>((out, item) => {
-            if (isAddingItems) {
-                out.push(item.isInShoppingList ? item : { ...item, canBeAdded: true });
-            } else {
-                if (item.isInShoppingList) {
-                    out.push(item);
-                }
-            }
-            return out;
-        }, []);
+    const pantry = pantries?.[0]?.pantryItems;
+    const categories = pantry?.reduce<any[]>((acc, item: PantryItem) => {
+        const shouldInclude = isAddingItems ? true : item.isInShoppingList;
+        if (!shouldInclude) return acc;
 
-        if (pantryItems.length) {
-            acc.push({ ...cat, pantryItems });
+        const entryItem = isAddingItems && !item.isInShoppingList ? { ...item, canBeAdded: true } : item;
+
+        if (!item.category) {
+            item.category = categoryList?.find(cat => cat.name.toLowerCase() === 'other');
+        }
+
+        const category = acc.find(cat => cat.id === item.categoryId);
+        if (!category) {
+            acc.push({
+                ...(item.category as ItemCategory),
+                pantryItems: [entryItem]
+            });
+        } else {
+            category.pantryItems.push(entryItem);
         }
 
         return acc;
-    }, []);
+    }, []).sort((a, b) => (a.sortOrder ?? 999) - (b.sortOrder ?? 999));
 
     const updateHeight = useCallback((r: any) => {
         if (swipeHeight !== r.nativeEvent.layout.height) {
@@ -147,20 +165,20 @@ export default function ListScreen() {
         ]);
 
     const handleRemoveItem = async (id: number) => {
-        await upsertPantryItem({ id, isInShoppingList: false });
+        await savePantryItem({ id, isInShoppingList: false });
     };
 
     const handleAddItem = async (id: number) => {
-        await upsertPantryItem({ id, isInShoppingList: true });
+        await savePantryItem({ id, isInShoppingList: true });
     };
 
     const handleCreateItem = async (name: string, categoryId?: number) => {
 
         if (!categoryId) {
-            categoryId = itemCategories.find(cat => cat.name.toLowerCase() === 'other')?.id;
+            categoryId = categoryList?.find(cat => cat.name.toLowerCase() === 'other')?.id;
         }
 
-        await upsertPantryItem({ name, isInShoppingList: true, categoryId });
+        await savePantryItem({ name, isInShoppingList: true, categoryId });
 
         setNewItemText('');
         newItemInputRef.current?.blur();
@@ -168,20 +186,19 @@ export default function ListScreen() {
 
     const handleEditItem = async (patch: UpsertPantryItem, cb?: Function) => {
 
-        const res = await upsertPantryItem(patch);
-
-        if (res) {
-            cb?.();
-        }
+        await savePantryItem(patch);
+        cb?.();
     };
+
+    const isLoading = !categories;
 
     return (
         <Screen
-            isLoading={isLoading && !filteredItemCategories}
+            isLoading={isLoading}
             refreshControl={
                 <RefreshControl
                     refreshing={isLoading}
-                    onRefresh={refetch}
+                    onRefresh={refetchPantries}
                 />
             }
         >
@@ -190,7 +207,7 @@ export default function ListScreen() {
                 actions={[
                     {
                         icon: 'list.bullet',
-                        onPress: () => {}
+                        onPress: () => { }
                     },
                     {
                         icon: isAddingItems ? 'checkmark' : 'plus',
@@ -217,7 +234,7 @@ export default function ListScreen() {
                 </View>
             )}
             <GestureHandlerRootView>
-                {filteredItemCategories?.map((itemCategory: ItemCategory) => (
+                {categories?.map((itemCategory: ItemCategory) => (
                     <View key={itemCategory.id}>
                         <View style={styles.categoryWrapper}>
                             <Text style={styles.categoryText}>{itemCategory.icon}</Text>
@@ -251,7 +268,7 @@ export default function ListScreen() {
                                             prog,
                                             trans,
                                             pantryItem,
-                                            itemCategories,
+                                            categories!,
                                             swipeHeight,
                                             proposeRemoveItem,
                                             handleEditItem,
@@ -259,9 +276,17 @@ export default function ListScreen() {
                                         )
                                     }
                                 >
-                                    <View onLayout={updateHeight} style={styles.listItemWrapper}>
+                                    <Pressable
+                                        onLayout={updateHeight}
+                                        style={styles.listItemWrapper}
+                                        onPress={() => savePantryItem({
+                                            id: pantryItem.id,
+                                            isInShoppingList: false,
+                                            isInStock: true
+                                        })}
+                                    >
                                         <Text style={styles.listItemText}>{pantryItem.name}</Text>
-                                    </View>
+                                    </Pressable>
                                 </Swipeable>
                             );
                         })}

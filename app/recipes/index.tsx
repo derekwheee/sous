@@ -3,9 +3,8 @@ import RecipeListing from '@/components/recipe-listing';
 import Screen from '@/components/screen';
 import { useApi } from '@/hooks/use-api';
 import globalStyles, { colors } from '@/styles/global';
-import { PantryItem, Recipe } from '@/types/interfaces';
+import { Pantry, Recipe } from '@/types/interfaces';
 import { getAvailableIngredients } from '@/util/recipe';
-import { useUser } from '@clerk/clerk-expo';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigation, useRouter } from 'expo-router';
 import { useLayoutEffect, useState } from 'react';
@@ -20,12 +19,13 @@ const styles = {
 
 export default function RecipeScreen() {
 
-    const { getRecipes, getPantry } = useApi();
+    const { getRecipes, getPantries } = useApi();
 
     const {
         isFetching: isRecipeLoadingerror,
         error: recipeError,
-        data: recipes
+        data: recipes,
+        refetch
     } = useQuery<Recipe[]>({
         queryKey: ['recipes'],
         queryFn: () => getRecipes()
@@ -34,14 +34,15 @@ export default function RecipeScreen() {
     const {
         isFetching: isPantryLoading,
         error: pantryError,
-        data: pantry = [],
-        refetch: refetchRecipes
-    } = useQuery<PantryItem[]>({
+        data: pantries,
+        refetch: refetchPantries
+    } = useQuery<Pantry[]>({
         queryKey: ['pantry'],
-        queryFn: () => getPantry()
+        queryFn: () => getPantries()
     });
 
-    const { user } = useUser();
+    // TODO: Allow selection of pantry
+    const pantry = pantries?.[0]?.pantryItems;
     const navigation = useNavigation();
     const router = useRouter();
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
@@ -68,8 +69,8 @@ export default function RecipeScreen() {
     const isLoading = isRecipeLoadingerror || isPantryLoading;
 
     const sortedRecipes = recipes?.sort((a, b) => {
-        const aRatio = getAvailableIngredients(a, pantry).length / (a.ingredients.length || 1);
-        const bRatio = getAvailableIngredients(b, pantry).length / (b.ingredients.length || 1);
+        const aRatio = getAvailableIngredients(a, pantry || []).length / (a.ingredients.length || 1);
+        const bRatio = getAvailableIngredients(b, pantry || []).length / (b.ingredients.length || 1);
         if (aRatio === bRatio) {
             return a.name.localeCompare(b.name);
         }
@@ -90,20 +91,26 @@ export default function RecipeScreen() {
                     refreshing={isRefreshing}
                     onRefresh={() => {
                         setIsRefreshing(true);
-                        refetchRecipes().finally(() => setIsRefreshing(false));
+                        refetch().finally(() => setIsRefreshing(false));
                     }}
                 />
             }
         >
             <Heading
                 title='Recipes'
-                actions={[{
-                    label: 'new recipe',
-                    icon: 'plus',
-                    onPress: () => router.push('/recipes/new')
-                }]}
+                actions={[
+                    {
+                        label: 'new recipe',
+                        icon: 'plus',
+                        onPress: () => router.push('/recipes/new')
+                    },
+                    {
+                        icon: 'slider.horizontal.3',
+                        onPress: () => {}
+                    }
+                ]}
             />
-            {filteredRecipes?.map((recipe: Recipe) => (
+            {pantry && filteredRecipes?.map((recipe: Recipe) => (
                 <RecipeListing key={recipe.id} recipe={recipe} pantry={pantry} />
             ))}
         </Screen>

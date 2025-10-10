@@ -3,8 +3,9 @@ import PantryListing from '@/components/pantry-listing';
 import Screen from '@/components/screen';
 import { useApi } from '@/hooks/use-api';
 import globalStyles, { colors } from '@/styles/global';
-import { ItemCategory, PantryItem, UpsertPantryItem } from '@/types/interfaces';
-import { useQuery } from '@tanstack/react-query';
+import { ItemCategory, Pantry, PantryItem, UpsertPantryItem } from '@/types/interfaces';
+import { standardMutation } from '@/util/query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigation } from 'expo-router';
 import { useLayoutEffect, useState } from 'react';
 import { Pressable, RefreshControl, StyleSheet } from 'react-native';
@@ -18,26 +19,33 @@ const styles = {
 };
 
 export default function PantryScreen() {
-    const { getPantry, getItemCategories, upsertPantryItem } = useApi();
+    const queryClient = useQueryClient();
+    const navigation = useNavigation();
+    const { getPantries, getItemCategories, upsertPantryItem } = useApi();
+
     const {
-        isFetching: isPantryLoading,
-        error: pantryError,
-        data: pantry,
-        refetch: refetchPantry
-    } = useQuery<PantryItem[]>({
+        data: pantries,
+        refetch: refetchPantries
+    } = useQuery<Pantry[]>({
         queryKey: ['pantry'],
-        queryFn: () => getPantry()
+        queryFn: () => getPantries()
     });
 
     const {
-        isFetched: isItemCategoriesLoading,
         data: itemCategories
     } = useQuery<ItemCategory[]>({
         queryKey: ['itemCategories'],
-        queryFn: () => getItemCategories()
+        queryFn: () => getItemCategories(pantries![0].id),
+        enabled: !!pantries && pantries.length > 0
     });
 
-    const navigation = useNavigation();
+    const { mutate: savePantryItem } = useMutation(
+        standardMutation<any, UpsertPantryItem>(
+            (patch: UpsertPantryItem) => upsertPantryItem(patch),
+            queryClient,
+            ['pantry']
+        )
+    );
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -53,17 +61,14 @@ export default function PantryScreen() {
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [showNewItemDialog, setShowNewItemDialog] = useState<boolean>(false);
 
-    const isLoading = isPantryLoading || isItemCategoriesLoading;
-
-    const handleSaveChanges = async (patch: UpsertPantryItem, cb?: Function) => {
-
-        const res = await upsertPantryItem(patch);
-
-        if (res) {
-            cb?.();
-        }
+    const handleSaveChanges = (patch: UpsertPantryItem, cb?: Function) => {
+        savePantryItem(patch, {
+            onSuccess: () => cb?.(),
+        });
     };
 
+    // TODO: Allow selection of pantry
+    const pantry = pantries?.[0]?.pantryItems;
     const sortedPantry = pantry?.sort((a, b) => {
         if (a.isInStock === b.isInStock) {
             return a.name.localeCompare(b.name);
@@ -77,15 +82,17 @@ export default function PantryScreen() {
         sortedPantry?.filter((item) => item.name.toLowerCase().includes(searchTerm.toLowerCase())) :
         sortedPantry;
 
+    const isLoading = !filteredPantry || !itemCategories;
+
     return (
         <Screen
-            isLoading={isLoading && !filteredPantry}
+            isLoading={isLoading}
             refreshControl={
                 <RefreshControl
                     refreshing={isRefreshing}
                     onRefresh={() => {
                         setIsRefreshing(true);
-                        refetchPantry().finally(() => setIsRefreshing(false));
+                        refetchPantries().finally(() => setIsRefreshing(false));
                     }}
                 />
             }
@@ -93,7 +100,7 @@ export default function PantryScreen() {
             <Heading
                 title='Pantry'
                 actions={[{
-                    label: 'Add Item',
+                    label: 'add item',
                     icon: 'plus',
                     onPress: () => setShowNewItemDialog(true)
                 }]}
@@ -115,7 +122,7 @@ export default function PantryScreen() {
                             categories={itemCategories}
                             onPressSave={handleSaveChanges}
                         >
-                            <PantryListing pantryItem={pantryItem} />
+                            <PantryListing pantryItem={pantryItem} onToggleFavorite={handleSaveChanges} />
                         </ItemDialog>
                     ))}
                 </>
