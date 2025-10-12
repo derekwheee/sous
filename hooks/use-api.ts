@@ -1,4 +1,5 @@
 import { useInvalidateQueries } from "@/hooks/use-invalidate-queries";
+import { User } from "@/types/interfaces";
 import { useAuth } from '@clerk/clerk-expo';
 import { useQuery } from "@tanstack/react-query";
 
@@ -23,7 +24,7 @@ export function useApi() {
         enabled: !!userId
     });
 
-    const householdId = user?.households?.[0]?.id || 0;
+    const householdId = (user as User | null)?.defaultHouseholdId || 0;
     const apiClient = createClient(invalidateQueries, getToken);
 
     return {

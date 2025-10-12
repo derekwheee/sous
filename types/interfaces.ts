@@ -1,7 +1,17 @@
+export interface User {
+    id: number;
+    email: string;
+    name: string;
+    defaultHouseholdId?: number;
+    createdAt: string;
+    updatedAt: string;
+    deleteAt?: string;
+    households?: Household[];
+}
+
 export interface Household {
     id: number;
     name: string;
-    isDefault: boolean;
     joinToken: string;
     createdAt: string;
     updatedAt: string;
