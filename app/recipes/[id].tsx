@@ -41,10 +41,11 @@ const styles = {
 export default function RecipeDetail() {
     const id = Number(useLocalSearchParams<{ id: string }>().id);
 
-    const { getRecipe } = useApi();
+    const { user, getRecipe } = useApi();
     const { isFetching, data: recipe, refetch } = useQuery<Recipe | null>({
         queryKey: ['recipe', id],
-        queryFn: () => getRecipe(id)
+        queryFn: () => getRecipe(id),
+        enabled: !!user
     });
 
     const matchingWords = findIngredientMatches(recipe);
@@ -97,7 +98,7 @@ export default function RecipeDetail() {
 
     return (
         <Screen
-            isLoading={isFetching && !recipe}
+            isLoading={!user || (isFetching && !recipe)}
             refreshControl={
                 <RefreshControl
                     refreshing={isRefreshing}

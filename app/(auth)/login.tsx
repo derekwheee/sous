@@ -1,5 +1,6 @@
 import Screen from '@/components/screen'
 import Text from '@/components/text'
+import { useApi } from '@/hooks/use-api'
 import globalStyles, { colors, fonts } from '@/styles/global'
 import { useSSO } from '@clerk/clerk-expo'
 import AntDesign from '@expo/vector-icons/AntDesign'
@@ -75,10 +76,11 @@ export const useWarmUpBrowser = () => {
 
 WebBrowser.maybeCompleteAuthSession()
 
-export default function Page() {
+export default function LoginScreen() {
     useWarmUpBrowser();
 
     const { startSSOFlow } = useSSO();
+    const { syncUser } = useApi();
     const router = useRouter();
 
     const onPress = useCallback(async (strategy: 'oauth_google' | 'oauth_apple') => {
@@ -86,16 +88,20 @@ export default function Page() {
             const { createdSessionId, setActive } = await startSSOFlow({
                 strategy,
                 redirectUrl: AuthSession.makeRedirectUri(),
-            })
+            });
 
-            if (createdSessionId) {
-                setActive!({
-                    session: createdSessionId,
-                    navigate: async () => {
-                        router.push('/recipes' as any)
-                    },
-                })
+            if (!createdSessionId) {
+                console.error('No session created');
+                return;
             }
+
+            setActive!({
+                session: createdSessionId,
+                navigate: async () => {
+                    await syncUser();
+                    router.push('/recipes' as any)
+                },
+            })
         } catch (err) {
             console.error(JSON.stringify(err, null, 2))
         }

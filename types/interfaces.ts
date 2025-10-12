@@ -1,6 +1,17 @@
+export interface Household {
+    id: number;
+    name: string;
+    isDefault: boolean;
+    joinToken: string;
+    createdAt: string;
+    updatedAt: string;
+    deleteAt?: string;
+}
+
 export interface Pantry {
     id: number;
     name: string;
+    isDefault: boolean;
     createdAt: string;
     updatedAt: string;
     deleteAt?: string;

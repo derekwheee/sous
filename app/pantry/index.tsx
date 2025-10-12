@@ -1,46 +1,59 @@
+import Button from '@/components/button';
 import Heading from '@/components/heading';
 import PantryListing from '@/components/pantry-listing';
 import Screen from '@/components/screen';
 import { useApi } from '@/hooks/use-api';
-import globalStyles, { colors } from '@/styles/global';
+import globalStyles, { colors, fonts } from '@/styles/global';
 import { ItemCategory, Pantry, PantryItem, UpsertPantryItem } from '@/types/interfaces';
-import { standardMutation } from '@/util/query';
+import { getDefault } from '@/util/pantry';
+import { pantryItemMutation } from '@/util/query';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useNavigation } from 'expo-router';
+import { useNavigation, useRouter } from 'expo-router';
 import { useLayoutEffect, useState } from 'react';
-import { Pressable, RefreshControl, StyleSheet } from 'react-native';
+import { Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import ItemDialog from './_components/item-dialog';
 
 const styles = {
     ...globalStyles,
     ...StyleSheet.create({
-
+        onboarding: {
+            alignItems: 'center',
+            marginVertical: 128,
+            gap: 16
+        },
+        onboardingText: {
+            fontSize: 16,
+            fontFamily: fonts.caprasimo
+        }
     })
 };
 
 export default function PantryScreen() {
     const queryClient = useQueryClient();
     const navigation = useNavigation();
-    const { getPantries, getItemCategories, upsertPantryItem } = useApi();
+    const router = useRouter();
+    const { user, getPantries, getItemCategories, upsertPantryItem } = useApi();
 
     const {
         data: pantries,
         refetch: refetchPantries
     } = useQuery<Pantry[]>({
         queryKey: ['pantry'],
-        queryFn: () => getPantries()
+        queryFn: () => getPantries(),
+        enabled: !!user
     });
 
     const {
         data: itemCategories
     } = useQuery<ItemCategory[]>({
         queryKey: ['itemCategories'],
-        queryFn: () => getItemCategories(pantries![0].id),
-        enabled: !!pantries && pantries.length > 0
+        queryFn: () => getItemCategories(getDefault(pantries)!.id),
+        enabled: !!user && !!pantries && pantries.length > 0,
     });
 
     const { mutate: savePantryItem } = useMutation(
-        standardMutation<any, UpsertPantryItem>(
+        pantryItemMutation<any, UpsertPantryItem>(
+            getDefault(pantries)?.id,
             (patch: UpsertPantryItem) => upsertPantryItem(patch),
             queryClient,
             ['pantry']
@@ -68,7 +81,7 @@ export default function PantryScreen() {
     };
 
     // TODO: Allow selection of pantry
-    const pantry = pantries?.[0]?.pantryItems;
+    const pantry = getDefault(pantries)?.pantryItems;
     const sortedPantry = pantry?.sort((a, b) => {
         if (a.isInStock === b.isInStock) {
             return a.name.localeCompare(b.name);
@@ -82,7 +95,7 @@ export default function PantryScreen() {
         sortedPantry?.filter((item) => item.name.toLowerCase().includes(searchTerm.toLowerCase())) :
         sortedPantry;
 
-    const isLoading = !filteredPantry || !itemCategories;
+    const isLoading = !user || !filteredPantry || !itemCategories;
 
     return (
         <Screen
@@ -105,16 +118,16 @@ export default function PantryScreen() {
                     onPress: () => setShowNewItemDialog(true)
                 }]}
             />
-            {itemCategories?.length && (
+            <ItemDialog
+                open={showNewItemDialog}
+                onOpenChange={setShowNewItemDialog}
+                categories={itemCategories || []}
+                onPressSave={handleSaveChanges}
+            >
+                <Pressable />
+            </ItemDialog>
+            {!!pantry?.length && !!itemCategories?.length && (
                 <>
-                    <ItemDialog
-                        open={showNewItemDialog}
-                        onOpenChange={setShowNewItemDialog}
-                        categories={itemCategories}
-                        onPressSave={handleSaveChanges}
-                    >
-                        <Pressable />
-                    </ItemDialog>
                     {filteredPantry?.map((pantryItem: PantryItem) => (
                         <ItemDialog
                             key={pantryItem.id}
@@ -126,6 +139,20 @@ export default function PantryScreen() {
                         </ItemDialog>
                     ))}
                 </>
+            )}
+            {!pantry?.length && (
+                <View style={styles.onboarding}>
+                    <Text style={styles.onboardingText}>you don't have anything in your pantry</Text>
+                    <Button
+                        text='add your first item'
+                        onPress={() => setShowNewItemDialog(true)}
+                    />
+                    <Text style={styles.onboardingText}>or</Text>
+                    <Button
+                        text='join a household'
+                        onPress={() => router.push('/profile/join')}
+                    />
+                </View>
             )}
         </Screen>
     )

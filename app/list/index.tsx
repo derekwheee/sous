@@ -1,13 +1,16 @@
 import ItemDialog from '@/app/pantry/_components/item-dialog';
+import Button from '@/components/button';
 import Heading from '@/components/heading';
 import Screen from '@/components/screen';
 import Text from '@/components/text';
 import { useApi } from '@/hooks/use-api';
 import globalStyles, { colors, fonts } from '@/styles/global';
 import { ItemCategory, Pantry, PantryItem, UpsertPantryItem } from '@/types/interfaces';
-import { standardMutation } from '@/util/query';
+import { getDefault } from '@/util/pantry';
+import { pantryItemMutation } from '@/util/query';
 import Feather from '@expo/vector-icons/Feather';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { router } from 'expo-router';
 import { createRef, useCallback, useRef, useState } from 'react';
 import { Alert, Pressable, RefreshControl, StyleSheet, TextInput, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -73,6 +76,15 @@ const styles = {
         searchInput: {
             flexGrow: 1,
             color: 'white'
+        },
+        onboarding: {
+            alignItems: 'center',
+            marginVertical: 128,
+            gap: 16
+        },
+        onboardingText: {
+            fontSize: 16,
+            fontFamily: fonts.caprasimo
         }
     })
 };
@@ -84,33 +96,35 @@ export default function ListScreen() {
     const newItemInputRef = useRef<TextInput>(null);
 
     const queryClient = useQueryClient();
-    const { getPantries, upsertPantryItem, getItemCategories } = useApi();
+    const { user, getPantries, upsertPantryItem, getItemCategories } = useApi();
 
     const {
-            data: pantries,
-            refetch: refetchPantries
-        } = useQuery<Pantry[]>({
-            queryKey: ['pantry'],
-            queryFn: () => getPantries()
-        });
+        data: pantries,
+        refetch: refetchPantries
+    } = useQuery<Pantry[]>({
+        queryKey: ['pantry'],
+        queryFn: () => getPantries(),
+        enabled: !!user
+    });
 
     const {
         data: categoryList
     } = useQuery<ItemCategory[]>({
         queryKey: ['itemCategories'],
-        queryFn: () => getItemCategories(pantries![0].id),
-        enabled: !!pantries && pantries.length > 0
+        queryFn: () => getItemCategories(getDefault(pantries)!.id),
+        enabled: !!user && !!pantries && pantries.length > 0
     });
 
     const { mutate: savePantryItem } = useMutation(
-        standardMutation<any, UpsertPantryItem>(
+        pantryItemMutation<any, UpsertPantryItem>(
+            getDefault(pantries)?.id,
             (patch: UpsertPantryItem) => upsertPantryItem(patch),
             queryClient,
             ['pantry']
         )
     );
 
-    const pantry = pantries?.[0]?.pantryItems;
+    const pantry = getDefault(pantries)?.pantryItems;
     const categories = pantry?.reduce<any[]>((acc, item: PantryItem) => {
         const shouldInclude = isAddingItems ? true : item.isInShoppingList;
         if (!shouldInclude) return acc;
@@ -190,7 +204,7 @@ export default function ListScreen() {
         cb?.();
     };
 
-    const isLoading = !categories;
+    const isLoading = !user || !categories;
 
     return (
         <Screen
@@ -293,6 +307,20 @@ export default function ListScreen() {
                     </View>
                 ))}
             </GestureHandlerRootView>
+            {!pantry?.length && (
+                <View style={styles.onboarding}>
+                    <Text style={styles.onboardingText}>you don't have anything in your shopping list</Text>
+                    <Button
+                        text='add your first item'
+                        onPress={() => setIsAddingItems(true)}
+                    />
+                    <Text style={styles.onboardingText}>or</Text>
+                    <Button
+                        text='join a household'
+                        onPress={() => router.push('/profile/join')}
+                    />
+                </View>
+            )}
         </Screen>
     )
 }

@@ -10,6 +10,7 @@ const styles = {
         wrapper: {
             display: 'flex',
             flexDirection: 'row',
+            gap: 16,
             alignItems: 'center',
             padding: 16,
             backgroundColor: '#fff',
@@ -19,11 +20,11 @@ const styles = {
         statusDot: {
             width: 16,
             height: 16,
-            marginRight: 16,
             borderRadius: 8,
             backgroundColor: colors.success
         },
         name: {
+            flexShrink: 1,
             fontSize: 16,
             textTransform: 'lowercase'
         },
@@ -50,7 +51,7 @@ export default function RecipeListing({ recipe, pantry, ...rest }: RecipeProps &
         <Link href={`/recipes/${recipe.id}`} asChild>
             <Pressable style={styles.wrapper} {...rest}>
                 <View style={[styles.statusDot, { backgroundColor: getStatusDotColor(availableIngredients.length, recipe.ingredients.length) }]} />
-                <Text style={styles.name}>{recipe.name}</Text>
+                <Text style={styles.name} numberOfLines={1}>{recipe.name}</Text>
                 <Text style={styles.ingredientsAvailable}>
                     {availableIngredients.length} / {recipe.ingredients.length}
                 </Text>
@@ -78,6 +79,6 @@ function getStatusDotColor(available: number, total: number) {
 
 function getAvailableIngredients(recipe: Recipe, pantry: PantryItem[]) {
     return recipe.ingredients.filter((ingredient) => {
-        return pantry.some((item) => item.name === ingredient.item);
+        return pantry?.some((item) => item.name === ingredient.item);
     });
 }

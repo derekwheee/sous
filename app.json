@@ -9,7 +9,10 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.sous"
+      "bundleIdentifier": "com.anonymous.sous",
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app needs access to your camera to scan a QR code."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -41,7 +44,13 @@
         }
       ],
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

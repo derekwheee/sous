@@ -13,17 +13,21 @@ import {
 const styles = {
     ...globalStyles,
     ...StyleSheet.create({
-
+        contentWrapper: {
+            flex: 1
+        }
     })
 };
 
 export default function Screen({
     isLoading = false,
     children,
+    ref,
     ...props
 }: {
     isLoading?: boolean,
-    children: React.ReactNode
+    children: React.ReactNode,
+    ref?: React.Ref<any>
 } & ScrollViewProps) {
     return (
         <>
@@ -32,9 +36,15 @@ export default function Screen({
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={{ flex: 1 }}
             >
-                <ScrollView {...props}>
+                <ScrollView
+                    {...props}
+                    ref={ref}
+                    contentContainerStyle={{ flexGrow: 1 }}
+                >
                     <HeaderSpacer />
-                    {children}
+                    <View style={styles.contentWrapper}>
+                        {children}
+                    </View>
                     <View style={{ height: 100 }} />
                 </ScrollView>
             </KeyboardAvoidingView>

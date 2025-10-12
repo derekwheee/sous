@@ -1,25 +1,34 @@
+import Button from '@/components/button';
 import Heading from '@/components/heading';
 import RecipeListing from '@/components/recipe-listing';
 import Screen from '@/components/screen';
+import Text from '@/components/text';
 import { useApi } from '@/hooks/use-api';
-import globalStyles, { colors } from '@/styles/global';
+import globalStyles, { colors, fonts } from '@/styles/global';
 import { Pantry, Recipe } from '@/types/interfaces';
 import { getAvailableIngredients } from '@/util/recipe';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigation, useRouter } from 'expo-router';
 import { useLayoutEffect, useState } from 'react';
-import { RefreshControl, StyleSheet } from 'react-native';
+import { RefreshControl, StyleSheet, View } from 'react-native';
 
 const styles = {
     ...globalStyles,
     ...StyleSheet.create({
-
+        onboarding: {
+            alignItems: 'center',
+            marginVertical: 128,
+            gap: 16
+        },
+        onboardingText: {
+            fontSize: 16,
+            fontFamily: fonts.caprasimo
+        }
     })
 };
 
 export default function RecipeScreen() {
-
-    const { getRecipes, getPantries } = useApi();
+    const { user, getRecipes, getPantries } = useApi();
 
     const {
         isFetching: isRecipeLoadingerror,
@@ -28,7 +37,8 @@ export default function RecipeScreen() {
         refetch
     } = useQuery<Recipe[]>({
         queryKey: ['recipes'],
-        queryFn: () => getRecipes()
+        queryFn: () => getRecipes(),
+        enabled: !!user
     });
 
     const {
@@ -38,7 +48,8 @@ export default function RecipeScreen() {
         refetch: refetchPantries
     } = useQuery<Pantry[]>({
         queryKey: ['pantry'],
-        queryFn: () => getPantries()
+        queryFn: () => getPantries(),
+        enabled: !!user
     });
 
     // TODO: Allow selection of pantry
@@ -66,7 +77,7 @@ export default function RecipeScreen() {
         console.log('Error fetching pantry:', pantryError);
     }
 
-    const isLoading = isRecipeLoadingerror || isPantryLoading;
+    const isLoading = !user || isRecipeLoadingerror || isPantryLoading;
 
     const sortedRecipes = recipes?.sort((a, b) => {
         const aRatio = getAvailableIngredients(a, pantry || []).length / (a.ingredients.length || 1);
@@ -106,13 +117,27 @@ export default function RecipeScreen() {
                     },
                     {
                         icon: 'slider.horizontal.3',
-                        onPress: () => {}
+                        onPress: () => { }
                     }
                 ]}
             />
-            {pantry && filteredRecipes?.map((recipe: Recipe) => (
-                <RecipeListing key={recipe.id} recipe={recipe} pantry={pantry} />
+            {filteredRecipes?.map((recipe: Recipe) => (
+                <RecipeListing key={recipe.id} recipe={recipe} pantry={pantry!} />
             ))}
+            {!recipes?.length && (
+                <View style={styles.onboarding}>
+                    <Text style={styles.onboardingText}>you don't have any recipes yet</Text>
+                    <Button
+                        text='create your first recipe'
+                        onPress={() => router.push('/recipes/new')}
+                    />
+                    <Text style={styles.onboardingText}>or</Text>
+                    <Button
+                        text='join a household'
+                        onPress={() => router.push('/profile/join')}
+                    />
+                </View>
+            )}
         </Screen>
     );
 }

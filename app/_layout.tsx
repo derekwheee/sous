@@ -5,19 +5,23 @@ import { ClerkProvider, SignedIn, SignedOut, useAuth } from '@clerk/clerk-expo';
 import { tokenCache } from '@clerk/clerk-expo/token-cache';
 import { Caprasimo_400Regular } from '@expo-google-fonts/caprasimo';
 import { Poppins_300Light, Poppins_400Regular, Poppins_500Medium, Poppins_700Bold } from '@expo-google-fonts/poppins';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ThemeProvider } from '@react-navigation/native';
 import { defaultConfig } from '@tamagui/config/v4';
 import { PortalProvider } from '@tamagui/portal';
 import { QueryClient, QueryClientProvider, useMutation } from '@tanstack/react-query';
+import * as ExpoDevice from "expo-device";
 import { useFonts } from 'expo-font';
 import { Slot, useRouter, useSegments } from 'expo-router';
 import { Tabs } from 'expo-router/tabs';
+import * as SecureStore from "expo-secure-store";
 import { SymbolView } from 'expo-symbols';
 import { useEffect, useRef } from 'react';
-import { Appearance, StatusBar, StyleSheet } from 'react-native';
+import { Appearance, Platform, StatusBar, StyleSheet } from 'react-native';
 import 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { useSyncQueriesExternal } from "react-query-external-sync";
 import { createTamagui, TamaguiProvider } from 'tamagui';
 
 const queryClient = new QueryClient()
@@ -55,7 +59,7 @@ function SignedOutRedirectGuard() {
 
 // add this component (place above RootLayout)
 function SyncUserOnSignIn() {
-    const { getToken, userId, isLoaded } = useAuth();
+    const { userId, isLoaded } = useAuth();
     const { syncUser } = useApi();
     const calledRef = useRef(false);
 
@@ -77,6 +81,35 @@ export default function RootLayout() {
     if (!process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY) {
         throw new Error('Missing authentication token');
     }
+
+    useSyncQueriesExternal({
+        queryClient,
+        socketURL: "http://localhost:42831", // Default port for React Native DevTools
+        deviceName: Platform?.OS || "web", // Platform detection
+        platform: Platform?.OS || "web", // Use appropriate platform identifier
+        deviceId: Platform?.OS || "web", // Use a PERSISTENT identifier (see note below)
+        isDevice: ExpoDevice.isDevice, // Automatically detects real devices vs emulators
+        extraDeviceInfo: {
+            // Optional additional info about your device
+            appVersion: "1.0.0",
+            // Add any relevant platform info
+        },
+        enableLogs: false,
+        envVariables: {
+            NODE_ENV: process.env.NODE_ENV,
+            // Add any private environment variables you want to monitor
+            // Public environment variables are automatically loaded
+        },
+        // Storage monitoring with CRUD operations
+        asyncStorage: AsyncStorage, // AsyncStorage for ['#storage', 'async', 'key'] queries + monitoring
+        secureStorage: SecureStore, // SecureStore for ['#storage', 'secure', 'key'] queries + monitoring
+        secureStorageKeys: [
+            "userToken",
+            "refreshToken",
+            "biometricKey",
+            "deviceId",
+        ], // SecureStore keys to monitor
+    });
 
     useEffect(() => {
         Appearance.setColorScheme('light');

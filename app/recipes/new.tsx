@@ -64,7 +64,7 @@ interface ImportedRecipe {
 }
 
 export default function CreateNewRecipe(props: any) {
-    const { createRecipe, importRecipe } = useApi();
+    const { user, createRecipe, importRecipe } = useApi();
     const router = useRouter();
     // animate save button into view when canBeSaved is true
     const translateY = useRef(new Animated.Value(80)).current;
@@ -218,7 +218,7 @@ export default function CreateNewRecipe(props: any) {
     // TODO: Add onSubmitEditing to each TextInput to move to next input
     return (
         <>
-            <Screen isLoading={isImporting}>
+            <Screen isLoading={!user || isImporting}>
                 <Heading
                     title='New Recipe'
                     actions={[{
