@@ -62,9 +62,10 @@ export function useApi() {
             keys: Keys = []
         ) => apiClient.get(keys, `/household/${householdId}/pantry`),
         upsertPantryItem: (
+            pantryId: number,
             item: object,
             keys: Keys = ['pantry', 'list', 'itemCategories']
-        ) => apiClient.post(keys, `/household/${householdId}/pantry`, item),
+        ) => apiClient.post(keys, `/household/${householdId}/pantry/${pantryId}`, item),
         getPantryItems: (
             pantryId: number,
             keys: Keys = []

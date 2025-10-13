@@ -118,7 +118,7 @@ export default function ListScreen() {
     const { mutate: savePantryItem } = useMutation(
         pantryItemMutation<any, UpsertPantryItem>(
             getDefault(pantries)?.id,
-            (patch: UpsertPantryItem) => upsertPantryItem(patch),
+            (patch: UpsertPantryItem) => upsertPantryItem(getDefault(pantries)?.id!, patch),
             queryClient,
             ['pantry']
         )

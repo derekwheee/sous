@@ -2,6 +2,7 @@ import Button from '@/components/button';
 import Heading from '@/components/heading';
 import RecipeListing from '@/components/recipe-listing';
 import Screen from '@/components/screen';
+import TagPill from '@/components/tag-pill';
 import Text from '@/components/text';
 import { useApi } from '@/hooks/use-api';
 import globalStyles, { colors, fonts } from '@/styles/global';
@@ -23,6 +24,14 @@ const styles = {
         onboardingText: {
             fontSize: 16,
             fontFamily: fonts.caprasimo
+        },
+        tagContainer: {
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            gap: 8,
+            paddingVertical: 16,
+            paddingHorizontal: 16,
+            marginBottom: 8
         }
     })
 };
@@ -52,12 +61,13 @@ export default function RecipeScreen() {
         enabled: !!user
     });
 
-    // TODO: Allow selection of pantry
     const pantry = pantries?.[0]?.pantryItems;
     const navigation = useNavigation();
     const router = useRouter();
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
     const [searchTerm, setSearchTerm] = useState<string>('');
+    const [showTags, setShowTags] = useState<boolean>(false);
+    const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -68,6 +78,14 @@ export default function RecipeScreen() {
             },
         });
     }, [navigation]);
+
+    const toggleTagSelected = (tag: string) => {
+        if (selectedTags.includes(tag)) {
+            setSelectedTags(selectedTags.filter((t) => t !== tag));
+        } else {
+            setSelectedTags([...selectedTags, tag]);
+        }
+    };
 
     if (recipeError) {
         console.log('Error fetching recipes:', recipeError);
@@ -88,11 +106,21 @@ export default function RecipeScreen() {
         return bRatio - aRatio;
     });
 
-    const filteredRecipes = searchTerm
+    const searchedRecipes = searchTerm
         ? sortedRecipes?.filter((recipe) =>
             recipe.name.toLowerCase().includes(searchTerm.toLowerCase())
         )
         : sortedRecipes;
+
+    const tags: string[] = Array.from(new Set(searchedRecipes?.flatMap((r) => r.tags?.map((t) => t.name) || [])));
+
+    const taggedRecipes = searchedRecipes?.filter((recipe) => {
+        if (selectedTags.length === 0) return true;
+        const recipeTagNames = recipe.tags?.map((t) => t.name) || [];
+        return selectedTags.every((tag) => recipeTagNames.includes(tag));
+    });
+
+    const filteredRecipes = taggedRecipes;
 
     return (
         <Screen
@@ -116,11 +144,23 @@ export default function RecipeScreen() {
                         onPress: () => router.push('/recipes/new')
                     },
                     {
-                        icon: 'slider.horizontal.3',
-                        onPress: () => { }
+                        icon: showTags ? 'tag.fill' : 'tag',
+                        onPress: () => setShowTags(!showTags)
                     }
                 ]}
             />
+            {showTags && (
+                <View style={styles.tagContainer}>
+                    {tags.map((tag) => (
+                        <TagPill
+                            key={tag}
+                            text={tag}
+                            onPress={() => toggleTagSelected(tag)}
+                            isActive={selectedTags.includes(tag)}
+                        />
+                    ))}
+                </View>
+            )}
             {filteredRecipes?.map((recipe: Recipe) => (
                 <RecipeListing key={recipe.id} recipe={recipe} pantry={pantry!} />
             ))}

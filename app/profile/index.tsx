@@ -58,23 +58,25 @@ export default function ProfileScreen() {
     return (
         <Screen>
             <Heading
-                title='Profile'
+                title='welcome,'
                 actions={[{
                     label: 'sign out',
                     icon: 'door.left.hand.open',
                     onPress: () => handleSignOut()
                 }]}
             />
-            <Text style={styles.welcomeText}>welcome,</Text>
-            <Text style={styles.userName}>{user?.firstName}</Text>
+            {/* <Text style={styles.welcomeText}>welcome,</Text> */}
+            <Text style={styles.userName}>{user?.firstName || 'friend'}</Text>
             <Text style={styles.sectionHeading}>household</Text>
             <Pressable onPress={() => router.push('/profile/link')} style={styles.menuItem}>
-                <SymbolView name="link" size={24} tintColor="#666" />
+                <SymbolView name="qrcode" size={24} tintColor="#000" />
                 <Text size={16}>share household</Text>
+                <SymbolView name="chevron.right" size={16} tintColor="#000" style={{ marginLeft: 'auto' }} />
             </Pressable>
             <Pressable onPress={() => router.push('/profile/join')} style={styles.menuItem}>
-                <SymbolView name="link" size={24} tintColor="#666" />
+                <SymbolView name="qrcode.viewfinder" size={24} tintColor="#000" />
                 <Text size={16}>join a household</Text>
+                <SymbolView name="chevron.right" size={16} tintColor="#000" style={{ marginLeft: 'auto' }} />
             </Pressable>
         </Screen>
     );

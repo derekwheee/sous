@@ -65,6 +65,16 @@ export interface Ingredient {
     deleteAt?: string;
 }
 
+export interface RecipeTag {
+    id: number;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
+    deleteAt?: string;
+    recipes: Recipe[];
+}
+
+
 export interface Recipe {
     id: number;
     name: string;
@@ -75,6 +85,7 @@ export interface Recipe {
     deleteAt?: string;
     ingredients: Ingredient[];
     instructions: string[];
+    tags?: RecipeTag[];
 }
 
 export interface CreateRecipe {
