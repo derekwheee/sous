@@ -299,7 +299,7 @@ export default function ListScreen() {
                                             isInStock: true
                                         })}
                                     >
-                                        <Text style={styles.listItemText}>{pantryItem.name}</Text>
+                                        <Text size={16} style={styles.listItemText}>{pantryItem.name}</Text>
                                     </Pressable>
                                 </Swipeable>
                             );

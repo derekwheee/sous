@@ -2,8 +2,9 @@ import { useInvalidateQueries } from "@/hooks/use-invalidate-queries";
 import { User } from "@/types/interfaces";
 import { useAuth } from '@clerk/clerk-expo';
 import { useQuery } from "@tanstack/react-query";
+import Constants from "expo-constants";
 
-const API_HOST: string | undefined = process.env.EXPO_PUBLIC_API_HOST;
+const API_HOST: string | undefined = Constants.expoConfig?.extra?.apiHost || process.env.EXPO_PUBLIC_API_HOST;
 
 if (!API_HOST) {
     throw new Error('API_HOST is not defined');

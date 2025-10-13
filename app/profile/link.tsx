@@ -28,7 +28,7 @@ export default function ProfileLinkScreen() {
     const { user } = useApi();
     const { width } = useWindowDimensions();
 
-    const household = user?.households?.find((h: Household) => h.isDefault);
+    const household = user?.households?.find((h: Household) => user.defaultHouseholdId === h.id);
 
     return (
         <Screen isLoading={!user}>

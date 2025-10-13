@@ -1,7 +1,7 @@
 import Heading from '@/components/heading';
 import Screen from '@/components/screen';
 import Text from '@/components/text';
-import globalStyles from '@/styles/global';
+import globalStyles, { fonts } from '@/styles/global';
 import { useClerk, useUser } from '@clerk/clerk-expo';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
@@ -14,7 +14,28 @@ const styles = {
             flexDirection: 'row',
             alignItems: 'center',
             gap: 16,
-            padding: 16
+            padding: 16,
+            borderBottomWidth: 1,
+            borderBottomColor: '#ccc'
+        },
+        welcomeText: {
+            marginVertical: 16,
+            paddingHorizontal: 16,
+            fontSize: 24
+        },
+        userName: {
+            paddingBottom: 32,
+            paddingHorizontal: 16,
+            fontSize: 56,
+            lineHeight: 60,
+            fontFamily: fonts.poppins.bold
+        },
+        sectionHeading: {
+            padding: 16,
+            fontSize: 16,
+            fontFamily: fonts.poppins.medium,
+            borderBottomWidth: 1,
+            borderBottomColor: '#ccc'
         }
     })
 };
@@ -44,13 +65,16 @@ export default function ProfileScreen() {
                     onPress: () => handleSignOut()
                 }]}
             />
+            <Text style={styles.welcomeText}>welcome,</Text>
+            <Text style={styles.userName}>{user?.firstName}</Text>
+            <Text style={styles.sectionHeading}>household</Text>
             <Pressable onPress={() => router.push('/profile/link')} style={styles.menuItem}>
                 <SymbolView name="link" size={24} tintColor="#666" />
-                <Text>share household</Text>
+                <Text size={16}>share household</Text>
             </Pressable>
             <Pressable onPress={() => router.push('/profile/join')} style={styles.menuItem}>
                 <SymbolView name="link" size={24} tintColor="#666" />
-                <Text>join a household</Text>
+                <Text size={16}>join a household</Text>
             </Pressable>
         </Screen>
     );

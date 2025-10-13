@@ -10,6 +10,7 @@ import { ThemeProvider } from '@react-navigation/native';
 import { defaultConfig } from '@tamagui/config/v4';
 import { PortalProvider } from '@tamagui/portal';
 import { QueryClient, QueryClientProvider, useMutation } from '@tanstack/react-query';
+import Constants from "expo-constants";
 import * as ExpoDevice from "expo-device";
 import { useFonts } from 'expo-font';
 import { Slot, useRouter, useSegments } from 'expo-router';
@@ -78,7 +79,7 @@ function SyncUserOnSignIn() {
 
 export default function RootLayout() {
 
-    if (!process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY) {
+    if (!Constants.expoConfig?.extra?.clerkKey && !process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY) {
         throw new Error('Missing authentication token');
     }
 
@@ -128,7 +129,13 @@ export default function RootLayout() {
     }
 
     return (
-        <ClerkProvider tokenCache={tokenCache}>
+        <ClerkProvider
+            tokenCache={tokenCache}
+            publishableKey={
+                Constants.expoConfig?.extra?.clerkKey ||
+                process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY
+            }
+        >
             <PortalProvider>
                 <TamaguiProvider config={config}>
                     <QueryClientProvider client={queryClient}>
