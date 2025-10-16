@@ -8,7 +8,7 @@ interface TextProps {
 }
 
 export default function Text({
-    size = 14,
+    size = 16,
     weight = 'light',
     align = 'left',
     children,

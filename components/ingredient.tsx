@@ -12,26 +12,30 @@ const styles = {
             flexDirection: 'row',
             alignItems: 'center',
             marginVertical: 4,
-            gap: 4
+            gap: 4,
         },
         icon: {
-            marginRight: 16
+            marginRight: 16,
         },
         ingredientText: {
-            flexShrink: 1
-        }
-    })
+            flexShrink: 1,
+        },
+    }),
 };
 
 interface IngredientProps {
-    ingredient: IngredientType
+    ingredient: IngredientType;
 }
 
 export default function Ingredient({ ingredient, ...rest }: IngredientProps & ViewProps) {
     return (
         <View style={styles.wrapper} {...rest}>
-            <Feather name="plus-circle" style={styles.icon} size={24} color="#000000" />
-            {ingredient.sentence && (<Text size={16} style={styles.ingredientText}>{ingredient.sentence}</Text>)}
+            <Feather name='plus-circle' style={styles.icon} size={24} color='#000000' />
+            {ingredient.sentence && (
+                <Text size={16} style={styles.ingredientText}>
+                    {ingredient.sentence}
+                </Text>
+            )}
         </View>
     );
 }

@@ -71,15 +71,23 @@ export interface RecipeTag {
     createdAt: string;
     updatedAt: string;
     deleteAt?: string;
-    recipes: Recipe[];
+    recipes?: Recipe[];
 }
 
+export interface UpsertRecipeTag {
+    id?: number;
+    name?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    deleteAt?: string;
+}
 
 export interface Recipe {
     id: number;
     name: string;
     prepTime: string;
     cookTime: string;
+    servings?: number;
     createdAt: string;
     updatedAt: string;
     deleteAt?: string;
@@ -92,6 +100,7 @@ export interface CreateRecipe {
     name: string;
     prepTime: string;
     cookTime: string;
+    servings?: number;
     deleteAt?: string;
     ingredients: string[];
     instructions: string[];
@@ -102,9 +111,37 @@ export interface PatchRecipe {
     name?: string;
     prepTime?: string;
     cookTime?: string;
+    servings?: number;
     deleteAt?: string;
-    ingredients?: Ingredient[];
+    ingredients?: string[];
     instructions?: string[];
+    tags?: UpsertRecipeTag[];
+}
+
+export interface UpsertRecipe {
+    id?: number;
+    name?: string;
+    prepTime?: string;
+    cookTime?: string;
+    servings?: number;
+    deleteAt?: string;
+    ingredients?: string[];
+    instructions?: string[];
+    tags?: UpsertRecipeTag[];
+}
+
+export interface DeleteRecipe {
+    id: number;
+}
+
+export interface ImportedRecipe {
+    name: string;
+    prepTime: string;
+    cookTime: string;
+    recipeYield: string;
+    ingredients: string[];
+    instructions: string[];
+    error?: any;
 }
 
 export interface ItemCategory {

@@ -6,12 +6,17 @@ import TagPill from '@/components/tag-pill';
 import Text from '@/components/text';
 import { useApi } from '@/hooks/use-api';
 import globalStyles, { colors, fonts } from '@/styles/global';
-import { Pantry, Recipe } from '@/types/interfaces';
+import { DeleteRecipe, Pantry, Recipe } from '@/types/interfaces';
+import { standardMutation } from '@/util/query';
 import { getAvailableIngredients } from '@/util/recipe';
-import { useQuery } from '@tanstack/react-query';
+import Feather from '@expo/vector-icons/Feather';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigation, useRouter } from 'expo-router';
-import { useLayoutEffect, useState } from 'react';
-import { RefreshControl, StyleSheet, View } from 'react-native';
+import { createRef, useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { Alert, Pressable, RefreshControl, StyleSheet, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
+import Reanimated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated';
 
 const styles = {
     ...globalStyles,
@@ -19,11 +24,11 @@ const styles = {
         onboarding: {
             alignItems: 'center',
             marginVertical: 128,
-            gap: 16
+            gap: 16,
         },
         onboardingText: {
             fontSize: 16,
-            fontFamily: fonts.caprasimo
+            fontFamily: fonts.caprasimo,
         },
         tagContainer: {
             flexDirection: 'row',
@@ -31,35 +36,60 @@ const styles = {
             gap: 8,
             paddingVertical: 16,
             paddingHorizontal: 16,
-            marginBottom: 8
-        }
-    })
+            marginBottom: 8,
+        },
+        deleteAction: {
+            alignContent: 'center',
+            justifyContent: 'center',
+            padding: 16,
+            aspectRatio: 1,
+            height: '100%',
+            backgroundColor: colors.error,
+        },
+        editAction: {
+            alignContent: 'center',
+            justifyContent: 'center',
+            padding: 16,
+            aspectRatio: 1,
+            height: '100%',
+            backgroundColor: colors.primary,
+        },
+    }),
 };
 
 export default function RecipeScreen() {
-    const { user, getRecipes, getPantries } = useApi();
+    const { user, getRecipes, getPantries, deleteRecipe } = useApi();
+    const queryClient = useQueryClient();
 
     const {
         isFetching: isRecipeLoadingerror,
         error: recipeError,
         data: recipes,
-        refetch
+        refetch,
     } = useQuery<Recipe[]>({
         queryKey: ['recipes'],
         queryFn: () => getRecipes(),
-        enabled: !!user
+        enabled: !!user,
     });
 
     const {
         isFetching: isPantryLoading,
         error: pantryError,
         data: pantries,
-        refetch: refetchPantries
     } = useQuery<Pantry[]>({
         queryKey: ['pantry'],
         queryFn: () => getPantries(),
-        enabled: !!user
+        enabled: !!user,
     });
+
+    const { mutate: handleDeleteRecipe } = useMutation(
+        standardMutation<any, DeleteRecipe>(
+            ({ id }: DeleteRecipe) => deleteRecipe(id),
+            queryClient,
+            ['recipes'],
+            { isDelete: true }
+        )
+    );
 
     const pantry = pantries?.[0]?.pantryItems;
     const navigation = useNavigation();
@@ -68,13 +98,24 @@ export default function RecipeScreen() {
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [showTags, setShowTags] = useState<boolean>(false);
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
+    const [swipeHeight, setSwipeHeight] = useState<number>(0);
+    const swipeRefs = useRef(new Map<number, React.RefObject<any>>());
+
+    const updateHeight = useCallback(
+        (r: any) => {
+            if (swipeHeight !== r.nativeEvent.layout.height) {
+                setSwipeHeight(r.nativeEvent.layout.height);
+            }
+        },
+        [swipeHeight]
+    );
 
     useLayoutEffect(() => {
         navigation.setOptions({
             headerSearchBarOptions: {
                 placeholder: 'search recipes...',
                 tintColor: colors.primary,
-                onChangeText: (event: any) => setSearchTerm(event.nativeEvent.text)
+                onChangeText: (event: any) => setSearchTerm(event.nativeEvent.text),
             },
         });
     }, [navigation]);
@@ -85,6 +126,32 @@ export default function RecipeScreen() {
         } else {
             setSelectedTags([...selectedTags, tag]);
         }
+    };
+
+    const proposeRemoveItem = useCallback((id: number, ref?: any) => {
+        if (ref) {
+            ref.close();
+        }
+
+        confirmRemoveItem(id);
+    }, []);
+
+    const confirmRemoveItem = (id: number) =>
+        Alert.alert('Remove item', 'Do you want to remove this item from your list?', [
+            {
+                text: 'Cancel',
+                onPress: () => {},
+                style: 'cancel',
+            },
+            {
+                text: 'Delete',
+                onPress: () => handleRemoveItem(id),
+                style: 'destructive',
+            },
+        ]);
+
+    const handleRemoveItem = async (id: number) => {
+        await handleDeleteRecipe({ id });
     };
 
     if (recipeError) {
@@ -98,8 +165,10 @@ export default function RecipeScreen() {
     const isLoading = !user || isRecipeLoadingerror || isPantryLoading;
 
     const sortedRecipes = recipes?.sort((a, b) => {
-        const aRatio = getAvailableIngredients(a, pantry || []).length / (a.ingredients.length || 1);
-        const bRatio = getAvailableIngredients(b, pantry || []).length / (b.ingredients.length || 1);
+        const aRatio =
+            getAvailableIngredients(a, pantry || []).length / (a.ingredients.length || 1);
+        const bRatio =
+            getAvailableIngredients(b, pantry || []).length / (b.ingredients.length || 1);
         if (aRatio === bRatio) {
             return a.name.localeCompare(b.name);
         }
@@ -108,11 +177,13 @@ export default function RecipeScreen() {
 
     const searchedRecipes = searchTerm
         ? sortedRecipes?.filter((recipe) =>
-            recipe.name.toLowerCase().includes(searchTerm.toLowerCase())
-        )
+              recipe.name.toLowerCase().includes(searchTerm.toLowerCase())
+          )
         : sortedRecipes;
 
-    const tags: string[] = Array.from(new Set(searchedRecipes?.flatMap((r) => r.tags?.map((t) => t.name) || [])));
+    const tags: string[] = Array.from(
+        new Set(searchedRecipes?.flatMap((r) => r.tags?.map((t) => t.name) || []))
+    );
 
     const taggedRecipes = searchedRecipes?.filter((recipe) => {
         if (selectedTags.length === 0) return true;
@@ -141,12 +212,12 @@ export default function RecipeScreen() {
                     {
                         label: 'new recipe',
                         icon: 'plus',
-                        onPress: () => router.push('/recipes/new')
+                        onPress: () => router.push('/recipes/new'),
                     },
                     {
                         icon: showTags ? 'tag.fill' : 'tag',
-                        onPress: () => setShowTags(!showTags)
-                    }
+                        onPress: () => setShowTags(!showTags),
+                    },
                 ]}
             />
             {showTags && (
@@ -161,9 +232,39 @@ export default function RecipeScreen() {
                     ))}
                 </View>
             )}
-            {filteredRecipes?.map((recipe: Recipe) => (
-                <RecipeListing key={recipe.id} recipe={recipe} pantry={pantry!} />
-            ))}
+            <GestureHandlerRootView>
+                {filteredRecipes?.map((recipe: Recipe) => {
+                    if (!swipeRefs.current.has(recipe.id)) {
+                        swipeRefs.current.set(recipe.id, createRef<any>());
+                    }
+                    const swipeRef = swipeRefs.current.get(recipe.id);
+
+                    return (
+                        <Swipeable
+                            key={recipe.id}
+                            ref={swipeRef}
+                            renderRightActions={(prog, trans) =>
+                                RightAction(
+                                    prog,
+                                    trans,
+                                    swipeHeight,
+                                    recipe,
+                                    proposeRemoveItem,
+                                    () => router.push(`/recipes/edit/${recipe.id}`),
+                                    swipeRef
+                                )
+                            }
+                        >
+                            <RecipeListing
+                                key={recipe.id}
+                                recipe={recipe}
+                                pantry={pantry!}
+                                onLayout={updateHeight}
+                            />
+                        </Swipeable>
+                    );
+                })}
+            </GestureHandlerRootView>
             {!recipes?.length && (
                 <View style={styles.onboarding}>
                     <Text style={styles.onboardingText}>you don't have any recipes yet</Text>
@@ -172,12 +273,43 @@ export default function RecipeScreen() {
                         onPress={() => router.push('/recipes/new')}
                     />
                     <Text style={styles.onboardingText}>or</Text>
-                    <Button
-                        text='join a household'
-                        onPress={() => router.push('/profile/join')}
-                    />
+                    <Button text='join a household' onPress={() => router.push('/profile/join')} />
                 </View>
             )}
         </Screen>
+    );
+}
+
+function RightAction(
+    prog: SharedValue<number>,
+    drag: SharedValue<number>,
+    width: number,
+    recipe: Recipe,
+    proposeRemoveItem: (id: number, ref?: any) => void,
+    handleEditItem: () => void,
+    swipeRef?: React.RefObject<any>
+) {
+    const styleAnimation = useAnimatedStyle(() => {
+        return {
+            transform: [{ translateX: drag.value + width * 2 }],
+        };
+    });
+
+    const close = (fn: Function, ...args: any) => {
+        fn(...args);
+        swipeRef?.current?.close();
+    };
+
+    return (
+        <Reanimated.View style={styleAnimation}>
+            <View style={{ flexDirection: 'row' }}>
+                <Pressable onPress={() => close(handleEditItem)}>
+                    <Feather name='edit-2' size={24} color='#fff' style={styles.editAction} />
+                </Pressable>
+                <Pressable onPress={() => close(proposeRemoveItem, recipe.id, swipeRef?.current)}>
+                    <Feather name='trash-2' size={24} color='#fff' style={styles.deleteAction} />
+                </Pressable>
+            </View>
+        </Reanimated.View>
     );
 }

@@ -1,7 +1,7 @@
 import { Pantry, UpsertPantryItem } from '@/types/interfaces';
 import { MutationFunction, QueryClient } from '@tanstack/react-query';
 
-function optimisticUpdate(patch: any, previous?: any) {
+function optimisticUpdate(patch: any, previous: any | undefined | null, isDelete: boolean) {
     if (!previous) return previous;
 
     const itemIndex = previous.findIndex((i: any) => i.id === patch.id);
@@ -13,6 +13,10 @@ function optimisticUpdate(patch: any, previous?: any) {
             ...patch
         };
         return [...updated, newItem];
+    } else if (isDelete) {
+        const updated = [...previous];
+        updated.splice(itemIndex, 1);
+        return updated;
     } else {
         const updated = [...previous];
         updated[itemIndex] = { ...updated[itemIndex], ...patch };
@@ -20,11 +24,11 @@ function optimisticUpdate(patch: any, previous?: any) {
     }
 }
 
-async function optimisticOnMutate<T>(client: QueryClient, queryKey: string[], patch: T) {
+async function optimisticOnMutate<T>(client: QueryClient, queryKey: string[], patch: T, isDelete: boolean) {
     await client.cancelQueries({ queryKey });
     const previous = client.getQueryData<T>(queryKey);
 
-    client.setQueryData<T>(queryKey, (old) => optimisticUpdate(patch, old));
+    client.setQueryData<T>(queryKey, (old) => optimisticUpdate(patch, old, isDelete));
 
     return { previous };
 }
@@ -33,19 +37,24 @@ export function standardMutation<TData, TVariables>(
     mutationFn: MutationFunction<TData, TVariables>,
     queryClient: QueryClient,
     queryKey: string[],
-    invalidateKeys?: string[] | string[][]
+    options: {
+        invalidateKeys?: string[] | string[][],
+        isDelete: boolean
+    } = {
+        isDelete: false
+    }
 ) {
     return {
         mutationFn,
-        onMutate: async (patch: TVariables) => optimisticOnMutate<TVariables>(queryClient, queryKey, patch),
+        onMutate: async (patch: TVariables) => optimisticOnMutate<TVariables>(queryClient, queryKey, patch, options.isDelete),
         onError: (_: any, __: any, context: { previous: TData | undefined } | undefined) => {
             if (context?.previous) {
                 queryClient.setQueryData(queryKey, context.previous);
             }
         },
         onSettled: () => {
-            if (invalidateKeys) {
-                for (const key of invalidateKeys) {
+            if (options.invalidateKeys) {
+                for (const key of options.invalidateKeys) {
                     queryClient.invalidateQueries({ queryKey: Array.isArray(key) ? key : [key] });
                 }
             } else {

@@ -8,7 +8,7 @@ import globalStyles, { colors, fonts } from '@/styles/global';
 import { Recipe } from '@/types/interfaces';
 import { findIngredientMatches } from '@/util/recipe';
 import { useQuery } from '@tanstack/react-query';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { RefreshControl, StyleSheet, View } from 'react-native';
 
@@ -41,6 +41,7 @@ const styles = {
 export default function RecipeDetail() {
     const id = Number(useLocalSearchParams<{ id: string }>().id);
 
+    const router = useRouter();
     const { user, getRecipe } = useApi();
     const { isFetching, data: recipe, refetch } = useQuery<Recipe | null>({
         queryKey: ['recipe', id],
@@ -118,7 +119,7 @@ export default function RecipeDetail() {
                     },
                     {
                         icon: 'pencil',
-                        onPress: () => {}
+                        onPress: () => router.push(`/recipes/edit/${id}`)
                     }
                 ]}
             >

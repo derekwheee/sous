@@ -34,6 +34,13 @@ export default function RecipesLayout() {
                     headerShown: true
                 }}
             />
+            <Stack.Screen
+                name='edit/[id]'
+                options={{
+                    title: 'Edit Recipe',
+                    headerShown: true
+                }}
+            />
         </Stack>
     );
 }
