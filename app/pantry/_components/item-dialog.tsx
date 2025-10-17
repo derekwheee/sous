@@ -1,4 +1,4 @@
-import Select from '@/components/select-input';
+import Autocomplete from '@/components/autocomplete';
 import Text from '@/components/text';
 import TextInput from '@/components/text-input';
 import globalStyles, { colors } from '@/styles/global';
@@ -16,14 +16,23 @@ import {
     Switch,
     Unspaced,
     XStack,
-    YStack
+    YStack,
 } from 'tamagui';
 
 const styles = {
     ...globalStyles,
     ...StyleSheet.create({
-
-    })
+        categoryTrigger: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            borderColor: colors.primary,
+            borderBottomWidth: 2,
+            padding: 16,
+            backgroundColor: '#eee',
+            marginBottom: 32,
+        },
+    }),
 };
 
 const SaveItemButton = ({
@@ -32,13 +41,18 @@ const SaveItemButton = ({
     disabled,
     ...props
 }: {
-    onPressSave: (cb?: Function) => void,
-    onPress?: Function,
-    disabled: boolean,
-    props?: React.ComponentProps<typeof Pressable>
+    onPressSave: (cb?: Function) => void;
+    onPress?: Function;
+    disabled: boolean;
+    props?: React.ComponentProps<typeof Pressable>;
 }) => {
     return (
-        <Pressable style={[styles.button, disabled && styles.buttonDisabled]} disabled={disabled} {...props} onPress={() => onPressSave(onPress)}>
+        <Pressable
+            style={[styles.button, disabled && styles.buttonDisabled]}
+            disabled={disabled}
+            {...props}
+            onPress={() => onPressSave(onPress)}
+        >
             <Text style={[styles.buttonText, disabled && styles.buttonTextDisabled]}>save</Text>
         </Pressable>
     );
@@ -47,24 +61,25 @@ const SaveItemButton = ({
 export default function ItemDialog({
     pantryItem = {
         name: '',
-        isInStock: false
+        isInStock: false,
     } as PantryItem,
     categories = [] as ItemCategory[],
     onPressSave,
     children,
     ...props
 }: {
-    pantryItem?: PantryItem,
-    categories: ItemCategory[],
-    onPressSave: (patch: UpsertPantryItem, cb?: Function) => void,
+    pantryItem?: PantryItem;
+    categories: ItemCategory[];
+    onPressSave: (patch: UpsertPantryItem, cb?: Function) => void;
 } & DialogProps) {
-
     const [isDirty, setIsDirty] = useState(false);
     const [name, setName] = useState(pantryItem.name);
     const [category, setCategory] = useState(pantryItem.category?.name);
     const [isInStock, setIsInStock] = useState(!!pantryItem.isInStock);
     const [isInShoppingList, setIsInShoppingList] = useState(!!pantryItem.isInShoppingList);
     const [isFavorite, setIsFavorite] = useState(!!pantryItem.isFavorite);
+    const [showCategoryInput, setShowCategoryInput] = useState(false);
+    const [categoryEntry, setCategoryEntry] = useState('');
 
     const patch: UpsertPantryItem = {
         id: pantryItem.id,
@@ -72,7 +87,7 @@ export default function ItemDialog({
         isInStock,
         isInShoppingList,
         isFavorite,
-        categoryId: categories.find(cat => cat.name === category)?.id
+        categoryId: categories.find((cat) => cat.name === category)?.id,
     };
 
     const change = (fn: Function) => {
@@ -80,27 +95,20 @@ export default function ItemDialog({
             setIsDirty(true);
         }
         fn();
-    }
+    };
 
     return (
         <Dialog modal {...props}>
-            <Dialog.Trigger asChild>
-                {children}
-            </Dialog.Trigger>
+            <Dialog.Trigger asChild>{children}</Dialog.Trigger>
 
-            <Adapt platform="touch">
-                <Sheet
-                    animation="medium"
-                    zIndex={200000}
-                    modal
-                    snapPoints={[90]}
-                >
-                    <Sheet.Frame padding="$4">
+            <Adapt platform='touch'>
+                <Sheet animation='medium' zIndex={200000} modal snapPoints={[90]}>
+                    <Sheet.Frame padding='$4'>
                         <Adapt.Contents />
                     </Sheet.Frame>
                     <Sheet.Overlay
-                        backgroundColor="$shadow6"
-                        animation="medium"
+                        backgroundColor='$shadow6'
+                        animation='medium'
                         enterStyle={{ opacity: 0 }}
                         exitStyle={{ opacity: 0 }}
                     />
@@ -109,8 +117,8 @@ export default function ItemDialog({
 
             <Dialog.Portal>
                 <Dialog.Overlay
-                    key="overlay"
-                    backgroundColor="$shadow6"
+                    key='overlay'
+                    backgroundColor='$shadow6'
                     animateOnly={['transform', 'opacity']}
                     animation={[
                         'quicker',
@@ -127,10 +135,10 @@ export default function ItemDialog({
                 <Dialog.FocusScope focusOnIdle>
                     <Dialog.Content
                         bordered
-                        paddingVertical="$4"
-                        paddingHorizontal="$6"
+                        paddingVertical='$4'
+                        paddingHorizontal='$6'
                         elevate
-                        key="content"
+                        key='content'
                         animateOnly={['transform', 'opacity']}
                         animation={[
                             'quicker',
@@ -144,8 +152,14 @@ export default function ItemDialog({
                         exitStyle={{ x: 0, y: 10, opacity: 0, scale: 0.95 }}
                     >
                         <Dialog.Title>
-                            <XStack style={{ width: '100%' }} justifyContent="space-between" alignItems="center">
-                                <Text style={styles.dialogHeading}>{!!pantryItem?.id ? 'Edit Item' : 'Add Item'}</Text>
+                            <XStack
+                                style={{ width: '100%' }}
+                                justifyContent='space-between'
+                                alignItems='center'
+                            >
+                                <Text style={styles.dialogHeading}>
+                                    {!!pantryItem?.id ? 'Edit Item' : 'Add Item'}
+                                </Text>
                                 <Dialog.Close displayWhenAdapted asChild>
                                     <SaveItemButton
                                         disabled={!isDirty || !name.trim()}
@@ -157,19 +171,19 @@ export default function ItemDialog({
                         <Dialog.Description />
                         <YStack>
                             {/* TODO: Figure out why I can click away to lose focus */}
-                            <XStack gap="$2" alignItems="center">
+                            <XStack gap='$2' alignItems='center'>
                                 <TextInput
-                                    id="name"
+                                    id='name'
                                     label='Name'
                                     value={name}
                                     onChangeText={(...args) => change(() => setName(...args))}
                                 />
                                 <Pressable
                                     onPress={() => change(() => setIsFavorite(!isFavorite))}
-                                    style={{ 
+                                    style={{
                                         position: 'relative',
-                                        top: -4
-                                     }}
+                                        top: -4,
+                                    }}
                                 >
                                     <SymbolView
                                         name={isFavorite ? 'star.fill' : 'star'}
@@ -178,58 +192,102 @@ export default function ItemDialog({
                                     />
                                 </Pressable>
                             </XStack>
-                            <Select
-                                label="Category"
-                                placeholder="Category..."
-                                value={category}
-                                onValueChange={(value) => change(() => setCategory(value))}
-                                selectLabel="select a category"
-                                selectItems={categories.map(cat => ({ label: `${cat.icon} ${cat.name}`, value: cat.name }))}
-                            />
+                            <Text weight='regular'>Category</Text>
+                            <Pressable
+                                onPress={() => setShowCategoryInput(true)}
+                                style={styles.categoryTrigger}
+                            >
+                                <Text weight='regular'>{category}</Text>
+                                <SymbolView
+                                    name='chevron.right'
+                                    size={16}
+                                    tintColor={colors.text}
+                                />
+                            </Pressable>
                         </YStack>
-                        <YStack gap="$2">
-                            <XStack alignItems="center" gap="$4">
+                        <YStack gap='$2'>
+                            <XStack alignItems='center' gap='$4'>
                                 <Switch
                                     id='isInStock'
                                     size='$2'
-                                    onCheckedChange={(checked) => change(() => setIsInStock(!!checked))}
+                                    onCheckedChange={(checked) =>
+                                        change(() => setIsInStock(!!checked))
+                                    }
                                     checked={isInStock}
                                 >
                                     <Switch.Thumb
-                                        animation="quicker"
+                                        animation='quicker'
                                         style={{
-                                            backgroundColor: isInStock ? colors.primary : '#ccc'
+                                            backgroundColor: isInStock ? colors.primary : '#ccc',
                                         }}
                                     />
                                 </Switch>
-                                <Text size={16} weight='regular'>In Stock</Text>
+                                <Text size={16} weight='regular'>
+                                    In Stock
+                                </Text>
                             </XStack>
-                            <XStack alignItems="center" gap="$4">
+                            <XStack alignItems='center' gap='$4'>
                                 <Switch
                                     id='isInShoppingList'
                                     size='$2'
-                                    onCheckedChange={(checked) => change(() => setIsInShoppingList(!!checked))}
+                                    onCheckedChange={(checked) =>
+                                        change(() => setIsInShoppingList(!!checked))
+                                    }
                                     checked={isInShoppingList}
                                 >
                                     <Switch.Thumb
-                                        animation="quicker"
+                                        animation='quicker'
                                         style={{
-                                            backgroundColor: isInShoppingList ? colors.primary : '#ccc'
+                                            backgroundColor: isInShoppingList
+                                                ? colors.primary
+                                                : '#ccc',
                                         }}
                                     />
                                 </Switch>
-                                <Text size={16} weight='regular'>In Shopping List</Text>
+                                <Text size={16} weight='regular'>
+                                    In Shopping List
+                                </Text>
                             </XStack>
                         </YStack>
 
                         <Unspaced>
                             <Dialog.Close asChild>
-                                <Button position="absolute" right="$3" size="$2" circular icon={X} />
+                                <Button
+                                    position='absolute'
+                                    right='$3'
+                                    size='$2'
+                                    circular
+                                    icon={X}
+                                />
                             </Dialog.Close>
+                        </Unspaced>
+
+                        <Unspaced>
+                            <Autocomplete
+                                open={showCategoryInput}
+                                mode='select'
+                                keyboardOffset={0}
+                                label='select category'
+                                value={categoryEntry}
+                                onChange={setCategoryEntry}
+                                onSelect={(value, close) => {
+                                    setCategory(value);
+                                    setCategoryEntry('');
+                                    close();
+                                }}
+                                onClose={() => {
+                                    setShowCategoryInput(false);
+                                    setCategoryEntry('');
+                                }}
+                                items={categories.map((cat) => ({
+                                    label: `${cat.icon} ${cat.name}`,
+                                    value: cat.name,
+                                }))}
+                            />
                         </Unspaced>
                     </Dialog.Content>
                 </Dialog.FocusScope>
             </Dialog.Portal>
         </Dialog>
-    )
+    );
 }

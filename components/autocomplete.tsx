@@ -34,6 +34,7 @@ const styles = {
             borderTopLeftRadius: 16,
             borderTopRightRadius: 16,
             backgroundColor: colors.background,
+            zIndex: 300000
         },
         headingText: {
             paddingTop: 32,
@@ -61,16 +62,20 @@ const styles = {
 
 type AutocompleteProps = {
     open?: boolean;
+    mode?: 'select' | 'create';
+    keyboardOffset?: number;
     label?: string;
     value: string;
     onChange: (text: string) => void;
-    onSelect: (item: string) => void;
+    onSelect: (item: string, close: () => void) => void;
     onClose?: () => void;
-    items?: string[];
+    items?: string[] | { label: string; value: string }[];
 };
 
 export default function Autocomplete({
     open = false,
+    mode = 'create',
+    keyboardOffset = -80,
     label,
     value,
     onChange,
@@ -85,7 +90,7 @@ export default function Autocomplete({
     const vw = (scale: number) => Dimensions.get('window').width * scale;
 
     const keyboardPadding = useDerivedValue(() => {
-        const target = open ? keyboard.height.value - 80 : 0;
+        const target = open ? keyboard.height.value + keyboardOffset : 0;
         return withSpring(target);
     }, [open, keyboard]);
 
@@ -98,6 +103,11 @@ export default function Autocomplete({
             inputRef.current?.blur();
         }
     }, [open]);
+
+    items = items.map<{ label: string; value: string }>((item) => ({
+        label: item instanceof Object ? item.label : (item as string),
+        value: item instanceof Object ? item.value : (item as string),
+    }));
 
     const handleClose = () => {
         inputRef.current?.blur();
@@ -116,8 +126,11 @@ export default function Autocomplete({
         transform: [{ translateY: withSpring(open ? 0 : height) }],
     }));
 
-    const filteredItems = items
-        .filter((item) => item.toLowerCase().includes(value.toLowerCase()));
+    const filteredItems = items.filter(
+        (item) =>
+            item.label.toLowerCase().includes(value.toLowerCase()) ||
+            item.value.toLowerCase().includes(value.toLowerCase())
+    );
 
     return (
         <>
@@ -135,15 +148,15 @@ export default function Autocomplete({
                     />
                 </Pressable>
                 {label && <Text style={styles.headingText}>{label}</Text>}
-                <ScrollView style={{ maxHeight: vh(0.25) }} keyboardShouldPersistTaps='handled'>
+                <ScrollView style={{ maxHeight: vh(0.3) }} keyboardShouldPersistTaps='handled'>
                     <View style={styles.tagWrapper}>
                         {filteredItems.map((item, i) => (
                             <Pill
                                 key={`${item}-pill-${i}`}
-                                text={item}
+                                text={item.label}
                                 icon='pointer.arrow.ipad.rays'
                                 tintColor={colors.primary}
-                                onPress={() => onSelect(item)}
+                                onPress={() => onSelect(item.value, handleClose)}
                             />
                         ))}
                     </View>
@@ -153,20 +166,20 @@ export default function Autocomplete({
                         ref={inputRef}
                         value={value}
                         onChangeText={onChange}
-                        placeholder='search or create...'
+                        placeholder={mode === 'create' ? 'search or create...' : 'search...'}
                         rightAdornment={{
-                            icon: 'plus.circle.fill',
-                            disabledIcon: 'circle.dotted',
-                            disabled: !value,
-                            onPress: () => onSelect(value),
+                            icon: mode === 'create' ? 'plus.circle.fill' : 'magnifyingglass.circle',
+                            disabledIcon: mode === 'create' ? 'circle.dotted' : 'magnifyingglass.circle',
+                            disabled: mode === 'create' ? !value : false,
+                            onPress: mode === 'create' ? () => onSelect(value, handleClose) : undefined,
                         }}
                         style={{ marginBottom: 16 }}
-                        returnKeyType='done'
+                        returnKeyType={mode === 'create' ? 'done' : 'default'}
                         submitBehavior='submit'
                         onSubmitEditing={(e) => {
                             const text = e.nativeEvent.text.trim();
                             if (text) {
-                                onSelect(text);
+                                onSelect(text, handleClose);
                             }
                             handleClose();
                         }}

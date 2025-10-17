@@ -9,24 +9,30 @@ const styles = {
             paddingVertical: 16,
             paddingHorizontal: 32,
             borderRadius: 8,
-            backgroundColor: colors.primary
+            backgroundColor: colors.primary,
         },
         buttonText: {
             color: '#fff',
             fontSize: 16,
-            textAlign: 'center'
-        }
-    })
+            textAlign: 'center',
+        },
+    }),
 };
 
 export default function Button({
     text,
+    disabled = false,
     ...props
 }: {
     text: string;
+    disabled?: boolean;
 } & PressableProps) {
     return (
-        <Pressable style={styles.button} {...props}>
+        <Pressable
+            style={[styles.button, disabled && { backgroundColor: '#ddd' }]}
+            {...props}
+            disabled={disabled}
+        >
             <Text style={styles.buttonText}>{text}</Text>
         </Pressable>
     );
