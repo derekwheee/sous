@@ -80,7 +80,6 @@ export default function PantryScreen() {
         });
     };
 
-    // TODO: Allow selection of pantry
     const pantry = getDefault(pantries)?.pantryItems;
     const sortedPantry = pantry?.sort((a, b) => {
         if (a.isInStock === b.isInStock) {
@@ -126,7 +125,7 @@ export default function PantryScreen() {
             >
                 <Pressable />
             </ItemDialog>
-            {!!pantry?.length && !!itemCategories?.length && (
+            {!!filteredPantry?.length && !!itemCategories?.length && (
                 <>
                     {filteredPantry?.map((pantryItem: PantryItem) => (
                         <ItemDialog
@@ -140,7 +139,7 @@ export default function PantryScreen() {
                     ))}
                 </>
             )}
-            {!pantry?.length && (
+            {!filteredPantry?.length && (
                 <View style={styles.onboarding}>
                     <Text style={styles.onboardingText}>you don't have anything in your pantry</Text>
                     <Button

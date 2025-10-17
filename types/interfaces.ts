@@ -58,6 +58,7 @@ export interface Ingredient {
     amount?: string;
     unit?: string;
     item?: string;
+    preparation?: string;
     pantryItemId?: number;
     pantryItem?: PantryItem;
     createdAt?: string;

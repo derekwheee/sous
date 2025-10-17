@@ -1,7 +1,8 @@
 import Text from '@/components/text';
-import globalStyles from '@/styles/global';
-import { Ingredient as IngredientType } from '@/types/interfaces';
-import Feather from '@expo/vector-icons/Feather';
+import globalStyles, { brightness, colors } from '@/styles/global';
+import { Ingredient as IngredientType, Pantry, PantryItem } from '@/types/interfaces';
+import { SymbolView } from 'expo-symbols';
+import Fuse from 'fuse.js';
 import { StyleSheet, View, ViewProps } from 'react-native';
 
 const styles = {
@@ -25,16 +26,48 @@ const styles = {
 
 interface IngredientProps {
     ingredient: IngredientType;
+    pantry?: Pantry;
+    onPress?: (ingredient: IngredientType, pantryItem?: PantryItem) => void;
 }
 
-export default function Ingredient({ ingredient, ...rest }: IngredientProps & ViewProps) {
+export default function Ingredient({
+    ingredient,
+    pantry,
+    onPress,
+    ...rest
+}: IngredientProps & ViewProps) {
+    const fuse = new Fuse(pantry?.pantryItems || [], {
+        keys: ['name'],
+        threshold: 0.45,
+    });
+
+    const matched = fuse.search(`${ingredient.item || ''}`);
+    const pantryItem = matched[0]?.item;
+
+    let icon: any;
+    let tintColor: string;
+
+    if (pantryItem?.isInShoppingList) {
+        icon = 'cart.circle';
+        tintColor = brightness(colors.text, 150);
+    } else if (pantryItem?.isInStock) {
+        icon = 'plus.arrow.trianglehead.clockwise';
+        tintColor = colors.success;
+    } else {
+        icon = 'plus.circle';
+        tintColor = colors.text;
+    }
+
     return (
         <View style={styles.wrapper} {...rest}>
-            <Feather name='plus-circle' style={styles.icon} size={24} color='#000000' />
+            <SymbolView
+                name={icon}
+                size={24}
+                tintColor={tintColor}
+                onTouchEnd={() => onPress && onPress(ingredient, pantryItem)}
+            />
             {ingredient.sentence && (
-                <Text size={16} style={styles.ingredientText}>
-                    {ingredient.sentence}
-                </Text>
+                <Text style={styles.ingredientText}>{ingredient.sentence}</Text>
             )}
         </View>
     );

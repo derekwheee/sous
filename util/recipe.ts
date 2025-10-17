@@ -1,9 +1,23 @@
 import { PantryItem, Recipe } from '@/types/interfaces';
+import Fuse from 'fuse.js';
 
-export function getAvailableIngredients(recipe: Recipe, pantry: PantryItem[]) {
-    return recipe.ingredients.filter((ingredient) => {
-        return pantry.some((item) => item.name === ingredient.item);
+export function getAvailableIngredients(recipe: Recipe, pantryItems?: PantryItem[]) {
+    const fuse = new Fuse(pantryItems || [], {
+        keys: ['name'],
+        threshold: 0.45,
     });
+
+    const availableIngredients: PantryItem[] = [];
+
+    recipe.ingredients.forEach((ingredient) => {
+        const matched = fuse.search(`${ingredient.item || ''}`);
+        const pantryItem = matched[0]?.item;
+        if (pantryItem && pantryItem.isInStock) {
+            availableIngredients.push(pantryItem);
+        }
+    });
+
+    return availableIngredients;
 }
 
 const normalize = (s?: string) => s?.toLowerCase().replace(/[^a-z\s]/g, '').trim() ?? '';

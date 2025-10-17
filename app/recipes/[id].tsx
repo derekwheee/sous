@@ -5,9 +5,11 @@ import Text from '@/components/text';
 import TimeLabel from '@/components/time-label';
 import { useApi } from '@/hooks/use-api';
 import globalStyles, { colors, fonts } from '@/styles/global';
-import { Recipe } from '@/types/interfaces';
+import { Ingredient as IngredientT, Pantry, PantryItem, Recipe, UpsertPantryItem } from '@/types/interfaces';
+import { getDefault } from '@/util/pantry';
+import { pantryItemMutation } from '@/util/query';
 import { findIngredientMatches } from '@/util/recipe';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { RefreshControl, StyleSheet, View } from 'react-native';
@@ -17,51 +19,123 @@ const styles = {
     ...StyleSheet.create({
         timeLabels: {
             flexDirection: 'row',
-            justifyContent: 'space-between'
+            justifyContent: 'space-between',
         },
         instructionContainer: {
             flex: 1,
             flexDirection: 'row',
-            marginBottom: 16
+            marginBottom: 16,
         },
         instructionIndex: {
             position: 'relative',
             top: -8,
             width: 48,
             fontFamily: fonts.poppins.bold,
-            fontSize: 32
+            fontSize: 32,
         },
         instructionText: {
             flexShrink: 1,
-            fontSize: 14
-        }
-    })
+            fontSize: 14,
+        },
+    }),
 };
 
 export default function RecipeDetail() {
     const id = Number(useLocalSearchParams<{ id: string }>().id);
 
     const router = useRouter();
-    const { user, getRecipe } = useApi();
-    const { isFetching, data: recipe, refetch } = useQuery<Recipe | null>({
+    const { user, getRecipe, getPantries, upsertPantryItem } = useApi();
+    const queryClient = useQueryClient();
+
+    const {
+        isFetching,
+        data: recipe,
+        refetch,
+    } = useQuery<Recipe | null>({
         queryKey: ['recipe', id],
         queryFn: () => getRecipe(id),
-        enabled: !!user
+        enabled: !!user,
     });
+
+    const { data: pantries } = useQuery<Pantry[]>({
+        queryKey: ['pantry'],
+        queryFn: () => getPantries(),
+        enabled: !!user,
+    });
+
+    const { mutate: savePantryItem } = useMutation(
+        pantryItemMutation<any, UpsertPantryItem>(
+            getDefault(pantries)?.id,
+            (patch: UpsertPantryItem) => upsertPantryItem(getDefault(pantries)?.id!, patch),
+            queryClient,
+            ['pantry']
+        )
+    );
+
+    const pantry = pantries?.length ? getDefault(pantries) : undefined;
+
+    const handleAddToShoppingList = async (ingredient: IngredientT, pantryItem?: PantryItem) => {
+        if (pantryItem?.isInShoppingList) {
+            return;
+        }
+
+        await savePantryItem({
+            name: pantryItem?.name || ingredient.item,
+            isInShoppingList: true,
+        });
+    };
 
     const matchingWords = findIngredientMatches(recipe);
 
     // small normalizers to compare tokens to matched terms
-    const normalize = (s?: string) => s?.toLowerCase().replace(/[^a-z0-9]/g, '').trim() ?? '';
-    const singularize = (w: string) => w.replace(/(ies|ses|es|s)$/, (m) => (m === 'ies' ? 'y' : ''));
+    const normalize = (s?: string) =>
+        s
+            ?.toLowerCase()
+            .replace(/[^a-z0-9]/g, '')
+            .trim() ?? '';
+    const singularize = (w: string) =>
+        w.replace(/(ies|ses|es|s)$/, (m) => (m === 'ies' ? 'y' : ''));
 
     const renderHighlighted = (instruction: string, matches: string[]) => {
-        const matchSet = new Set(matches.map(m => m.toLowerCase()));
+        const matchSet = new Set(matches.map((m) => m.toLowerCase()));
         // stop words to avoid accidental substring matches (e.g. "in" in "spinach")
         const stopWords = new Set([
-            'a','an','the','in','on','and','or','of','to','with','for','by','at','from',
-            'is','are','be','as','that','this','these','those','it','its','was','were',
-            'but','if','then','so','into','about','over','under','near','per'
+            'a',
+            'an',
+            'the',
+            'in',
+            'on',
+            'and',
+            'or',
+            'of',
+            'to',
+            'with',
+            'for',
+            'by',
+            'at',
+            'from',
+            'is',
+            'are',
+            'be',
+            'as',
+            'that',
+            'this',
+            'these',
+            'those',
+            'it',
+            'its',
+            'was',
+            'were',
+            'but',
+            'if',
+            'then',
+            'so',
+            'into',
+            'about',
+            'over',
+            'under',
+            'near',
+            'per',
         ]);
 
         // keep separators so we can recompose text with spacing/punctuation preserved
@@ -82,7 +156,7 @@ export default function RecipeDetail() {
             const sing = singularize(norm);
             const isMatch =
                 (norm && (matchSet.has(norm) || matchSet.has(sing))) ||
-                Array.from(matchSet).some(m => m.includes(norm) || norm.includes(m));
+                Array.from(matchSet).some((m) => m.includes(norm) || norm.includes(m));
 
             if (isMatch) {
                 return (
@@ -115,12 +189,12 @@ export default function RecipeDetail() {
                     {
                         icon: 'square.and.arrow.up',
                         nudge: -2,
-                        onPress: () => {}
+                        onPress: () => {},
                     },
                     {
                         icon: 'pencil',
-                        onPress: () => router.push(`/recipes/edit/${id}`)
-                    }
+                        onPress: () => router.push(`/recipes/edit/${id}`),
+                    },
                 ]}
             >
                 {recipe?.name}
@@ -133,7 +207,12 @@ export default function RecipeDetail() {
                 <Text style={styles.h2}>Ingredients</Text>
                 <View>
                     {recipe?.ingredients?.map((ingredient) => (
-                        <Ingredient key={ingredient.id} ingredient={ingredient} />
+                        <Ingredient
+                            key={ingredient.id}
+                            ingredient={ingredient}
+                            pantry={pantry}
+                            onPress={handleAddToShoppingList}
+                        />
                     ))}
                 </View>
             </View>

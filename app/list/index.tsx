@@ -133,6 +133,7 @@ export default function ListScreen() {
 
         if (!item.category) {
             item.category = categoryList?.find(cat => cat.name.toLowerCase() === 'other');
+            item.categoryId = item.category?.id;
         }
 
         const category = acc.find(cat => cat.id === item.categoryId);
@@ -282,7 +283,7 @@ export default function ListScreen() {
                                             prog,
                                             trans,
                                             pantryItem,
-                                            categories!,
+                                            categoryList!,
                                             swipeHeight,
                                             proposeRemoveItem,
                                             handleEditItem,
@@ -299,7 +300,7 @@ export default function ListScreen() {
                                             isInStock: true
                                         })}
                                     >
-                                        <Text size={16} style={styles.listItemText}>{pantryItem.name}</Text>
+                                        <Text style={styles.listItemText}>{pantryItem.name}</Text>
                                     </Pressable>
                                 </Swipeable>
                             );
@@ -342,6 +343,8 @@ function RightAction(
         };
     });
 
+    swipeRef?.current?.close
+
     return (
         <Reanimated.View style={styleAnimation}>
             <View style={{ flexDirection: 'row' }}>
@@ -350,7 +353,7 @@ function RightAction(
                     categories={itemCategories}
                     onPressSave={handleEditItem}
                 >
-                    <Pressable>
+                    <Pressable onPress={() => swipeRef?.current?.close()}>
                         <Feather name="edit-2" size={24} color="#fff" style={styles.editAction} />
                     </Pressable>
                 </ItemDialog>

@@ -91,7 +91,7 @@ export default function RecipeScreen() {
         )
     );
 
-    const pantry = pantries?.[0]?.pantryItems;
+    const pantryItems = pantries?.[0]?.pantryItems;
     const navigation = useNavigation();
     const router = useRouter();
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
@@ -166,9 +166,9 @@ export default function RecipeScreen() {
 
     const sortedRecipes = recipes?.sort((a, b) => {
         const aRatio =
-            getAvailableIngredients(a, pantry || []).length / (a.ingredients.length || 1);
+            getAvailableIngredients(a, pantryItems || []).length / (a.ingredients.length || 1);
         const bRatio =
-            getAvailableIngredients(b, pantry || []).length / (b.ingredients.length || 1);
+            getAvailableIngredients(b, pantryItems || []).length / (b.ingredients.length || 1);
         if (aRatio === bRatio) {
             return a.name.localeCompare(b.name);
         }
@@ -258,7 +258,7 @@ export default function RecipeScreen() {
                             <RecipeListing
                                 key={recipe.id}
                                 recipe={recipe}
-                                pantry={pantry!}
+                                pantryItems={pantryItems!}
                                 onLayout={updateHeight}
                             />
                         </Swipeable>
