@@ -88,6 +88,15 @@ async function makeRequest(
     }
 
     const response = await fetch(`${API_HOST}${url}`, options);
+
+    if (response.status === 401) {
+        showSnackbar({
+            message: `unauthorized`,
+            type: 'error',
+        });
+        return null;
+    }
+
     const isJson = response.headers.get('Content-Type')?.includes('application/json');
 
     try {

@@ -10,13 +10,21 @@ export default function PantryLayout() {
                 headerShadowVisible: false,
                 headerBackButtonDisplayMode: 'minimal',
                 headerBlurEffect: 'none',
-                headerBackground: () => <HeaderBackground />
+                headerBackground: () => <HeaderBackground />,
             }}
         >
             <Stack.Screen
-                name="index"
+                name='index'
                 options={{
                     title: 'Pantry',
+                }}
+            />
+            <Stack.Screen
+                name='edit'
+                options={{
+                    title: 'Edit Item',
+                    presentation: 'modal',
+                    headerShown: false,
                 }}
             />
         </Stack>

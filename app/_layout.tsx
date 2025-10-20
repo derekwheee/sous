@@ -26,6 +26,7 @@ import { SymbolView } from 'expo-symbols';
 import { useEffect, useRef } from 'react';
 import { Appearance, Platform, StatusBar, StyleSheet } from 'react-native';
 import 'react-native-gesture-handler';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useSyncQueriesExternal } from 'react-query-external-sync';
@@ -136,105 +137,119 @@ export default function RootLayout() {
                 process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY
             }
         >
-            <PortalProvider>
-                <TamaguiProvider config={config}>
-                    <QueryClientProvider client={queryClient}>
-                        <ThemeProvider value={Theme}>
-                            <SnackbarProvider>
-                                <SafeAreaProvider>
-                                    <SignedOut>
-                                        <SignedOutRedirectGuard />
-                                        <Slot />
-                                    </SignedOut>
-                                    <SignedIn>
-                                        <SyncUserOnSignIn />
-                                        <Tabs
-                                            initialRouteName='recipes'
-                                            screenOptions={() => ({
-                                                headerShown: false,
-                                                tabBarStyle: styles.tabBar,
-                                                tabBarLabelStyle: styles.tabLabel,
-                                                tabBarActiveTintColor: colors.primary,
-                                                tabBarInactiveTintColor: '#888',
-                                            })}
-                                        >
-                                            <Tabs.Screen
-                                                name='recipes'
-                                                options={{
-                                                    tabBarLabel: 'Recipes',
-                                                    tabBarIcon: ({ color, size }) => (
-                                                        <SymbolView
-                                                            name='book'
-                                                            style={{ width: size, height: size }}
-                                                            type='palette'
-                                                            tintColor={color}
-                                                        />
-                                                    ),
-                                                }}
-                                            />
-                                            <Tabs.Screen
-                                                name='pantry'
-                                                options={{
-                                                    tabBarLabel: 'Pantry',
-                                                    tabBarIcon: ({ color, size }) => (
-                                                        <SymbolView
-                                                            name='refrigerator'
-                                                            style={{ width: size, height: size }}
-                                                            type='palette'
-                                                            tintColor={color}
-                                                        />
-                                                    ),
-                                                }}
-                                            />
-                                            <Tabs.Screen
-                                                name='list'
-                                                options={{
-                                                    tabBarLabel: 'List',
-                                                    tabBarIcon: ({ color, size }) => (
-                                                        <SymbolView
-                                                            name='cart'
-                                                            style={{ width: size, height: size }}
-                                                            type='palette'
-                                                            tintColor={color}
-                                                        />
-                                                    ),
-                                                }}
-                                            />
-                                            <Tabs.Screen
-                                                name='profile'
-                                                options={{
-                                                    tabBarLabel: 'Profile',
-                                                    tabBarIcon: ({ color, size }) => (
-                                                        <SymbolView
-                                                            name='smiley'
-                                                            style={{ width: size, height: size }}
-                                                            type='palette'
-                                                            tintColor={color}
-                                                        />
-                                                    ),
-                                                }}
-                                            />
-                                            <Tabs.Screen
-                                                name='+not-found'
-                                                options={{
-                                                    href: null,
-                                                }}
-                                            />
-                                            <Tabs.Screen
-                                                name='(auth)'
-                                                options={{
-                                                    href: null,
-                                                }}
-                                            />
-                                        </Tabs>
-                                    </SignedIn>
-                                    <StatusBar barStyle='dark-content' />
-                                </SafeAreaProvider>
-                            </SnackbarProvider>
-                        </ThemeProvider>
-                    </QueryClientProvider>
-                </TamaguiProvider>
-            </PortalProvider>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+                <PortalProvider>
+                    <TamaguiProvider config={config}>
+                        <QueryClientProvider client={queryClient}>
+                            <ThemeProvider value={Theme}>
+                                <SnackbarProvider>
+                                    <SafeAreaProvider>
+                                        <SignedOut>
+                                            <SignedOutRedirectGuard />
+                                            <Slot />
+                                        </SignedOut>
+                                        <SignedIn>
+                                            <SyncUserOnSignIn />
+                                            <Tabs
+                                                initialRouteName='recipes'
+                                                screenOptions={() => ({
+                                                    headerShown: false,
+                                                    tabBarStyle: styles.tabBar,
+                                                    tabBarLabelStyle: styles.tabLabel,
+                                                    tabBarActiveTintColor: colors.primary,
+                                                    tabBarInactiveTintColor: '#888',
+                                                })}
+                                            >
+                                                <Tabs.Screen
+                                                    name='recipes'
+                                                    options={{
+                                                        tabBarLabel: 'Recipes',
+                                                        tabBarIcon: ({ color, size }) => (
+                                                            <SymbolView
+                                                                name='book'
+                                                                style={{
+                                                                    width: size,
+                                                                    height: size,
+                                                                }}
+                                                                type='palette'
+                                                                tintColor={color}
+                                                            />
+                                                        ),
+                                                    }}
+                                                />
+                                                <Tabs.Screen
+                                                    name='pantry'
+                                                    options={{
+                                                        tabBarLabel: 'Pantry',
+                                                        tabBarIcon: ({ color, size }) => (
+                                                            <SymbolView
+                                                                name='refrigerator'
+                                                                style={{
+                                                                    width: size,
+                                                                    height: size,
+                                                                }}
+                                                                type='palette'
+                                                                tintColor={color}
+                                                            />
+                                                        ),
+                                                    }}
+                                                />
+                                                <Tabs.Screen
+                                                    name='list'
+                                                    options={{
+                                                        tabBarLabel: 'List',
+                                                        tabBarIcon: ({ color, size }) => (
+                                                            <SymbolView
+                                                                name='cart'
+                                                                style={{
+                                                                    width: size,
+                                                                    height: size,
+                                                                }}
+                                                                type='palette'
+                                                                tintColor={color}
+                                                            />
+                                                        ),
+                                                    }}
+                                                />
+                                                <Tabs.Screen
+                                                    name='profile'
+                                                    options={{
+                                                        tabBarLabel: 'Profile',
+                                                        tabBarIcon: ({ color, size }) => (
+                                                            <SymbolView
+                                                                name='smiley'
+                                                                style={{
+                                                                    width: size,
+                                                                    height: size,
+                                                                }}
+                                                                type='palette'
+                                                                tintColor={color}
+                                                            />
+                                                        ),
+                                                    }}
+                                                />
+                                                <Tabs.Screen
+                                                    name='+not-found'
+                                                    options={{
+                                                        href: null,
+                                                    }}
+                                                />
+                                                <Tabs.Screen
+                                                    name='(auth)'
+                                                    options={{
+                                                        href: null,
+                                                    }}
+                                                />
+                                            </Tabs>
+                                        </SignedIn>
+                                        <StatusBar barStyle='dark-content' />
+                                    </SafeAreaProvider>
+                                </SnackbarProvider>
+                            </ThemeProvider>
+                        </QueryClientProvider>
+                    </TamaguiProvider>
+                </PortalProvider>
+            </GestureHandlerRootView>
         </ClerkProvider>
     );
 }

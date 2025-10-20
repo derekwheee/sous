@@ -107,7 +107,7 @@ export default function Autocomplete({
     items = items.map<{ label: string; value: string }>((item) => ({
         label: item instanceof Object ? item.label : (item as string),
         value: item instanceof Object ? item.value : (item as string),
-    }));
+    })).sort((a, b) => a.value.localeCompare(b.value));
 
     const handleClose = () => {
         inputRef.current?.blur();

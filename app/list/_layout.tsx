@@ -19,6 +19,14 @@ export default function ListLayout() {
                     title: 'List'
                 }}
             />
+            <Stack.Screen
+                name="edit"
+                options={{
+                    title: 'Edit Item',
+                    presentation: 'modal',
+                    headerShown: false
+                }}
+            />
         </Stack>
     );
 }

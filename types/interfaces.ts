@@ -38,6 +38,7 @@ export interface PantryItem {
     createdAt: string;
     updatedAt: string;
     deleteAt?: string;
+    pantryId: number;
     categoryId?: number;
     category?: ItemCategory;
 }
@@ -49,7 +50,9 @@ export interface UpsertPantryItem {
     isFavorite?: boolean;
     isInShoppingList?: boolean;
     deleteAt?: string;
+    pantryId?: number;
     categoryId?: number;
+    deletedAt?: Date;
 }
 
 export interface Ingredient {

@@ -210,13 +210,15 @@ export default function RecipeScreen() {
                 title='Recipes'
                 actions={[
                     {
-                        label: 'new recipe',
-                        icon: 'plus',
-                        onPress: () => router.push('/recipes/new'),
+                        label: 'filter',
+                        icon: showTags
+                            ? 'line.3.horizontal.decrease.circle.fill'
+                            : 'line.3.horizontal.decrease.circle',
+                        onPress: () => setShowTags(!showTags),
                     },
                     {
-                        icon: showTags ? 'tag.fill' : 'tag',
-                        onPress: () => setShowTags(!showTags),
+                        icon: 'plus',
+                        onPress: () => router.push('/recipes/new'),
                     },
                 ]}
             />

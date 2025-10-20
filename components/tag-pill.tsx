@@ -1,15 +1,15 @@
 import Text from '@/components/text';
-import globalStyles, { colors } from '@/styles/global';
+import globalStyles, { brightness, colors } from '@/styles/global';
 import { Pressable, PressableProps, StyleSheet } from 'react-native';
 
 const styles = {
     ...globalStyles,
     ...StyleSheet.create({
         pill: {
-            paddingVertical: 8,
-            paddingHorizontal: 16,
+            paddingVertical: 4,
+            paddingHorizontal: 12,
             borderRadius: 32,
-            backgroundColor: '#ddd'
+            backgroundColor: brightness(colors.green, 40),
         },
         pillActive: {
             backgroundColor: colors.primary,

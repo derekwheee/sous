@@ -10,8 +10,7 @@ import { pantryItemMutation } from '@/util/query';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigation, useRouter } from 'expo-router';
 import { useLayoutEffect, useState } from 'react';
-import { Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
-import ItemDialog from './_components/item-dialog';
+import { RefreshControl, StyleSheet, Text, View } from 'react-native';
 
 const styles = {
     ...globalStyles,
@@ -19,13 +18,13 @@ const styles = {
         onboarding: {
             alignItems: 'center',
             marginVertical: 128,
-            gap: 16
+            gap: 16,
         },
         onboardingText: {
             fontSize: 16,
-            fontFamily: fonts.caprasimo
-        }
-    })
+            fontFamily: fonts.caprasimo,
+        },
+    }),
 };
 
 export default function PantryScreen() {
@@ -34,18 +33,13 @@ export default function PantryScreen() {
     const router = useRouter();
     const { user, getPantries, getItemCategories, upsertPantryItem } = useApi();
 
-    const {
-        data: pantries,
-        refetch: refetchPantries
-    } = useQuery<Pantry[]>({
+    const { data: pantries, refetch: refetchPantries } = useQuery<Pantry[]>({
         queryKey: ['pantry'],
         queryFn: () => getPantries(),
-        enabled: !!user
+        enabled: !!user,
     });
 
-    const {
-        data: itemCategories
-    } = useQuery<ItemCategory[]>({
+    const { data: itemCategories } = useQuery<ItemCategory[]>({
         queryKey: ['itemCategories'],
         queryFn: () => getItemCategories(getDefault(pantries)!.id),
         enabled: !!user && !!pantries && pantries.length > 0,
@@ -65,14 +59,13 @@ export default function PantryScreen() {
             headerSearchBarOptions: {
                 placeholder: 'search pantry...',
                 tintColor: colors.primary,
-                onChangeText: (event: any) => setSearchTerm(event.nativeEvent.text)
+                onChangeText: (event: any) => setSearchTerm(event.nativeEvent.text),
             },
         });
     }, [navigation]);
 
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
     const [searchTerm, setSearchTerm] = useState<string>('');
-    const [showNewItemDialog, setShowNewItemDialog] = useState<boolean>(false);
 
     const handleSaveChanges = (patch: UpsertPantryItem, cb?: Function) => {
         savePantryItem(patch, {
@@ -80,19 +73,22 @@ export default function PantryScreen() {
         });
     };
 
-    const pantry = getDefault(pantries)?.pantryItems;
-    const sortedPantry = pantry?.sort((a, b) => {
-        if (a.isInStock === b.isInStock) {
-            return a.name.localeCompare(b.name);
-        }
-        return a.isInStock ? -1 : 1;
-    }).filter((item) => {
-        return !item.category?.isNonFood && (item.isInStock || item.isFavorite);
-    });
+    const pantry = getDefault(pantries);
+    const pantryItems = pantry?.pantryItems;
+    const sortedPantry = pantryItems
+        ?.sort((a, b) => {
+            if (a.isInStock === b.isInStock) {
+                return a.name.localeCompare(b.name);
+            }
+            return a.isInStock ? -1 : 1;
+        })
+        .filter((item) => {
+            return !item.category?.isNonFood && (item.isInStock || item.isFavorite);
+        });
 
-    const filteredPantry = searchTerm ?
-        sortedPantry?.filter((item) => item.name.toLowerCase().includes(searchTerm.toLowerCase())) :
-        sortedPantry;
+    const filteredPantry = searchTerm
+        ? sortedPantry?.filter((item) => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
+        : sortedPantry;
 
     const isLoading = !user || !filteredPantry || !itemCategories;
 
@@ -111,48 +107,44 @@ export default function PantryScreen() {
         >
             <Heading
                 title='Pantry'
-                actions={[{
-                    label: 'add item',
-                    icon: 'plus',
-                    onPress: () => setShowNewItemDialog(true)
-                }]}
+                actions={[
+                    {
+                        label: 'add item',
+                        icon: 'plus',
+                        onPress: () => router.push({
+                            pathname: '/pantry/edit',
+                            params: { pantryId: pantry!.id },
+                        })
+                    },
+                ]}
             />
-            <ItemDialog
-                open={showNewItemDialog}
-                onOpenChange={setShowNewItemDialog}
-                categories={itemCategories || []}
-                onPressSave={handleSaveChanges}
-            >
-                <Pressable />
-            </ItemDialog>
-            {!!filteredPantry?.length && !!itemCategories?.length && (
-                <>
-                    {filteredPantry?.map((pantryItem: PantryItem) => (
-                        <ItemDialog
-                            key={pantryItem.id}
-                            pantryItem={pantryItem}
-                            categories={itemCategories}
-                            onPressSave={handleSaveChanges}
-                        >
-                            <PantryListing pantryItem={pantryItem} onToggleFavorite={handleSaveChanges} />
-                        </ItemDialog>
-                    ))}
-                </>
-            )}
+            {!!filteredPantry?.length &&
+                !!itemCategories?.length &&
+                filteredPantry?.map((pantryItem: PantryItem) => (
+                    <PantryListing
+                        key={pantryItem.id}
+                        pantryItem={pantryItem}
+                        onToggleFavorite={handleSaveChanges}
+                    />
+                ))}
             {!filteredPantry?.length && (
                 <View style={styles.onboarding}>
-                    <Text style={styles.onboardingText}>you don't have anything in your pantry</Text>
+                    <Text style={styles.onboardingText}>
+                        you don't have anything in your pantry
+                    </Text>
                     <Button
                         text='add your first item'
-                        onPress={() => setShowNewItemDialog(true)}
+                        onPress={() =>
+                            router.push({
+                                pathname: '/pantry/edit',
+                                params: { pantryId: pantry!.id },
+                            })
+                        }
                     />
                     <Text style={styles.onboardingText}>or</Text>
-                    <Button
-                        text='join a household'
-                        onPress={() => router.push('/profile/join')}
-                    />
+                    <Button text='join a household' onPress={() => router.push('/profile/join')} />
                 </View>
             )}
         </Screen>
-    )
+    );
 }
