@@ -1,27 +1,30 @@
 {
-    "cli": {
-        "version": ">= 16.20.4",
-        "appVersionSource": "remote"
+  "cli": {
+    "version": ">= 16.20.4",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "channel": "development"
     },
-    "build": {
-        "development": {
-            "developmentClient": true,
-            "distribution": "internal"
-        },
-        "preview": {
-            "distribution": "internal",
-            "ios": {
-                "buildConfiguration": "Release"
-            },
-            "android": {
-                "gradleCommand": ":app:assembleRelease"
-            }
-        },
-        "production": {
-            "autoIncrement": true
-        }
+    "preview": {
+      "distribution": "internal",
+      "ios": {
+        "buildConfiguration": "Release"
+      },
+      "android": {
+        "gradleCommand": ":app:assembleRelease"
+      },
+      "channel": "preview"
     },
-    "submit": {
-        "production": {}
+    "production": {
+      "autoIncrement": true,
+      "channel": "production"
     }
+  },
+  "submit": {
+    "production": {}
+  }
 }
