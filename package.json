@@ -12,7 +12,8 @@
     "run:clean": "expo prebuild --clean && expo run:ios",
     "preview": "eas build -p ios -e preview",
     "preview:local": "eas build --platform ios --local --profile preview --output ./builds/sous-preview.ipa",
-    "deploy:local": "ios-deploy --bundle builds/sous-preview.ipa"
+    "deploy:local": "ios-deploy --bundle builds/sous-preview.ipa",
+    "update:preview": "eas update --branch preview --message 'Preview update'"
   },
   "dependencies": {
     "@clerk/clerk-expo": "^2.16.1",

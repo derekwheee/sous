@@ -100,7 +100,13 @@ async function makeRequest(
     const isJson = response.headers.get('Content-Type')?.includes('application/json');
 
     try {
-        return isJson ? await response.json() : await response.text();
+        const body = isJson ? await response.json() : await response.text();
+
+        if (isJson && body?.error) {
+            throw new Error(body.error);
+        }
+
+        return body;
     } catch (err) {
         showSnackbar({
             message: `something went wrong`,

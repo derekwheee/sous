@@ -164,6 +164,10 @@ export default function RecipeScreen() {
 
     const isLoading = !user || isRecipeLoadingerror || isPantryLoading;
 
+    if (recipes && !recipes.sort) {
+        console.log(recipes);
+    }
+
     const sortedRecipes = recipes?.sort((a, b) => {
         const aRatio =
             getAvailableIngredients(a, pantryItems || []).length / (a.ingredients.length || 1);

@@ -1,13 +1,13 @@
 import HeaderBackground from '@/components/header-background';
 import { useAuth } from '@clerk/clerk-expo';
-import { Redirect, Stack } from 'expo-router';
+import { Stack } from 'expo-router';
 
 export default function AuthRoutesLayout() {
     const { isSignedIn } = useAuth()
 
-    if (isSignedIn) {
-        return <Redirect href={'/recipes' as any} />
-    }
+    // if (isSignedIn) {
+    //     return <Redirect href={'/recipes' as any} />
+    // }
 
     return <Stack
         screenOptions={{
