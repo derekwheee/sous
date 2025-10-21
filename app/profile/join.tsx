@@ -2,6 +2,7 @@ import Button from '@/components/button';
 import Text from '@/components/text';
 import { useApi } from '@/hooks/use-api';
 import globalStyles, { fonts } from '@/styles/global';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { BarcodeScanningResult, CameraView, useCameraPermissions } from 'expo-camera';
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
@@ -15,15 +16,15 @@ const styles = {
             justifyContent: 'center',
             padding: 64,
             alignItems: 'center',
-            gap: 16
+            gap: 16,
         },
         shareText: {
             fontFamily: fonts.caprasimo,
             fontSize: 32,
             textAlign: 'center',
-            marginVertical: 32
-        }
-    })
+            marginVertical: 32,
+        },
+    }),
 };
 
 function validateBarcodeData(data: string): { id: string; joinToken: string } | null {
@@ -38,27 +39,38 @@ function validateBarcodeData(data: string): { id: string; joinToken: string } | 
     }
 }
 
-export default function ProfileJoinScreen() {
+function delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
+export default function ProfileJoinScreen() {
     const router = useRouter();
-    const { user, joinHousehold } = useApi();
+    const queryClient = useQueryClient();
+    const { user, getUser, joinHousehold } = useApi();
     const [permission, requestPermission] = useCameraPermissions();
     const cameraRef = useRef<CameraView>(null);
     const [joinObject, setJoinObject] = useState<{ id: string; joinToken: string } | null>(null);
 
-    const commitJoin = async (parsed: { id: string; joinToken: string }) => {
-        try {
-            await joinHousehold(parsed, ['user']);
-            router.push('/recipes');
-        } catch (error) {
+    const { refetch: refetchUser } = useQuery({
+        queryKey: ['user'],
+        queryFn: () => getUser(),
+        enabled: !!user.id,
+    });
+
+    const { mutate: commitJoin } = useMutation({
+        mutationFn: (parsed: { id: string; joinToken: string }) => joinHousehold(parsed, ['user']),
+        onSuccess: async () => {
+            await refetchUser();
+            await queryClient.invalidateQueries();
+            await delay(2000);
+            router.replace('/recipes');
+        },
+        onError: (error) => {
             console.error('Failed to join household:', error);
-        }
-    }
+        },
+    });
 
     const handleBarcodeScan = ({ data }: BarcodeScanningResult) => {
-        if (joinObject) {
-            return;
-        }
 
         const parsed = validateBarcodeData(data);
         if (parsed) {
@@ -70,8 +82,10 @@ export default function ProfileJoinScreen() {
     if (!permission) {
         return (
             <View style={styles.container}>
-                <Text size={24} align='center'>we need permission to use your camera</Text>
-                <Button text="grant permission" onPress={requestPermission} />
+                <Text size={24} align='center'>
+                    we need permission to use your camera
+                </Text>
+                <Button text='grant permission' onPress={requestPermission} />
             </View>
         );
     }
@@ -79,6 +93,7 @@ export default function ProfileJoinScreen() {
     return (
         <CameraView
             ref={cameraRef}
+            active={!joinObject}
             style={{
                 position: 'absolute',
                 top: 0,
@@ -88,7 +103,7 @@ export default function ProfileJoinScreen() {
                 justifyContent: 'center',
                 alignItems: 'center',
             }}
-            onBarcodeScanned={handleBarcodeScan}
+            onBarcodeScanned={(scan) => !joinObject && handleBarcodeScan(scan)}
         />
     );
 }

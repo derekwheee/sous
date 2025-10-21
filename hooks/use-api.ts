@@ -2,8 +2,9 @@ import { useSnackbar } from '@/components/snackbar';
 import { useInvalidateQueries } from '@/hooks/use-invalidate-queries';
 import { UpsertRecipe, User } from '@/types/interfaces';
 import { useAuth } from '@clerk/clerk-expo';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Constants from 'expo-constants';
+import { useEffect } from 'react';
 
 const API_HOST: string | undefined =
     Constants.expoConfig?.extra?.apiHost || process.env.EXPO_PUBLIC_API_HOST;
@@ -15,8 +16,9 @@ if (!API_HOST) {
 type Keys = string[] | string[][];
 
 export function useApi() {
-    const { getToken, userId } = useAuth();
+    const { getToken, userId, isSignedIn } = useAuth();
     const invalidateQueries = useInvalidateQueries();
+    const queryClient = useQueryClient();
     const { showSnackbar } = useSnackbar();
 
     const { data: user } = useQuery({
@@ -24,6 +26,12 @@ export function useApi() {
         queryFn: () => apiClient.get([], '/user'),
         enabled: !!userId,
     });
+
+    useEffect(() => {
+        if (!isSignedIn) {
+            queryClient.invalidateQueries();
+        }
+    }, [isSignedIn, invalidateQueries]);
 
     const householdId = (user as User | null)?.defaultHouseholdId || 0;
     const apiClient = createClient(invalidateQueries, getToken, showSnackbar);
@@ -33,7 +41,7 @@ export function useApi() {
         // User
         getUser: (keys: Keys = []) => apiClient.get(keys, '/user'),
         syncUser: (keys: Keys = ['user']) => apiClient.post(keys, '/user/sync'),
-        joinHousehold: ({ id, joinToken }: { id: string; joinToken: string }, keys: Keys = []) =>
+        joinHousehold: ({ id, joinToken }: { id: string; joinToken: string }, keys: Keys = ['user']) =>
             apiClient.post(keys, `/household/${id}/join`, { joinToken }),
         // Recipes
         getRecipes: (keys: Keys = []) => apiClient.get(keys, `/household/${householdId}/recipes`),
