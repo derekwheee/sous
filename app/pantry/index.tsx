@@ -104,20 +104,19 @@ export default function PantryScreen() {
                     }}
                 />
             }
-        >
-            <Heading
-                title='Pantry'
-                actions={[
-                    {
-                        label: 'add item',
-                        icon: 'plus',
-                        onPress: () => router.push({
+            actions={[
+                {
+                    label: 'add item',
+                    icon: 'plus',
+                    onPress: () =>
+                        router.push({
                             pathname: '/pantry/edit',
                             params: { pantryId: pantry!.id },
-                        })
-                    },
-                ]}
-            />
+                        }),
+                },
+            ]}
+        >
+            <Heading title='Pantry' />
             {!!filteredPantry?.length &&
                 !!itemCategories?.length &&
                 filteredPantry?.map((pantryItem: PantryItem) => (

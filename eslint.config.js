@@ -5,6 +5,6 @@ export default [
     ...pluginQuery.configs['flat/recommended'],
     expoConfig,
     {
-        ignores: ['dist/*'],
+        ignores: ['dist/*', 'builds/*', 'node_modules/*'],
     },
 ];

@@ -201,20 +201,18 @@ export default function ListScreen() {
         <Screen
             isLoading={isLoading}
             refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetchPantries} />}
+            actions={[
+                // {
+                //     icon: 'list.bullet',
+                //     onPress: () => {}
+                // },
+                {
+                    icon: isAddingItems ? 'checkmark' : 'plus',
+                    onPress: () => setIsAddingItems(!isAddingItems),
+                },
+            ]}
         >
-            <Heading
-                title='Shopping List'
-                actions={[
-                    // {
-                    //     icon: 'list.bullet',
-                    //     onPress: () => {}
-                    // },
-                    {
-                        icon: isAddingItems ? 'checkmark' : 'plus',
-                        onPress: () => setIsAddingItems(!isAddingItems),
-                    },
-                ]}
-            />
+            <Heading title='Shopping List' />
             {isAddingItems && (
                 <View style={styles.search}>
                     <TextInput

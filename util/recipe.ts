@@ -1,10 +1,11 @@
 import { PantryItem, Recipe } from '@/types/interfaces';
+import { FUZZY_SEARCH_THRESHOLD } from '@/util/constants';
 import Fuse from 'fuse.js';
 
 export function getAvailableIngredients(recipe: Recipe, pantryItems?: PantryItem[]) {
     const fuse = new Fuse(pantryItems || [], {
         keys: ['name'],
-        threshold: 0.45,
+        threshold: FUZZY_SEARCH_THRESHOLD,
     });
 
     const availableIngredients: PantryItem[] = [];

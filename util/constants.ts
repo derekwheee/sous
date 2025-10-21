@@ -1,0 +1,1 @@
+export const FUZZY_SEARCH_THRESHOLD = 0.2;

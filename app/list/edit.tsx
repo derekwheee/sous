@@ -10,7 +10,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { Switch, XStack, YStack } from 'tamagui';
+import { Spinner, Switch, XStack, YStack } from 'tamagui';
 
 const styles = {
     ...globalStyles,
@@ -37,11 +37,13 @@ const SaveItemButton = ({
     onPressSave,
     onPress,
     disabled,
+    isSaving,
     ...props
 }: {
     onPressSave: (cb?: Function) => void;
     onPress?: Function;
     disabled: boolean;
+    isSaving: boolean;
     props?: React.ComponentProps<typeof Pressable>;
 }) => {
     return (
@@ -51,7 +53,10 @@ const SaveItemButton = ({
             {...props}
             onPress={() => onPressSave(onPress)}
         >
-            <Text style={[styles.buttonText, disabled && styles.buttonTextDisabled]}>save</Text>
+            {isSaving && <Spinner size='small' color='#000' />}
+            {!isSaving && (
+                <Text style={[styles.buttonText, disabled && styles.buttonTextDisabled]}>save</Text>
+            )}
         </Pressable>
     );
 };
@@ -74,7 +79,7 @@ export default function EditItemModal() {
         enabled: !!user && !!pantryId,
     });
 
-    const { mutate: savePantryItem } = useMutation({
+    const { mutate: savePantryItem, isPending: isSaving } = useMutation({
         mutationFn: (item: UpsertPantryItem) => upsertPantryItem(Number(pantryId), item),
     });
 
@@ -138,8 +143,9 @@ export default function EditItemModal() {
                         {!!pantryItem?.id ? 'Edit Item' : 'Add Item'}
                     </Text>
                     <SaveItemButton
-                        disabled={!isDirty || !name?.trim()}
+                        disabled={!isDirty || !name?.trim() || isSaving}
                         onPressSave={(cb) => handleSave(patch, cb)}
+                        isSaving={isSaving}
                     />
                 </XStack>
                 <YStack>
@@ -223,7 +229,7 @@ export default function EditItemModal() {
                 value={categoryEntry}
                 onChange={setCategoryEntry}
                 onSelect={(value, close) => {
-                    setCategory(value);
+                    change(() => setCategory(value));
                     setCategoryEntry('');
                     close();
                 }}

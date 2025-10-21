@@ -5,7 +5,14 @@ import Text from '@/components/text';
 import TimeLabel from '@/components/time-label';
 import { useApi } from '@/hooks/use-api';
 import globalStyles, { colors, fonts } from '@/styles/global';
-import { Ingredient as IngredientT, Pantry, PantryItem, Recipe, UpsertPantryItem } from '@/types/interfaces';
+import {
+    Ingredient as IngredientT,
+    Pantry,
+    PantryItem,
+    Recipe,
+    UpsertPantryItem,
+} from '@/types/interfaces';
+import { highlightInstructions } from '@/util/highligher';
 import { getDefault } from '@/util/pantry';
 import { pantryItemMutation } from '@/util/query';
 import { findIngredientMatches } from '@/util/recipe';
@@ -169,6 +176,12 @@ export default function RecipeDetail() {
         });
     };
 
+    const r = (instruction: string) =>
+        highlightInstructions(
+            recipe?.ingredients.map((i) => i.item || '') || [],
+            instruction
+        );
+
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
     return (
@@ -184,21 +197,7 @@ export default function RecipeDetail() {
                 />
             }
         >
-            <PageTitle
-                actions={[
-                    {
-                        icon: 'square.and.arrow.up',
-                        nudge: -2,
-                        onPress: () => {},
-                    },
-                    {
-                        icon: 'pencil',
-                        onPress: () => router.push(`/recipes/edit/${id}`),
-                    },
-                ]}
-            >
-                {recipe?.name}
-            </PageTitle>
+            <PageTitle>{recipe?.name}</PageTitle>
             <View style={[styles.content, styles.timeLabels]}>
                 <TimeLabel label={'prep time'} time={recipe?.prepTime ?? ''} />
                 <TimeLabel label={'cook time'} time={recipe?.cookTime ?? ''} />
@@ -223,7 +222,28 @@ export default function RecipeDetail() {
                         <View key={i} style={styles.instructionContainer}>
                             <Text style={styles.instructionIndex}>{i + 1}</Text>
                             <Text style={styles.instructionText}>
-                                {renderHighlighted(instruction, matchingWords)}
+                                {r(instruction).map(({ text, isHighlighted, match }, key) => {
+                                    return (
+                                        <Text
+                                            key={key}
+                                            style={isHighlighted ? { color: colors.primary } : {}}
+                                            {...(isHighlighted
+                                                ? {
+                                                      onPress: () => {
+                                                          console.log(
+                                                              text,
+                                                              match,
+                                                              recipe?.ingredients[match.refIndex]
+                                                                  ?.sentence
+                                                          );
+                                                      },
+                                                  }
+                                                : {})}
+                                        >
+                                            {text}
+                                        </Text>
+                                    );
+                                })}
                             </Text>
                         </View>
                     ))}

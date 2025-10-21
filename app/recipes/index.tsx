@@ -205,23 +205,21 @@ export default function RecipeScreen() {
                     }}
                 />
             }
+            actions={[
+                {
+                    label: 'filter',
+                    icon: showTags
+                        ? 'line.3.horizontal.decrease.circle.fill'
+                        : 'line.3.horizontal.decrease.circle',
+                    onPress: () => setShowTags(!showTags),
+                },
+                {
+                    icon: 'plus',
+                    onPress: () => router.push('/recipes/new'),
+                },
+            ]}
         >
-            <Heading
-                title='Recipes'
-                actions={[
-                    {
-                        label: 'filter',
-                        icon: showTags
-                            ? 'line.3.horizontal.decrease.circle.fill'
-                            : 'line.3.horizontal.decrease.circle',
-                        onPress: () => setShowTags(!showTags),
-                    },
-                    {
-                        icon: 'plus',
-                        onPress: () => router.push('/recipes/new'),
-                    },
-                ]}
-            />
+            <Heading title='Recipes' />
             {showTags && (
                 <View style={styles.tagContainer}>
                     {tags.map((tag) => (

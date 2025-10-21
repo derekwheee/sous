@@ -1,6 +1,7 @@
 import Text from '@/components/text';
 import globalStyles, { brightness, colors } from '@/styles/global';
 import { Ingredient as IngredientType, Pantry, PantryItem } from '@/types/interfaces';
+import { FUZZY_SEARCH_THRESHOLD } from '@/util/constants';
 import { SymbolView } from 'expo-symbols';
 import Fuse from 'fuse.js';
 import { StyleSheet, View, ViewProps } from 'react-native';
@@ -38,7 +39,7 @@ export default function Ingredient({
 }: IngredientProps & ViewProps) {
     const fuse = new Fuse(pantry?.pantryItems || [], {
         keys: ['name'],
-        threshold: 0.45,
+        threshold: FUZZY_SEARCH_THRESHOLD,
     });
 
     const matched = fuse.search(`${ingredient.item || ''}`);
