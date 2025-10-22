@@ -62,7 +62,15 @@ const SaveItemButton = ({
 };
 
 export default function EditItemModal() {
-    const { pantryItemId, pantryId } = useLocalSearchParams();
+    const {
+        pantryItemId,
+        pantryId,
+        newName,
+    }: {
+        pantryItemId?: string;
+        pantryId?: string;
+        newName?: string;
+    } = useLocalSearchParams();
 
     const { user, getItemCategories, getPantryItem, upsertPantryItem } = useApi();
     const router = useRouter();
@@ -84,7 +92,7 @@ export default function EditItemModal() {
     });
 
     const [isDirty, setIsDirty] = useState(false);
-    const [name, setName] = useState(pantryItem?.name);
+    const [name, setName] = useState(pantryItem?.name || newName || '');
     const [category, setCategory] = useState(
         pantryItem?.category?.name ||
             categoryList?.find((c) => c.name.toLowerCase() === 'other')?.name
@@ -166,9 +174,13 @@ export default function EditItemModal() {
                             }}
                         >
                             <SymbolView
-                                name={isFavorite ? 'star.fill' : 'star'}
-                                size={32}
-                                tintColor={isFavorite ? colors.sous : '#ccc'}
+                                name={
+                                    isFavorite
+                                        ? 'repeat.circle.fill'
+                                        : 'repeat.circle'
+                                }
+                                size={40}
+                                tintColor={isFavorite ? colors.primary : '#ccc'}
                             />
                         </Pressable>
                     </XStack>

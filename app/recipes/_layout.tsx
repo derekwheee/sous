@@ -10,35 +10,35 @@ export default function RecipesLayout() {
                 headerShadowVisible: false,
                 headerBackButtonDisplayMode: 'minimal',
                 headerBlurEffect: 'none',
-                headerBackground: () => <HeaderBackground />
+                headerBackground: () => <HeaderBackground />,
             }}
         >
             <Stack.Screen
                 name='index'
                 options={{
                     title: 'Recipes',
-                    headerShown: true
+                    headerShown: true,
                 }}
             />
             <Stack.Screen
                 name='[id]'
                 options={{
                     title: 'Recipe Details',
-                    headerShown: true
+                    headerShown: true,
                 }}
             />
             <Stack.Screen
                 name='new'
                 options={{
                     title: 'New Recipe',
-                    headerShown: true
+                    headerShown: true,
                 }}
             />
             <Stack.Screen
                 name='edit/[id]'
                 options={{
                     title: 'Edit Recipe',
-                    headerShown: true
+                    headerShown: true,
                 }}
             />
         </Stack>

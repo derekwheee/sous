@@ -9,8 +9,8 @@ import { getDefault } from '@/util/pantry';
 import { pantryItemMutation } from '@/util/query';
 import Feather from '@expo/vector-icons/Feather';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { router } from 'expo-router';
-import { createRef, useCallback, useRef, useState } from 'react';
+import { router, useNavigation } from 'expo-router';
+import { createRef, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { Alert, Pressable, RefreshControl, StyleSheet, TextInput, View } from 'react-native';
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import Reanimated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated';
@@ -86,10 +86,33 @@ const styles = {
 };
 
 export default function ListScreen() {
+    const navigation = useNavigation();
     const [isAddingItems, setIsAddingItems] = useState<boolean>(false);
     const [swipeHeight, setSwipeHeight] = useState<number>(0);
     const [newItemText, setNewItemText] = useState<string>('');
     const newItemInputRef = useRef<TextInput>(null);
+
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            // headerSearchBarOptions: {
+            //     placeholder: 'search pantry...',
+            //     tintColor: colors.primary,
+            //     onChangeText: (event: any) => setSearchTerm(event.nativeEvent.text),
+            // },
+            unstable_headerRightItems: () => [
+                {
+                    type: 'button',
+                    label: isAddingItems ? 'done' : 'new item',
+                    icon: isAddingItems ? null : {
+                        type: 'sfSymbol',
+                        name: 'plus',
+                    },
+                    tintColor: colors.primary,
+                    onPress: () => setIsAddingItems(!isAddingItems),
+                },
+            ],
+        });
+    }, [navigation, isAddingItems]);
 
     const queryClient = useQueryClient();
     const { user, getPantries, upsertPantryItem, getItemCategories } = useApi();
@@ -201,16 +224,6 @@ export default function ListScreen() {
         <Screen
             isLoading={isLoading}
             refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetchPantries} />}
-            actions={[
-                // {
-                //     icon: 'list.bullet',
-                //     onPress: () => {}
-                // },
-                {
-                    icon: isAddingItems ? 'checkmark' : 'plus',
-                    onPress: () => setIsAddingItems(!isAddingItems),
-                },
-            ]}
         >
             <Heading title='Shopping List' />
             {isAddingItems && (

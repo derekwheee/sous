@@ -204,9 +204,9 @@ export default function PantryListing({
                     }
                 >
                     <SymbolView
-                        name={pantryItem.isFavorite ? 'star.fill' : 'star'}
+                        name={'repeat'}
                         size={24}
-                        tintColor={pantryItem.isFavorite ? colors.sous : '#ccc'}
+                        tintColor={pantryItem.isFavorite ? colors.primary : '#ccc'}
                     />
                 </Pressable>
             </Pressable>

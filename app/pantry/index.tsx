@@ -9,8 +9,9 @@ import { getDefault } from '@/util/pantry';
 import { pantryItemMutation } from '@/util/query';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigation, useRouter } from 'expo-router';
-import { useLayoutEffect, useState } from 'react';
-import { RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { SymbolView } from 'expo-symbols';
+import { useLayoutEffect, useRef, useState } from 'react';
+import { Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 
 const styles = {
     ...globalStyles,
@@ -23,6 +24,14 @@ const styles = {
         onboardingText: {
             fontSize: 16,
             fontFamily: fonts.caprasimo,
+        },
+        addSearchTerm: {
+            flexDirection: 'row',
+            gap: 4,
+            alignItems: 'center',
+        },
+        addSearchTermText: {
+            color: colors.primary,
         },
     }),
 };
@@ -54,15 +63,37 @@ export default function PantryScreen() {
         )
     );
 
+    const searchBarRef = useRef<any>(null);
+
     useLayoutEffect(() => {
         navigation.setOptions({
             headerSearchBarOptions: {
+                ref: searchBarRef,
+                autoCapitalize: 'none',
+                hideNavigationBar: false,
                 placeholder: 'search pantry...',
                 tintColor: colors.primary,
                 onChangeText: (event: any) => setSearchTerm(event.nativeEvent.text),
+                onCancelButtonPress: () => setSearchTerm(''),
             },
+            unstable_headerRightItems: () => [
+                {
+                    type: 'button',
+                    label: 'new item',
+                    icon: {
+                        type: 'sfSymbol',
+                        name: 'plus',
+                    },
+                    tintColor: colors.primary,
+                    onPress: () =>
+                        router.push({
+                            pathname: '/pantry/edit',
+                            params: { pantryId: pantry!.id },
+                        }),
+                },
+            ],
         });
-    }, [navigation]);
+    }, [navigation, router]);
 
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
     const [searchTerm, setSearchTerm] = useState<string>('');
@@ -83,7 +114,7 @@ export default function PantryScreen() {
             return a.isInStock ? -1 : 1;
         })
         .filter((item) => {
-            return !item.category?.isNonFood && (item.isInStock || item.isFavorite);
+            return !!searchTerm || (!item.category?.isNonFood && (item.isInStock || item.isFavorite));
         });
 
     const filteredPantry = searchTerm
@@ -104,17 +135,6 @@ export default function PantryScreen() {
                     }}
                 />
             }
-            actions={[
-                {
-                    label: 'add item',
-                    icon: 'plus',
-                    onPress: () =>
-                        router.push({
-                            pathname: '/pantry/edit',
-                            params: { pantryId: pantry!.id },
-                        }),
-                },
-            ]}
         >
             <Heading title='Pantry' />
             {!!filteredPantry?.length &&
@@ -126,7 +146,29 @@ export default function PantryScreen() {
                         onToggleFavorite={handleSaveChanges}
                     />
                 ))}
-            {!filteredPantry?.length && (
+            {!filteredPantry?.length && !!searchTerm && (
+                <View style={styles.onboarding}>
+                    <Text style={styles.onboardingText}>no items match your search</Text>
+                    <Pressable
+                        style={styles.addSearchTerm}
+                        onPress={() => {
+                            const newName = searchTerm;
+                            setSearchTerm('');
+                            searchBarRef.current?.clearText();
+                            router.push({
+                                pathname: '/pantry/edit',
+                                params: { pantryId: pantry!.id, newName },
+                            });
+                        }}
+                    >
+                        <Text style={styles.addSearchTermText}>
+                            add "{searchTerm}" to your pantry
+                        </Text>
+                        <SymbolView name='chevron.right' size={12} tintColor={colors.primary} />
+                    </Pressable>
+                </View>
+            )}
+            {!pantry && (
                 <View style={styles.onboarding}>
                     <Text style={styles.onboardingText}>
                         you don't have anything in your pantry

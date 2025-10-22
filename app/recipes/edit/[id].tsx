@@ -17,9 +17,9 @@ import {
 import Feather from '@expo/vector-icons/Feather';
 import { useQuery } from '@tanstack/react-query';
 import * as Clipboard from 'expo-clipboard';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Alert, Animated, Pressable, StyleSheet, View } from 'react-native';
 
 const styles = {
@@ -80,7 +80,8 @@ const styles = {
 };
 
 export default function EditRecipe(props: any) {
-    const params = useLocalSearchParams<{ id: string }>();
+    const navigation = useNavigation();
+    const params = useLocalSearchParams<{ id: string, newName: string }>();
     const id = params.id ? Number(params.id) : undefined;
     const isNewRecipe = !id;
     const { showSnackbar } = useSnackbar();
@@ -126,7 +127,7 @@ export default function EditRecipe(props: any) {
 
     useEffect(() => {
         if (recipe) {
-            setName(recipe.name || '');
+            setName(recipe.name || params.newName || '');
             setPrepTime(recipe.prepTime || '');
             setCookTime(recipe.cookTime || '');
             setServings(recipe.servings ? String(recipe.servings) : '');
@@ -143,6 +144,13 @@ export default function EditRecipe(props: any) {
             useNativeDriver: true,
         }).start();
     }, [canBeSaved, translateY]);
+
+    useLayoutEffect(() => {
+        console.log('setting header right items');
+        navigation.setOptions({
+            unstable_headerRightItems: () => headingActions,
+        });
+    }, [navigation]);
 
     const handleSaveRecipe = async () => {
         setIsSaving(true);
@@ -270,8 +278,12 @@ export default function EditRecipe(props: any) {
     const headingActions = isNewRecipe
         ? [
               {
-                  icon: 'square.and.arrow.down',
-                  nudge: -2,
+                  label: 'import',
+                  icon: {
+                      type: 'sfSymbol',
+                      name: 'square.and.arrow.down',
+                  },
+                  type: 'button',
                   onPress: async () => {
                       const pasted = await Clipboard.getStringAsync();
                       if (!pasted || !isValidUrl(pasted)) {
@@ -280,23 +292,30 @@ export default function EditRecipe(props: any) {
                       }
                       confirmImport(pasted);
                   },
+                  tintColor: colors.primary,
               },
           ]
         : [
               {
-                  icon: 'eye',
-                  onPress: () => router.back(),
+                  type: 'button',
+                  label: 'view',
+                  icon: {
+                      type: 'sfSymbol',
+                      name: 'arrow.right',
+                  },
+                  tintColor: colors.primary,
+                  onPress: () => router.push(`/recipes/${id}`),
               },
           ];
 
     // TODO: Add onSubmitEditing to each TextInput to move to next input
     return (
         <>
-            <Screen isLoading={!user || !!(params?.id && !recipe) || isImporting} {...props}>
-                <Heading
-                    title={params?.id ? 'edit recipe' : 'new recipe'}
-                    actions={headingActions}
-                />
+            <Screen
+                isLoading={!user || !!(params?.id && !recipe) || isImporting}
+                // actions={headingActions}
+            >
+                <Heading title={params?.id ? 'edit recipe' : 'new recipe'} />
                 <View style={styles.content}>
                     <TextInput
                         label='name'

@@ -1,10 +1,11 @@
 import Heading from '@/components/heading';
 import Screen from '@/components/screen';
 import Text from '@/components/text';
-import globalStyles, { fonts } from '@/styles/global';
+import globalStyles, { colors, fonts } from '@/styles/global';
 import { useClerk, useUser } from '@clerk/clerk-expo';
-import { useRouter } from 'expo-router';
+import { useNavigation, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
+import { useLayoutEffect } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 
 const styles = {
@@ -24,10 +25,9 @@ const styles = {
             fontSize: 24,
         },
         userName: {
-            paddingBottom: 32,
+            marginTop: -32,
             paddingHorizontal: 16,
             fontSize: 56,
-            lineHeight: 60,
             fontFamily: fonts.poppins.bold,
         },
         sectionHeading: {
@@ -41,9 +41,27 @@ const styles = {
 };
 
 export default function ProfileScreen() {
+    const navigation = useNavigation();
     const { signOut } = useClerk();
     const { user } = useUser();
     const router = useRouter();
+
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            unstable_headerRightItems: () => [
+                {
+                    type: 'button',
+                    label: 'sign out',
+                    icon: {
+                        type: 'sfSymbol',
+                        name: 'rectangle.portrait.and.arrow.right',
+                    },
+                    tintColor: colors.primary,
+                    onPress: () => handleSignOut(),
+                },
+            ],
+        });
+    }, [navigation]);
 
     const handleSignOut = async () => {
         try {
@@ -55,15 +73,7 @@ export default function ProfileScreen() {
     };
 
     return (
-        <Screen
-            actions={[
-                {
-                    label: 'sign out',
-                    icon: 'door.left.hand.open',
-                    onPress: () => handleSignOut(),
-                },
-            ]}
-        >
+        <Screen>
             <Heading title='welcome,' />
             <Text style={styles.userName}>{user?.firstName || 'friend'}</Text>
             <Text style={styles.sectionHeading}>household</Text>

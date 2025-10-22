@@ -17,8 +17,8 @@ import { getDefault } from '@/util/pantry';
 import { pantryItemMutation } from '@/util/query';
 import { findIngredientMatches } from '@/util/recipe';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
+import { useLayoutEffect, useState } from 'react';
 import { RefreshControl, StyleSheet, View } from 'react-native';
 
 const styles = {
@@ -50,9 +50,27 @@ const styles = {
 export default function RecipeDetail() {
     const id = Number(useLocalSearchParams<{ id: string }>().id);
 
+    const navigation = useNavigation();
     const router = useRouter();
     const { user, getRecipe, getPantries, upsertPantryItem } = useApi();
     const queryClient = useQueryClient();
+
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            unstable_headerRightItems: () => [
+                {
+                    type: 'button',
+                    label: 'new recipe',
+                    icon: {
+                        type: 'sfSymbol',
+                        name: 'pencil',
+                    },
+                    tintColor: colors.primary,
+                    onPress: () => router.push(`/recipes/edit/${id}`),
+                },
+            ],
+        });
+    }, [navigation, router]);
 
     const {
         isFetching,
@@ -177,10 +195,7 @@ export default function RecipeDetail() {
     };
 
     const r = (instruction: string) =>
-        highlightInstructions(
-            recipe?.ingredients.map((i) => i.item || '') || [],
-            instruction
-        );
+        highlightInstructions(recipe?.ingredients.map((i) => i.item || '') || [], instruction);
 
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 

@@ -12,6 +12,7 @@ import { getAvailableIngredients } from '@/util/recipe';
 import Feather from '@expo/vector-icons/Feather';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigation, useRouter } from 'expo-router';
+import { SymbolView } from 'expo-symbols';
 import { createRef, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { Alert, Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -53,6 +54,14 @@ const styles = {
             aspectRatio: 1,
             height: '100%',
             backgroundColor: colors.primary,
+        },
+        addSearchTerm: {
+            flexDirection: 'row',
+            gap: 4,
+            alignItems: 'center',
+        },
+        addSearchTermText: {
+            color: colors.primary,
         },
     }),
 };
@@ -100,6 +109,7 @@ export default function RecipeScreen() {
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [swipeHeight, setSwipeHeight] = useState<number>(0);
     const swipeRefs = useRef(new Map<number, React.RefObject<any>>());
+    const searchBarRef = useRef<any>(null);
 
     const updateHeight = useCallback(
         (r: any) => {
@@ -113,12 +123,39 @@ export default function RecipeScreen() {
     useLayoutEffect(() => {
         navigation.setOptions({
             headerSearchBarOptions: {
+                ref: searchBarRef,
+                autoCapitalize: 'none',
                 placeholder: 'search recipes...',
+                hideNavigationBar: false,
                 tintColor: colors.primary,
                 onChangeText: (event: any) => setSearchTerm(event.nativeEvent.text),
+                onCancelButtonPress: () => setSearchTerm(''),
             },
+            unstable_headerRightItems: () => [
+                {
+                    type: 'button',
+                    label: 'filter recipes',
+                    icon: {
+                        type: 'sfSymbol',
+                        name: 'line.3.horizontal.decrease.circle',
+                    },
+                    tintColor: colors.primary,
+                    onPress: () => setShowTags(!showTags),
+                    selected: showTags,
+                },
+                {
+                    type: 'button',
+                    label: 'new recipe',
+                    icon: {
+                        type: 'sfSymbol',
+                        name: 'plus',
+                    },
+                    tintColor: colors.primary,
+                    onPress: () => router.push('/recipes/new'),
+                },
+            ],
         });
-    }, [navigation]);
+    }, [navigation, showTags, router]);
 
     const toggleTagSelected = (tag: string) => {
         if (selectedTags.includes(tag)) {
@@ -209,19 +246,6 @@ export default function RecipeScreen() {
                     }}
                 />
             }
-            actions={[
-                {
-                    label: 'filter',
-                    icon: showTags
-                        ? 'line.3.horizontal.decrease.circle.fill'
-                        : 'line.3.horizontal.decrease.circle',
-                    onPress: () => setShowTags(!showTags),
-                },
-                {
-                    icon: 'plus',
-                    onPress: () => router.push('/recipes/new'),
-                },
-            ]}
         >
             <Heading title='Recipes' />
             {showTags && (
@@ -236,39 +260,63 @@ export default function RecipeScreen() {
                     ))}
                 </View>
             )}
-            <GestureHandlerRootView>
-                {filteredRecipes?.map((recipe: Recipe) => {
-                    if (!swipeRefs.current.has(recipe.id)) {
-                        swipeRefs.current.set(recipe.id, createRef<any>());
-                    }
-                    const swipeRef = swipeRefs.current.get(recipe.id);
+            {!!filteredRecipes?.length && (
+                <GestureHandlerRootView>
+                    {filteredRecipes?.map((recipe: Recipe) => {
+                        if (!swipeRefs.current.has(recipe.id)) {
+                            swipeRefs.current.set(recipe.id, createRef<any>());
+                        }
+                        const swipeRef = swipeRefs.current.get(recipe.id);
 
-                    return (
-                        <Swipeable
-                            key={recipe.id}
-                            ref={swipeRef}
-                            renderRightActions={(prog, trans) =>
-                                RightAction(
-                                    prog,
-                                    trans,
-                                    swipeHeight,
-                                    recipe,
-                                    proposeRemoveItem,
-                                    () => router.push(`/recipes/edit/${recipe.id}`),
-                                    swipeRef
-                                )
-                            }
-                        >
-                            <RecipeListing
+                        return (
+                            <Swipeable
                                 key={recipe.id}
-                                recipe={recipe}
-                                pantryItems={pantryItems!}
-                                onLayout={updateHeight}
-                            />
-                        </Swipeable>
-                    );
-                })}
-            </GestureHandlerRootView>
+                                ref={swipeRef}
+                                renderRightActions={(prog, trans) =>
+                                    RightAction(
+                                        prog,
+                                        trans,
+                                        swipeHeight,
+                                        recipe,
+                                        proposeRemoveItem,
+                                        () => router.push(`/recipes/edit/${recipe.id}`),
+                                        swipeRef
+                                    )
+                                }
+                            >
+                                <RecipeListing
+                                    key={recipe.id}
+                                    recipe={recipe}
+                                    pantryItems={pantryItems!}
+                                    onLayout={updateHeight}
+                                />
+                            </Swipeable>
+                        );
+                    })}
+                </GestureHandlerRootView>
+            )}
+            {!filteredRecipes?.length && !!searchTerm && (
+                <View style={styles.onboarding}>
+                    <Text style={styles.onboardingText}>no items match your search</Text>
+                    <Pressable
+                        style={styles.addSearchTerm}
+                        onPress={() => {
+                            const newName = searchTerm;
+                            setSearchTerm('');
+                            searchBarRef.current?.clearText();
+                            router.push({
+                                pathname: '/recipes/new',
+                                params: { newName },
+                            });
+                        }}
+                    >
+                        <Text style={styles.addSearchTermText}>
+                            add a recipe for "{searchTerm}"
+                        </Text>
+                        <SymbolView name='chevron.right' size={12} tintColor={colors.primary} />
+                    </Pressable>
+                </View>
+            )}
             {!recipes?.length && (
                 <View style={styles.onboarding}>
                     <Text style={styles.onboardingText}>you don't have any recipes yet</Text>
