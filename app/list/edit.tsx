@@ -3,9 +3,10 @@ import Loading from '@/components/loading';
 import Text from '@/components/text';
 import TextInput from '@/components/text-input';
 import { useApi } from '@/hooks/use-api';
+import { usePantry } from '@/hooks/use-pantry';
 import globalStyles, { colors } from '@/styles/global';
-import { ItemCategory, PantryItem, UpsertPantryItem } from '@/types/interfaces';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { ItemCategory, UpsertPantryItem } from '@/types/interfaces';
+import { useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import React, { useEffect, useState } from 'react';
@@ -72,23 +73,21 @@ export default function EditItemModal() {
         newName?: string;
     } = useLocalSearchParams();
 
-    const { user, getItemCategories, getPantryItem, upsertPantryItem } = useApi();
+    const { user, getItemCategories } = useApi();
     const router = useRouter();
 
-    const { data: pantryItem } = useQuery<PantryItem>({
-        queryKey: ['pantryItem', pantryItemId],
-        queryFn: () => getPantryItem(Number(pantryItemId), Number(pantryId)),
-        enabled: !!user && !!pantryItemId && !!pantryId,
+    const {
+        pantryItem: { data: pantryItem },
+        savePantryItem,
+        isPantryItemSaving,
+    } = usePantry({
+        pantryItemId: pantryItemId ? Number(pantryItemId) : undefined,
     });
 
     const { data: categoryList } = useQuery<ItemCategory[]>({
         queryKey: ['itemCategories'],
         queryFn: () => getItemCategories(Number(pantryId)),
         enabled: !!user && !!pantryId,
-    });
-
-    const { mutate: savePantryItem, isPending: isSaving } = useMutation({
-        mutationFn: (item: UpsertPantryItem) => upsertPantryItem(Number(pantryId), item),
     });
 
     const [isDirty, setIsDirty] = useState(false);
@@ -151,9 +150,9 @@ export default function EditItemModal() {
                         {!!pantryItem?.id ? 'Edit Item' : 'Add Item'}
                     </Text>
                     <SaveItemButton
-                        disabled={!isDirty || !name?.trim() || isSaving}
+                        disabled={!isDirty || !name?.trim() || isPantryItemSaving}
                         onPressSave={(cb) => handleSave(patch, cb)}
-                        isSaving={isSaving}
+                        isSaving={isPantryItemSaving}
                     />
                 </XStack>
                 <YStack>
@@ -174,11 +173,7 @@ export default function EditItemModal() {
                             }}
                         >
                             <SymbolView
-                                name={
-                                    isFavorite
-                                        ? 'repeat.circle.fill'
-                                        : 'repeat.circle'
-                                }
+                                name={isFavorite ? 'repeat.circle.fill' : 'repeat.circle'}
                                 size={40}
                                 tintColor={isFavorite ? colors.primary : '#ccc'}
                             />
@@ -201,6 +196,7 @@ export default function EditItemModal() {
                         <Switch
                             id='isInStock'
                             size='$2'
+                            borderColor={isInStock ? colors.primary : '#ccc'}
                             onCheckedChange={(checked) => change(() => setIsInStock(!!checked))}
                             checked={isInStock}
                         >
@@ -217,6 +213,7 @@ export default function EditItemModal() {
                         <Switch
                             id='isInShoppingList'
                             size='$2'
+                            borderColor={isInShoppingList ? colors.primary : '#ccc'}
                             onCheckedChange={(checked) =>
                                 change(() => setIsInShoppingList(!!checked))
                             }

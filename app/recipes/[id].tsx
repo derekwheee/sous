@@ -4,19 +4,14 @@ import Screen from '@/components/screen';
 import Text from '@/components/text';
 import TimeLabel from '@/components/time-label';
 import { useApi } from '@/hooks/use-api';
+import { usePantry } from '@/hooks/use-pantry';
+import { useRecipe } from '@/hooks/use-recipe';
 import globalStyles, { colors, fonts } from '@/styles/global';
 import {
     Ingredient as IngredientT,
-    Pantry,
-    PantryItem,
-    Recipe,
-    UpsertPantryItem,
+    PantryItem
 } from '@/types/interfaces';
 import { highlightInstructions } from '@/util/highligher';
-import { getDefault } from '@/util/pantry';
-import { pantryItemMutation } from '@/util/query';
-import { findIngredientMatches } from '@/util/recipe';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useLayoutEffect, useState } from 'react';
 import { RefreshControl, StyleSheet, View } from 'react-native';
@@ -52,52 +47,65 @@ export default function RecipeDetail() {
 
     const navigation = useNavigation();
     const router = useRouter();
-    const { user, getRecipe, getPantries, upsertPantryItem } = useApi();
-    const queryClient = useQueryClient();
+    const { user } = useApi();
+
+    const {
+        recipe: { isFetching, data: recipe, refetch },
+        deleteRecipe,
+    } = useRecipe({ recipeId: id });
+
+    const {
+        pantry,
+        savePantryItem,
+    } = usePantry({ user });
 
     useLayoutEffect(() => {
         navigation.setOptions({
             unstable_headerRightItems: () => [
                 {
-                    type: 'button',
-                    label: 'new recipe',
+                    type: 'menu',
+                    label: 'edit recipe',
                     icon: {
                         type: 'sfSymbol',
-                        name: 'pencil',
+                        name: 'ellipsis',
                     },
-                    tintColor: colors.primary,
-                    onPress: () => router.push(`/recipes/edit/${id}`),
+                    menu: {
+                        items: [
+                            {
+                                type: 'action',
+                                label: 'I made this',
+                                icon: {
+                                    type: 'sfSymbol',
+                                    name: 'checkmark',
+                                },
+                                onPress: () => router.push(`/recipes/edit/${id}`),
+                            },
+                            {
+                                type: 'action',
+                                label: 'edit recipe',
+                                icon: {
+                                    type: 'sfSymbol',
+                                    name: 'pencil',
+                                },
+                                onPress: () => router.push(`/recipes/edit/${id}`),
+                            },
+                            {
+                                destructive: true,
+                                type: 'action',
+                                label: 'delete recipe',
+                                icon: {
+                                    type: 'sfSymbol',
+                                    name: 'trash',
+                                },
+                                tintColor: colors.primary,
+                                onPress: () => deleteRecipe(id, () => router.push('/recipes')),
+                            },
+                        ],
+                    },
                 },
             ],
         });
     }, [navigation, router]);
-
-    const {
-        isFetching,
-        data: recipe,
-        refetch,
-    } = useQuery<Recipe | null>({
-        queryKey: ['recipe', id],
-        queryFn: () => getRecipe(id),
-        enabled: !!user,
-    });
-
-    const { data: pantries } = useQuery<Pantry[]>({
-        queryKey: ['pantry'],
-        queryFn: () => getPantries(),
-        enabled: !!user,
-    });
-
-    const { mutate: savePantryItem } = useMutation(
-        pantryItemMutation<any, UpsertPantryItem>(
-            getDefault(pantries)?.id,
-            (patch: UpsertPantryItem) => upsertPantryItem(getDefault(pantries)?.id!, patch),
-            queryClient,
-            ['pantry']
-        )
-    );
-
-    const pantry = pantries?.length ? getDefault(pantries) : undefined;
 
     const handleAddToShoppingList = async (ingredient: IngredientT, pantryItem?: PantryItem) => {
         if (pantryItem?.isInShoppingList) {
@@ -110,91 +118,7 @@ export default function RecipeDetail() {
         });
     };
 
-    const matchingWords = findIngredientMatches(recipe);
-
-    // small normalizers to compare tokens to matched terms
-    const normalize = (s?: string) =>
-        s
-            ?.toLowerCase()
-            .replace(/[^a-z0-9]/g, '')
-            .trim() ?? '';
-    const singularize = (w: string) =>
-        w.replace(/(ies|ses|es|s)$/, (m) => (m === 'ies' ? 'y' : ''));
-
-    const renderHighlighted = (instruction: string, matches: string[]) => {
-        const matchSet = new Set(matches.map((m) => m.toLowerCase()));
-        // stop words to avoid accidental substring matches (e.g. "in" in "spinach")
-        const stopWords = new Set([
-            'a',
-            'an',
-            'the',
-            'in',
-            'on',
-            'and',
-            'or',
-            'of',
-            'to',
-            'with',
-            'for',
-            'by',
-            'at',
-            'from',
-            'is',
-            'are',
-            'be',
-            'as',
-            'that',
-            'this',
-            'these',
-            'those',
-            'it',
-            'its',
-            'was',
-            'were',
-            'but',
-            'if',
-            'then',
-            'so',
-            'into',
-            'about',
-            'over',
-            'under',
-            'near',
-            'per',
-        ]);
-
-        // keep separators so we can recompose text with spacing/punctuation preserved
-        const parts = instruction.split(/(\s+|[^A-Za-z0-9]+)/);
-        return parts.map((part, idx) => {
-            if (!part) return null;
-            // whitespace or punctuation: render as-is
-            if (/^\s+$/.test(part) || (/[^A-Za-z0-9]/.test(part) && part.trim() === '')) {
-                return <Text key={`${idx}-${part}`}>{part}</Text>;
-            }
-
-            const norm = normalize(part);
-            if (!norm || stopWords.has(norm)) {
-                // don't attempt to match stop words
-                return <Text key={`${idx}-${part}`}>{part}</Text>;
-            }
-
-            const sing = singularize(norm);
-            const isMatch =
-                (norm && (matchSet.has(norm) || matchSet.has(sing))) ||
-                Array.from(matchSet).some((m) => m.includes(norm) || norm.includes(m));
-
-            if (isMatch) {
-                return (
-                    <Text key={`${idx}-${part}`} style={{ color: colors.primary }}>
-                        {part}
-                    </Text>
-                );
-            }
-            return <Text key={`${idx}-${part}`}>{part}</Text>;
-        });
-    };
-
-    const r = (instruction: string) =>
+    const highlight = (instruction: string) =>
         highlightInstructions(recipe?.ingredients.map((i) => i.item || '') || [], instruction);
 
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
@@ -237,28 +161,33 @@ export default function RecipeDetail() {
                         <View key={i} style={styles.instructionContainer}>
                             <Text style={styles.instructionIndex}>{i + 1}</Text>
                             <Text style={styles.instructionText}>
-                                {r(instruction).map(({ text, isHighlighted, match }, key) => {
-                                    return (
-                                        <Text
-                                            key={key}
-                                            style={isHighlighted ? { color: colors.primary } : {}}
-                                            {...(isHighlighted
-                                                ? {
-                                                      onPress: () => {
-                                                          console.log(
-                                                              text,
-                                                              match,
-                                                              recipe?.ingredients[match.refIndex]
-                                                                  ?.sentence
-                                                          );
-                                                      },
-                                                  }
-                                                : {})}
-                                        >
-                                            {text}
-                                        </Text>
-                                    );
-                                })}
+                                {highlight(instruction).map(
+                                    ({ text, isHighlighted, match }, key) => {
+                                        return (
+                                            <Text
+                                                key={key}
+                                                style={
+                                                    isHighlighted ? { color: colors.primary } : {}
+                                                }
+                                                {...(isHighlighted
+                                                    ? {
+                                                          onPress: () => {
+                                                              console.log(
+                                                                  text,
+                                                                  match,
+                                                                  recipe?.ingredients[
+                                                                      match.refIndex
+                                                                  ]?.sentence
+                                                              );
+                                                          },
+                                                      }
+                                                    : {})}
+                                            >
+                                                {text}
+                                            </Text>
+                                        );
+                                    }
+                                )}
                             </Text>
                         </View>
                     ))}

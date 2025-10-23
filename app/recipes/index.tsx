@@ -4,17 +4,16 @@ import RecipeListing from '@/components/recipe-listing';
 import Screen from '@/components/screen';
 import TagPill from '@/components/tag-pill';
 import Text from '@/components/text';
-import { useApi } from '@/hooks/use-api';
+import { usePantry } from '@/hooks/use-pantry';
+import { useRecipe } from '@/hooks/use-recipe';
 import globalStyles, { colors, fonts } from '@/styles/global';
-import { DeleteRecipe, Pantry, Recipe } from '@/types/interfaces';
-import { standardMutation } from '@/util/query';
+import { Recipe } from '@/types/interfaces';
 import { getAvailableIngredients } from '@/util/recipe';
 import Feather from '@expo/vector-icons/Feather';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigation, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { createRef, useCallback, useLayoutEffect, useRef, useState } from 'react';
-import { Alert, Pressable, RefreshControl, StyleSheet, View } from 'react-native';
+import { Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import Reanimated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated';
@@ -67,42 +66,21 @@ const styles = {
 };
 
 export default function RecipeScreen() {
-    const { user, getRecipes, getPantries, deleteRecipe } = useApi();
-    const queryClient = useQueryClient();
-
-    const {
-        isFetching: isRecipeLoadingerror,
-        error: recipeError,
-        data: recipes,
-        refetch,
-    } = useQuery<Recipe[]>({
-        queryKey: ['recipes'],
-        queryFn: () => getRecipes(),
-        enabled: !!user,
-    });
-
-    const {
-        isFetching: isPantryLoading,
-        error: pantryError,
-        data: pantries,
-    } = useQuery<Pantry[]>({
-        queryKey: ['pantry'],
-        queryFn: () => getPantries(),
-        enabled: !!user,
-    });
-
-    const { mutate: handleDeleteRecipe } = useMutation(
-        standardMutation<any, DeleteRecipe>(
-            ({ id }: DeleteRecipe) => deleteRecipe(id),
-            queryClient,
-            ['recipes'],
-            { isDelete: true }
-        )
-    );
-
-    const pantryItems = pantries?.[0]?.pantryItems;
     const navigation = useNavigation();
     const router = useRouter();
+
+    const {
+        recipes: { data: recipes, isFetching: isRecipesLoading, error: recipesError, refetch },
+        deleteRecipe,
+    } = useRecipe();
+
+    const {
+        pantries: { error: pantryError, isFetching: isPantryLoading },
+        pantry,
+    } = usePantry();
+
+    const pantryItems = pantry?.pantryItems;
+
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [showTags, setShowTags] = useState<boolean>(false);
@@ -165,41 +143,15 @@ export default function RecipeScreen() {
         }
     };
 
-    const proposeRemoveItem = useCallback((id: number, ref?: any) => {
-        if (ref) {
-            ref.close();
-        }
-
-        confirmRemoveItem(id);
-    }, []);
-
-    const confirmRemoveItem = (id: number) =>
-        Alert.alert('Remove item', 'Do you want to remove this item from your list?', [
-            {
-                text: 'Cancel',
-                onPress: () => {},
-                style: 'cancel',
-            },
-            {
-                text: 'Delete',
-                onPress: () => handleRemoveItem(id),
-                style: 'destructive',
-            },
-        ]);
-
-    const handleRemoveItem = async (id: number) => {
-        await handleDeleteRecipe({ id });
-    };
-
-    if (recipeError) {
-        console.log('Error fetching recipes:', recipeError);
+    if (recipesError) {
+        console.log('Error fetching recipes:', recipesError);
     }
 
     if (pantryError) {
         console.log('Error fetching pantry:', pantryError);
     }
 
-    const isLoading = !user || isRecipeLoadingerror || isPantryLoading;
+    const isLoading = isRecipesLoading || isPantryLoading;
 
     if (recipes && !recipes.sort) {
         console.log(recipes);
@@ -278,7 +230,9 @@ export default function RecipeScreen() {
                                         trans,
                                         swipeHeight,
                                         recipe,
-                                        proposeRemoveItem,
+                                        (id, ref) => {
+                                            deleteRecipe(id, () => ref?.close());
+                                        },
                                         () => router.push(`/recipes/edit/${recipe.id}`),
                                         swipeRef
                                     )

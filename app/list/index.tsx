@@ -3,12 +3,11 @@ import Heading from '@/components/heading';
 import Screen from '@/components/screen';
 import Text from '@/components/text';
 import { useApi } from '@/hooks/use-api';
+import { usePantry } from '@/hooks/use-pantry';
 import globalStyles, { colors, fonts } from '@/styles/global';
-import { ItemCategory, Pantry, PantryItem, UpsertPantryItem } from '@/types/interfaces';
-import { getDefault } from '@/util/pantry';
-import { pantryItemMutation } from '@/util/query';
+import { ItemCategory, PantryItem } from '@/types/interfaces';
 import Feather from '@expo/vector-icons/Feather';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { router, useNavigation } from 'expo-router';
 import { createRef, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { Alert, Pressable, RefreshControl, StyleSheet, TextInput, View } from 'react-native';
@@ -103,10 +102,12 @@ export default function ListScreen() {
                 {
                     type: 'button',
                     label: isAddingItems ? 'done' : 'new item',
-                    icon: isAddingItems ? null : {
-                        type: 'sfSymbol',
-                        name: 'plus',
-                    },
+                    icon: isAddingItems
+                        ? null
+                        : {
+                              type: 'sfSymbol',
+                              name: 'plus',
+                          },
                     tintColor: colors.primary,
                     onPress: () => setIsAddingItems(!isAddingItems),
                 },
@@ -114,32 +115,20 @@ export default function ListScreen() {
         });
     }, [navigation, isAddingItems]);
 
-    const queryClient = useQueryClient();
-    const { user, getPantries, upsertPantryItem, getItemCategories } = useApi();
-
-    const { data: pantries, refetch: refetchPantries } = useQuery<Pantry[]>({
-        queryKey: ['pantry'],
-        queryFn: () => getPantries(),
-        enabled: !!user,
-    });
+    const { user, getItemCategories } = useApi();
+    const {
+        pantries: { data: pantries, refetch: refetchPantries },
+        pantry,
+        savePantryItem,
+    } = usePantry();
 
     const { data: categoryList } = useQuery<ItemCategory[]>({
         queryKey: ['itemCategories'],
-        queryFn: () => getItemCategories(getDefault(pantries)!.id),
+        queryFn: () => getItemCategories(pantry!.id),
         enabled: !!user && !!pantries && pantries.length > 0,
     });
 
-    const { mutate: savePantryItem } = useMutation(
-        pantryItemMutation<any, UpsertPantryItem>(
-            getDefault(pantries)?.id,
-            (patch: UpsertPantryItem) => upsertPantryItem(getDefault(pantries)?.id!, patch),
-            queryClient,
-            ['pantry']
-        )
-    );
-
-    const pantry = getDefault(pantries)?.pantryItems;
-    const categories = pantry
+    const categories = pantry?.pantryItems
         ?.reduce<any[]>((acc, item: PantryItem) => {
             const shouldInclude = isAddingItems ? true : item.isInShoppingList;
             if (!shouldInclude) return acc;
@@ -313,7 +302,7 @@ export default function ListScreen() {
                         })}
                 </View>
             ))}
-            {!pantry?.length && (
+            {!pantry?.pantryItems.length && (
                 <View style={styles.onboarding}>
                     <Text style={styles.onboardingText}>
                         you don't have anything in your shopping list

@@ -3,11 +3,11 @@ import Heading from '@/components/heading';
 import PantryListing from '@/components/pantry-listing';
 import Screen from '@/components/screen';
 import { useApi } from '@/hooks/use-api';
+import { usePantry } from '@/hooks/use-pantry';
 import globalStyles, { colors, fonts } from '@/styles/global';
-import { ItemCategory, Pantry, PantryItem, UpsertPantryItem } from '@/types/interfaces';
+import { ItemCategory, PantryItem, UpsertPantryItem } from '@/types/interfaces';
 import { getDefault } from '@/util/pantry';
-import { pantryItemMutation } from '@/util/query';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigation, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useLayoutEffect, useRef, useState } from 'react';
@@ -40,28 +40,21 @@ export default function PantryScreen() {
     const queryClient = useQueryClient();
     const navigation = useNavigation();
     const router = useRouter();
-    const { user, getPantries, getItemCategories, upsertPantryItem } = useApi();
+    const { user, getItemCategories } = useApi();
 
-    const { data: pantries, refetch: refetchPantries } = useQuery<Pantry[]>({
-        queryKey: ['pantry'],
-        queryFn: () => getPantries(),
-        enabled: !!user,
-    });
+    const {
+        pantries: {
+            data: pantries,
+            refetch: refetchPantries,
+        },
+        savePantryItem,
+    } = usePantry();
 
     const { data: itemCategories } = useQuery<ItemCategory[]>({
         queryKey: ['itemCategories'],
         queryFn: () => getItemCategories(getDefault(pantries)!.id),
         enabled: !!user && !!pantries && pantries.length > 0,
     });
-
-    const { mutate: savePantryItem } = useMutation(
-        pantryItemMutation<any, UpsertPantryItem>(
-            getDefault(pantries)?.id,
-            (patch: UpsertPantryItem) => upsertPantryItem(getDefault(pantries)?.id!, patch),
-            queryClient,
-            ['pantry']
-        )
-    );
 
     const searchBarRef = useRef<any>(null);
 

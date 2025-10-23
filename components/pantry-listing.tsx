@@ -1,13 +1,12 @@
 import Text from '@/components/text';
-import { useApi } from '@/hooks/use-api';
+import { usePantry } from '@/hooks/use-pantry';
 import globalStyles, { colors } from '@/styles/global';
-import { PantryItem, UpsertPantryItem } from '@/types/interfaces';
+import { PantryItem } from '@/types/interfaces';
 import Feather from '@expo/vector-icons/Feather';
-import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useCallback, useRef, useState } from 'react';
-import { Alert, Pressable, PressableProps, StyleSheet, View } from 'react-native';
+import { Pressable, PressableProps, StyleSheet, View } from 'react-native';
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import Reanimated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated';
 
@@ -74,11 +73,7 @@ export default function PantryListing({
     onRemoveItem?: (id: number, ref?: any) => void;
     style?: any;
 } & PressableProps) {
-    const { upsertPantryItem } = useApi();
-    const { mutate: savePantryItem } = useMutation({
-        mutationKey: ['pantryItem', pantryItem.id],
-        mutationFn: (item: UpsertPantryItem) => upsertPantryItem(pantryItem.pantryId, item),
-    });
+    const { finishPantryItem, deletePantryItem } = usePantry();
 
     const router = useRouter();
     const [swipeHeight, setSwipeHeight] = useState<number>(0);
@@ -94,68 +89,6 @@ export default function PantryListing({
         [swipeHeight]
     );
 
-    const proposeRemoveItem = useCallback((id: number, ref?: any) => {
-        if (ref) {
-            ref.close();
-        }
-
-        confirmRemoveItem(id);
-    }, []);
-
-    const confirmRemoveItem = (id: number) =>
-        Alert.alert('Remove item', 'Do you want to remove this item from your list?', [
-            {
-                text: 'Cancel',
-                onPress: () => {},
-                style: 'cancel',
-            },
-            {
-                text: 'Delete',
-                onPress: () => handleRemoveItem(id),
-                style: 'destructive',
-            },
-        ]);
-
-    const handleRemoveItem = async (id: number) => {
-        await savePantryItem({
-            id,
-            isInShoppingList: false,
-            isInStock: false,
-            deletedAt: new Date(),
-        });
-    };
-
-    const proposeFinishedItem = useCallback((id: number, ref?: any) => {
-        if (ref) {
-            ref.close();
-        }
-
-        confirmFinishedItem(id);
-    }, []);
-
-    const confirmFinishedItem = (id: number) =>
-        Alert.alert('Finish item', 'Are you all out of this item?', [
-            {
-                text: 'Cancel',
-                onPress: () => {},
-                style: 'cancel',
-            },
-            {
-                text: 'Yes',
-                onPress: () => handleFinishItem(id),
-                style: 'default',
-                isPreferred: true,
-            },
-        ]);
-
-    const handleFinishItem = async (id: number) => {
-        await savePantryItem({
-            id,
-            isInShoppingList: pantryItem.isFavorite,
-            isInStock: false
-        });
-    };
-
     return (
         <Swipeable
             key={pantryItem.id}
@@ -166,7 +99,7 @@ export default function PantryListing({
                     drag={trans}
                     pantryItem={pantryItem}
                     width={swipeHeight}
-                    onFinishItem={proposeFinishedItem}
+                    onFinishItem={() => finishPantryItem(pantryItem)}
                     swipeRef={swipeRef}
                 />
             )}
@@ -185,7 +118,11 @@ export default function PantryListing({
                             },
                         })
                     }
-                    onRemoveItem={proposeRemoveItem}
+                    onRemoveItem={(id, ref) => {
+                        deletePantryItem(id, () => {
+                            ref?.close();
+                        });
+                    }}
                     swipeRef={swipeRef}
                 />
             )}
