@@ -1,5 +1,7 @@
 import { useSnackbar } from '@/components/snackbar';
 import { useInvalidateQueries } from '@/hooks/use-invalidate-queries';
+import { SSEMessageType } from '@/util/constants';
+import { subscribe } from '@/util/see';
 import { useAuth } from '@clerk/clerk-expo';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Constants from 'expo-constants';
@@ -26,13 +28,38 @@ export function useApi() {
         enabled: !!userId,
     });
 
+    const householdId = (user as User | null)?.defaultHouseholdId || 0;
+
+    useEffect(() => {
+        if (!householdId) {
+            return;
+        }
+
+        const unsubscribe = subscribe(householdId, (data: BroadcastMessage) => {
+            // TODO: Way way way too many listeners are being created, need to fix this
+            switch (data.type) {
+                case SSEMessageType.RECIPE_UPDATE:
+                    invalidateQueries(['recipes']);
+                    break;
+                case SSEMessageType.RECIPE_DELETE:
+                    invalidateQueries(['recipes']);
+                    break;
+                case SSEMessageType.PANTRY_UPDATE:
+                    invalidateQueries(['pantry']);
+                    invalidateQueries(['pantryItem']);
+                    break;
+            }
+        });
+
+        return () => unsubscribe();
+    }, [invalidateQueries, householdId]);
+
     useEffect(() => {
         if (!isSignedIn) {
             queryClient.invalidateQueries();
         }
     }, [isSignedIn, invalidateQueries]);
 
-    const householdId = (user as User | null)?.defaultHouseholdId || 0;
     const apiClient = createClient(invalidateQueries, getToken, showSnackbar);
 
     return {
@@ -40,8 +67,10 @@ export function useApi() {
         // User
         getUser: (keys: Keys = []) => apiClient.get(keys, '/user'),
         syncUser: (keys: Keys = ['user']) => apiClient.post(keys, '/user/sync'),
-        joinHousehold: ({ id, joinToken }: { id: string; joinToken: string }, keys: Keys = ['user']) =>
-            apiClient.post(keys, `/household/${id}/join`, { joinToken }),
+        joinHousehold: (
+            { id, joinToken }: { id: string; joinToken: string },
+            keys: Keys = ['user']
+        ) => apiClient.post(keys, `/household/${id}/join`, { joinToken }),
         // Recipes
         getRecipes: (keys: Keys = []) => apiClient.get(keys, `/household/${householdId}/recipes`),
         getRecipe: (id: number, keys: Keys = []) =>

@@ -194,7 +194,6 @@ export default function ListScreen() {
         await savePantryItem({ name, isInShoppingList: true, categoryId });
 
         setNewItemText('');
-        newItemInputRef.current?.blur();
     };
 
     const isLoading = !user || !categories;

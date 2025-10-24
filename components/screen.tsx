@@ -27,7 +27,7 @@ export default function Screen({
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={{ flex: 1 }}
             >
-                <ScrollView {...props} ref={ref} contentContainerStyle={{ flexGrow: 1 }}>
+                <ScrollView {...props} ref={ref} contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps='handled'>
                     <HeaderSpacer />
                     {children}
                     <View style={{ height: 100 }} />

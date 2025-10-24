@@ -100,7 +100,17 @@ function mapLegacyHeaderItems(headerItems: HeaderItem[]): {
                                         : colors.primary,
                             }}
                         >
-                            {!item.icon && <Text>{item.label}</Text>}
+                            {!item.icon && (
+                                <Text
+                                    style={{
+                                        paddingHorizontal: 4,
+                                        color: '#fff',
+                                        fontFamily: fonts.poppins.medium,
+                                    }}
+                                >
+                                    {item.label}
+                                </Text>
+                            )}
                             {item.icon && (
                                 <SymbolView
                                     name={item.icon?.name || ''}
@@ -129,13 +139,15 @@ function mapLiquidGlassHeaderItems(headerItems: HeaderItem[]): {
                     labelStyle: {
                         fontFamily: fonts.poppins.medium,
                         fontSize: 16,
-                        color: colors.primary,
+                        color: '#fff',
                         ...labelStyle,
                     },
-                    icon: {
-                        type: 'sfSymbol',
-                        ...icon,
-                    },
+                    icon: icon
+                        ? {
+                              type: 'sfSymbol',
+                              ...icon,
+                          }
+                        : undefined,
                     variant: 'prominent',
                     tintColor: colors.primary,
                     ...rest,
