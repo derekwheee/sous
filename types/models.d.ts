@@ -91,7 +91,7 @@ interface Recipe {
     name: string;
     prepTime: string;
     cookTime: string;
-    servings?: number;
+    servings?: string;
     createdAt: string;
     updatedAt: string;
     deleteAt?: string;
@@ -104,7 +104,7 @@ interface CreateRecipe {
     name: string;
     prepTime: string;
     cookTime: string;
-    servings?: number;
+    servings?: string;
     deleteAt?: string;
     ingredients: string[];
     instructions: string[];
@@ -115,7 +115,7 @@ interface PatchRecipe {
     name?: string;
     prepTime?: string;
     cookTime?: string;
-    servings?: number;
+    servings?: string;
     deleteAt?: string;
     ingredients?: string[];
     instructions?: string[];
@@ -127,7 +127,7 @@ interface UpsertRecipe {
     name?: string;
     prepTime?: string;
     cookTime?: string;
-    servings?: number;
+    servings?: string;
     deleteAt?: string;
     ingredients?: string[];
     instructions?: string[];

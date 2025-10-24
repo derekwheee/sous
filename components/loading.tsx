@@ -89,7 +89,7 @@ export default function PageTitle({ isLoading = false, duration = 300, ...rest }
             <Reanimated.View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                 <Text style={styles.loadingText}>let me get that for you...</Text>
                 <Text style={[styles.longWaitText, { opacity: showLongWaitMessage ? 1 : 0 }]}>
-                    this is taking a while, huh?
+                    this could take a minute
                 </Text>
             </Reanimated.View>
         </Reanimated.View>

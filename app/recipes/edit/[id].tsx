@@ -110,7 +110,7 @@ export default function EditRecipe() {
         name,
         prepTime,
         cookTime,
-        servings: servings ? Number(servings) : undefined,
+        servings,
         ingredients: ingredients.filter((i) => i.trim() !== ''),
         instructions: instructions.filter((i) => i.trim() !== ''),
         tags,
@@ -123,7 +123,7 @@ export default function EditRecipe() {
             setName(recipe.name || params.newName || '');
             setPrepTime(recipe.prepTime || '');
             setCookTime(recipe.cookTime || '');
-            setServings(recipe.servings ? String(recipe.servings) : '');
+            setServings(recipe.servings || '');
             setIngredients(recipe.ingredients.map((i) => i.sentence || ''));
             setInstructions(recipe.instructions || []);
             setTags(recipe.tags || []);
@@ -278,6 +278,15 @@ export default function EditRecipe() {
         }
 
         const res: ImportedRecipe = await importRecipe(url);
+
+        if (!res) {
+            showSnackbar({
+                message: 'Sorry, we couldn\'t import that recipe. Please try a different link.',
+                type: 'warning',
+            });
+            setIsImporting(false);
+            return;
+        }
 
         if (res && !res.error) {
             setName(res.name || '');

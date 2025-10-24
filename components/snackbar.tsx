@@ -149,6 +149,7 @@ const styles = StyleSheet.create({
         paddingTop: 64,
     },
     message: {
+        flexShrink: 1,
         fontSize: 16,
     },
 });
