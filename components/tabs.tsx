@@ -1,3 +1,4 @@
+import { useSSE } from '@/hooks/use-sse';
 import { colors, fonts } from '@/styles/global';
 import { useAuth } from '@clerk/clerk-expo';
 import { Tabs } from 'expo-router/tabs';
@@ -20,6 +21,8 @@ const styles = StyleSheet.create({
 
 export default function TabRouter() {
     const { isSignedIn = false } = useAuth();
+    
+    useSSE();
 
     return (
         <Tabs

@@ -1,7 +1,5 @@
 import { useSnackbar } from '@/components/snackbar';
 import { useInvalidateQueries } from '@/hooks/use-invalidate-queries';
-import { SSEMessageType } from '@/util/constants';
-import { subscribe } from '@/util/see';
 import { useAuth } from '@clerk/clerk-expo';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Constants from 'expo-constants';
@@ -29,30 +27,6 @@ export function useApi() {
     });
 
     const householdId = (user as User | null)?.defaultHouseholdId || 0;
-
-    useEffect(() => {
-        if (!householdId) {
-            return;
-        }
-
-        const unsubscribe = subscribe(householdId, (data: BroadcastMessage) => {
-            // TODO: Way way way too many listeners are being created, need to fix this
-            switch (data.type) {
-                case SSEMessageType.RECIPE_UPDATE:
-                    invalidateQueries(['recipes']);
-                    break;
-                case SSEMessageType.RECIPE_DELETE:
-                    invalidateQueries(['recipes']);
-                    break;
-                case SSEMessageType.PANTRY_UPDATE:
-                    invalidateQueries(['pantry']);
-                    invalidateQueries(['pantryItem']);
-                    break;
-            }
-        });
-
-        return () => unsubscribe();
-    }, [invalidateQueries, householdId]);
 
     useEffect(() => {
         if (!isSignedIn) {

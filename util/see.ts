@@ -13,14 +13,22 @@ type Callback = (data: any) => void;
 const sources: Record<number, EventSource> = {};
 const listeners: Record<number, Callback[]> = {};
 
-export function subscribe(householdId: number, cb: Callback) {
-    console.log(listeners[householdId]?.length);
+export function subscribe(token: string, householdId: number, cb: Callback) {
     if (!sources[householdId]) {
-        const source = new EventSource(`${API_HOST}/events/${householdId}`);
+        const source = new EventSource(`${API_HOST}/events/${householdId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
         sources[householdId] = source;
         listeners[householdId] = [];
 
         source.addEventListener('error', (err) => {
+            // Check for 'message' property safely, or use 'type' for error filtering
+            const errorMessage = (err as any)?.message || (err as any)?.data || '';
+            if (typeof errorMessage === 'string' && errorMessage.includes('network connection')) {
+                return;
+            }
             console.error(err);
         });
 
