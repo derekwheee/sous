@@ -11,7 +11,7 @@ import globalStyles, { brightness, colors } from '@/styles/global';
 import Feather from '@expo/vector-icons/Feather';
 import { useQuery } from '@tanstack/react-query';
 import * as Clipboard from 'expo-clipboard';
-import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Animated, Pressable, StyleSheet, View } from 'react-native';
@@ -73,8 +73,7 @@ const styles = {
     }),
 };
 
-export default function EditRecipe(props: any) {
-    const navigation = useNavigation();
+export default function EditRecipe() {
     const params = useLocalSearchParams<{ id: string; newName: string }>();
     const id = params.id ? Number(params.id) : undefined;
     const isNewRecipe = !id;
@@ -291,38 +290,50 @@ export default function EditRecipe(props: any) {
         setIsImporting(false);
     };
 
-    // TODO: Add onSubmitEditing to each TextInput to move to next input
+    const nameRef = useRef<any>(null);
+    const prepTimeRef = useRef<any>(null);
+    const cookTimeRef = useRef<any>(null);
+    const servingsRef = useRef<any>(null);
+
     return (
         <>
-            <Screen
-                isLoading={!user || !!(params?.id && !recipe) || isImporting}
-                // actions={headingActions}
-            >
+            <Screen isLoading={!user || !!(params?.id && !recipe) || isImporting}>
                 <Heading title={params?.id ? 'edit recipe' : 'new recipe'} />
                 <View style={styles.content}>
                     <TextInput
+                        ref={nameRef}
                         label='name'
                         onChangeText={setName}
                         value={name}
                         placeholder='hot tamales'
+                        returnKeyType='next'
+                        onSubmitEditing={() => prepTimeRef.current?.focus()}
                     />
                     <TextInput
+                        ref={prepTimeRef}
                         label='prep time'
                         onChangeText={setPrepTime}
                         value={prepTime}
                         placeholder='1 hour'
+                        returnKeyType='next'
+                        onSubmitEditing={() => cookTimeRef.current?.focus()}
                     />
                     <TextInput
                         label='cook time'
                         onChangeText={setCookTime}
                         value={cookTime}
                         placeholder='20 mins'
+                        returnKeyType='next'
+                        ref={cookTimeRef}
+                        onSubmitEditing={() => servingsRef.current?.focus()}
                     />
                     <TextInput
                         label='servings'
                         onChangeText={setServings}
                         value={servings}
                         placeholder='4'
+                        returnKeyType='next'
+                        ref={servingsRef}
                     />
                     <Text style={styles.h3}>ingredients</Text>
                     {ingredients.map((ingredient, i) => (
@@ -334,6 +345,7 @@ export default function EditRecipe(props: any) {
                                 value={ingredient}
                                 placeholder='e.g. 1 cup of flour'
                                 style={{ marginBottom: 0 }}
+                                returnKeyType='next'
                             />
                             <Pressable
                                 onPress={() => handleRemoveIngredient(i)}
@@ -358,6 +370,7 @@ export default function EditRecipe(props: any) {
                                 value={instruction}
                                 placeholder='e.g. Mix all ingredients'
                                 style={{ marginBottom: 0 }}
+                                returnKeyType='next'
                             />
                             <Pressable
                                 onPress={() => handleRemoveInstruction(i)}

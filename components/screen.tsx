@@ -1,19 +1,6 @@
 import HeaderSpacer from '@/components/header-spacer';
 import Loading from '@/components/loading';
-import globalStyles from '@/styles/global';
-import {
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    ScrollViewProps,
-    StyleSheet,
-    View,
-} from 'react-native';
-
-const styles = {
-    ...globalStyles,
-    ...StyleSheet.create({}),
-};
+import { KeyboardAvoidingView, Platform, ScrollView, ScrollViewProps, View } from 'react-native';
 
 export default function Screen({
     isLoading = false,
@@ -46,11 +33,7 @@ export default function Screen({
                     <View style={{ height: 100 }} />
                 </ScrollView>
             </KeyboardAvoidingView>
-            {footerItems && footerItems.length > 0 && (
-                <>
-                    {footerItems.map((item) => item)}
-                </>
-            )}
+            {footerItems && footerItems.length > 0 && <>{footerItems.map((item) => item)}</>}
         </>
     );
 }

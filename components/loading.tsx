@@ -12,17 +12,25 @@ const styles = {
             top: 0,
             left: 0,
             right: 0,
-            height: '60%',
+            height: '66.7%',
             backgroundColor: colors.primary,
             zIndex: 1000,
-            transform: [{ translateY: '-150%' }]
+            overflowX: 'hidden',
         },
         loadingText: {
+            marginBottom: 16,
             fontSize: 28,
             fontFamily: fonts.caprasimo,
             textAlign: 'center',
             color: 'white',
-            zIndex: 1001
+            zIndex: 1001,
+        },
+        longWaitText: {
+            fontSize: 16,
+            fontFamily: fonts.poppins.medium,
+            textAlign: 'center',
+            color: 'white',
+            zIndex: 1001,
         },
         circle: {
             width: '150%',
@@ -30,11 +38,10 @@ const styles = {
             borderRadius: 9999,
             backgroundColor: colors.primary,
             position: 'absolute',
-            bottom: '-50%',
-            left: '50%',
-            transform: [{ translateX: '-50%' }]
-        }
-    })
+            left: '-25%',
+            bottom: '-30%',
+        },
+    }),
 };
 
 type Props = ViewProps & {
@@ -44,16 +51,31 @@ type Props = ViewProps & {
 
 export default function PageTitle({ isLoading = false, duration = 300, ...rest }: Props) {
     const [measuredHeight, setMeasuredHeight] = useState(0);
+    const [showLongWaitMessage, setShowLongWaitMessage] = useState(false);
     const translateY = useSharedValue(0);
 
     useEffect(() => {
+        if (isLoading) {
+            setTimeout(() => {
+                setShowLongWaitMessage(true);
+            }, 5000);
+        }
+    }, [isLoading]);
+
+    useEffect(() => {
         // target in pixels: 0 (visible) or -150% of measured height (hidden)
-        const target = measuredHeight ? (!isLoading ? -1.5 * measuredHeight : 0) : (!isLoading ? -1000 : 0);
+        const target = measuredHeight
+            ? !isLoading
+                ? -1.5 * measuredHeight
+                : 0
+            : !isLoading
+            ? -1000
+            : 0;
         translateY.value = withTiming(target, { duration });
     }, [isLoading, measuredHeight, duration, translateY]);
 
     const animatedStyle = useAnimatedStyle(() => ({
-        transform: [{ translateY: translateY.value }]
+        transform: [{ translateY: translateY.value }],
     }));
 
     const onLayout = (e: LayoutChangeEvent) => {
@@ -66,6 +88,9 @@ export default function PageTitle({ isLoading = false, duration = 300, ...rest }
             <Reanimated.View style={styles.circle} />
             <Reanimated.View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                 <Text style={styles.loadingText}>let me get that for you...</Text>
+                <Text style={[styles.longWaitText, { opacity: showLongWaitMessage ? 1 : 0 }]}>
+                    this is taking a while, huh?
+                </Text>
             </Reanimated.View>
         </Reanimated.View>
     );

@@ -150,7 +150,7 @@ export default function PantryScreen() {
                     </Pressable>
                 </View>
             )}
-            {!pantry && (
+            {!isLoading && !pantry && (
                 <View style={styles.onboarding}>
                     <Text style={styles.onboardingText}>
                         you don't have anything in your pantry

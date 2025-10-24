@@ -50,6 +50,7 @@ export function useHeader({
                   <SearchBar
                       inputProps={{
                           autoFocus: !!legacySearchTerm,
+                          placeholder: searchPlaceholder || 'search...',
                       }}
                       value={legacySearchTerm}
                       onChangeText={(text) => {

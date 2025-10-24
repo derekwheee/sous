@@ -106,6 +106,7 @@ export default function TabRouter() {
                 name='(auth)'
                 options={{
                     href: null,
+                    tabBarStyle: [styles.tabBar, { display: 'none' }],
                 }}
             />
             <Tabs.Screen

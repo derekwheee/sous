@@ -176,7 +176,7 @@ export default function RecipeScreen() {
 
     return (
         <Screen
-            isLoading={isLoading && !filteredRecipes}
+            isLoading={isLoading}
             footerItems={isLegacyVersion ? [<SearchBar key='search-bar' />] : undefined}
             refreshControl={
                 <RefreshControl
@@ -260,7 +260,7 @@ export default function RecipeScreen() {
                     </Pressable>
                 </View>
             )}
-            {!recipes?.length && (
+            {!isLoading && !recipes?.length && (
                 <View style={styles.onboarding}>
                     <Text style={styles.onboardingText}>you don't have any recipes yet</Text>
                     <Button
