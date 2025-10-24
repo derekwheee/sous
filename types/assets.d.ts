@@ -204,10 +204,15 @@ interface UpsertItemCategory {
 interface UseHeaderParams {
     searchBarRef?: any;
     searchPlaceholder?: string;
-    onChangeSearch?: (event: Event) => void;
+    onChangeSearch?: ({ nativeEvent: { text } }: { nativeEvent: { text: string } }) => void;
     onCancelSearch?: () => void;
-    headerItems: HeaderItem[];
+    headerItems?: HeaderItem[];
     dependencies?: React.DependencyList;
+}
+
+interface UseHeader {
+    isLegacyVersion: boolean;
+    SearchBar?: React.Element;
 }
 
 interface HeaderMenuItem {

@@ -7,20 +7,19 @@ import {
     ScrollView,
     ScrollViewProps,
     StyleSheet,
-    View
+    View,
 } from 'react-native';
 
 const styles = {
     ...globalStyles,
-    ...StyleSheet.create({
-
-    }),
+    ...StyleSheet.create({}),
 };
 
 export default function Screen({
     isLoading = false,
     children,
     ref,
+    footerItems,
     ...props
 }: {
     isLoading?: boolean;
@@ -32,6 +31,7 @@ export default function Screen({
     }[];
     children: React.ReactNode;
     ref?: React.Ref<any>;
+    footerItems?: React.ReactElement[];
 } & ScrollViewProps) {
     return (
         <>
@@ -46,6 +46,11 @@ export default function Screen({
                     <View style={{ height: 100 }} />
                 </ScrollView>
             </KeyboardAvoidingView>
+            {footerItems && footerItems.length > 0 && (
+                <>
+                    {footerItems.map((item) => item)}
+                </>
+            )}
         </>
     );
 }

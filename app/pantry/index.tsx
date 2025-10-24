@@ -7,11 +7,11 @@ import { useHeader } from '@/hooks/use-header';
 import { usePantry } from '@/hooks/use-pantry';
 import globalStyles, { colors, fonts } from '@/styles/global';
 import { getDefault } from '@/util/pantry';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useNavigation, useRouter } from 'expo-router';
+import { useQuery } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useRef, useState } from 'react';
-import { Platform, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 
 const styles = {
     ...globalStyles,
@@ -37,13 +37,8 @@ const styles = {
 };
 
 export default function PantryScreen() {
-    const queryClient = useQueryClient();
-    const navigation = useNavigation();
     const router = useRouter();
     const { user, getItemCategories } = useApi();
-    const { OS, Version } = Platform;
-
-    const shouldHideSearchBar = OS !== 'ios' || Number(Version) < 26;
 
     const {
         pantries: { data: pantries, refetch: refetchPantries },
@@ -58,7 +53,7 @@ export default function PantryScreen() {
 
     const searchBarRef = useRef<any>(null);
 
-    useHeader({
+    const { isLegacyVersion, SearchBar } = useHeader({
         searchBarRef,
         searchPlaceholder: 'search pantry...',
         onChangeSearch: (event: any) => setSearchTerm(event.nativeEvent.text),
@@ -112,6 +107,7 @@ export default function PantryScreen() {
     return (
         <Screen
             isLoading={isLoading}
+            footerItems={isLegacyVersion ? [<SearchBar key='search-bar' />] : undefined}
             refreshControl={
                 <RefreshControl
                     refreshing={isRefreshing}

@@ -88,7 +88,7 @@ export default function RecipeScreen() {
     const swipeRefs = useRef(new Map<number, React.RefObject<any>>());
     const searchBarRef = useRef<any>(null);
 
-    useHeader({
+    const { isLegacyVersion, SearchBar } = useHeader({
         searchBarRef,
         searchPlaceholder: 'search recipes...',
         onChangeSearch: (event: any) => setSearchTerm(event.nativeEvent.text),
@@ -177,6 +177,7 @@ export default function RecipeScreen() {
     return (
         <Screen
             isLoading={isLoading && !filteredRecipes}
+            footerItems={isLegacyVersion ? [<SearchBar key='search-bar' />] : undefined}
             refreshControl={
                 <RefreshControl
                     refreshing={isRefreshing}

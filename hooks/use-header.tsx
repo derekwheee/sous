@@ -1,8 +1,9 @@
+import SearchBar from '@/components/search-bar';
 import Text from '@/components/text';
 import { colors, fonts } from '@/styles/global';
 import { useNavigation } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
-import React, { useLayoutEffect } from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 import { Platform, Pressable, View } from 'react-native';
 
 export function useHeader({
@@ -10,9 +11,9 @@ export function useHeader({
     searchPlaceholder,
     onChangeSearch,
     onCancelSearch,
-    headerItems,
+    headerItems = [],
     dependencies = [],
-}: UseHeaderParams) {
+}: UseHeaderParams = {}): UseHeader {
     const navigation = useNavigation();
     const { OS, Version } = Platform;
 
@@ -21,6 +22,8 @@ export function useHeader({
     const platformHeaderItems = isLegacyVersion
         ? mapLegacyHeaderItems(headerItems)
         : mapLiquidGlassHeaderItems(headerItems);
+
+    const [legacySearchTerm, setLegacySearchTerm] = useState('');
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -40,7 +43,24 @@ export function useHeader({
         });
     }, [navigation, ...dependencies]);
 
-    return {};
+    return {
+        isLegacyVersion,
+        SearchBar: isLegacyVersion
+            ? () => (
+                  <SearchBar
+                      inputProps={{
+                          autoFocus: !!legacySearchTerm,
+                      }}
+                      value={legacySearchTerm}
+                      onChangeText={(text) => {
+                          setLegacySearchTerm(text);
+                          onChangeSearch?.({ nativeEvent: { text } });
+                      }}
+                      onCancel={onCancelSearch}
+                  />
+              )
+            : undefined,
+    };
 }
 
 function mapLegacyHeaderItems(headerItems: HeaderItem[]): {
