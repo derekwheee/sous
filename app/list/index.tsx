@@ -3,13 +3,13 @@ import Heading from '@/components/heading';
 import Screen from '@/components/screen';
 import Text from '@/components/text';
 import { useApi } from '@/hooks/use-api';
+import { useHeader } from '@/hooks/use-header';
 import { usePantry } from '@/hooks/use-pantry';
 import globalStyles, { colors, fonts } from '@/styles/global';
-import { ItemCategory, PantryItem } from '@/types/interfaces';
 import Feather from '@expo/vector-icons/Feather';
 import { useQuery } from '@tanstack/react-query';
-import { router, useNavigation } from 'expo-router';
-import { createRef, useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { router } from 'expo-router';
+import { createRef, useCallback, useRef, useState } from 'react';
 import { Alert, Pressable, RefreshControl, StyleSheet, TextInput, View } from 'react-native';
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import Reanimated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated';
@@ -85,35 +85,25 @@ const styles = {
 };
 
 export default function ListScreen() {
-    const navigation = useNavigation();
     const [isAddingItems, setIsAddingItems] = useState<boolean>(false);
     const [swipeHeight, setSwipeHeight] = useState<number>(0);
     const [newItemText, setNewItemText] = useState<string>('');
     const newItemInputRef = useRef<TextInput>(null);
 
-    useLayoutEffect(() => {
-        navigation.setOptions({
-            // headerSearchBarOptions: {
-            //     placeholder: 'search pantry...',
-            //     tintColor: colors.primary,
-            //     onChangeText: (event: any) => setSearchTerm(event.nativeEvent.text),
-            // },
-            unstable_headerRightItems: () => [
-                {
-                    type: 'button',
-                    label: isAddingItems ? 'done' : 'new item',
-                    icon: isAddingItems
-                        ? null
-                        : {
-                              type: 'sfSymbol',
-                              name: 'plus',
-                          },
-                    tintColor: colors.primary,
-                    onPress: () => setIsAddingItems(!isAddingItems),
-                },
-            ],
-        });
-    }, [navigation, isAddingItems]);
+    useHeader({
+        dependencies: [isAddingItems],
+        headerItems: [
+            {
+                label: isAddingItems ? 'done' : 'new item',
+                icon: isAddingItems
+                    ? undefined
+                    : {
+                          name: 'plus',
+                      },
+                onPress: () => setIsAddingItems(!isAddingItems),
+            },
+        ],
+    });
 
     const { user, getItemCategories } = useApi();
     const {

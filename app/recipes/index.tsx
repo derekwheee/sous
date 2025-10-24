@@ -4,15 +4,15 @@ import RecipeListing from '@/components/recipe-listing';
 import Screen from '@/components/screen';
 import TagPill from '@/components/tag-pill';
 import Text from '@/components/text';
+import { useHeader } from '@/hooks/use-header';
 import { usePantry } from '@/hooks/use-pantry';
 import { useRecipe } from '@/hooks/use-recipe';
 import globalStyles, { colors, fonts } from '@/styles/global';
-import { Recipe } from '@/types/interfaces';
 import { getAvailableIngredients } from '@/util/recipe';
 import Feather from '@expo/vector-icons/Feather';
-import { useNavigation, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
-import { createRef, useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { createRef, useCallback, useRef, useState } from 'react';
 import { Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
@@ -66,7 +66,6 @@ const styles = {
 };
 
 export default function RecipeScreen() {
-    const navigation = useNavigation();
     const router = useRouter();
 
     const {
@@ -89,6 +88,32 @@ export default function RecipeScreen() {
     const swipeRefs = useRef(new Map<number, React.RefObject<any>>());
     const searchBarRef = useRef<any>(null);
 
+    useHeader({
+        searchBarRef,
+        searchPlaceholder: 'search recipes...',
+        onChangeSearch: (event: any) => setSearchTerm(event.nativeEvent.text),
+        onCancelSearch: () => setSearchTerm(''),
+        dependencies: [showTags, router],
+        headerItems: [
+            {
+                label: 'filter recipes',
+                icon: {
+                    name: 'line.3.horizontal.decrease.circle',
+                },
+                onPress: () => setShowTags(!showTags),
+                selected: showTags,
+            },
+            {
+                label: 'new recipe',
+                icon: {
+                    name: 'plus',
+                },
+                tintColor: colors.primary,
+                onPress: () => router.push('/recipes/new'),
+            },
+        ],
+    });
+
     const updateHeight = useCallback(
         (r: any) => {
             if (swipeHeight !== r.nativeEvent.layout.height) {
@@ -97,43 +122,6 @@ export default function RecipeScreen() {
         },
         [swipeHeight]
     );
-
-    useLayoutEffect(() => {
-        navigation.setOptions({
-            headerSearchBarOptions: {
-                ref: searchBarRef,
-                autoCapitalize: 'none',
-                placeholder: 'search recipes...',
-                hideNavigationBar: false,
-                tintColor: colors.primary,
-                onChangeText: (event: any) => setSearchTerm(event.nativeEvent.text),
-                onCancelButtonPress: () => setSearchTerm(''),
-            },
-            unstable_headerRightItems: () => [
-                {
-                    type: 'button',
-                    label: 'filter recipes',
-                    icon: {
-                        type: 'sfSymbol',
-                        name: 'line.3.horizontal.decrease.circle',
-                    },
-                    tintColor: colors.primary,
-                    onPress: () => setShowTags(!showTags),
-                    selected: showTags,
-                },
-                {
-                    type: 'button',
-                    label: 'new recipe',
-                    icon: {
-                        type: 'sfSymbol',
-                        name: 'plus',
-                    },
-                    tintColor: colors.primary,
-                    onPress: () => router.push('/recipes/new'),
-                },
-            ],
-        });
-    }, [navigation, showTags, router]);
 
     const toggleTagSelected = (tag: string) => {
         if (selectedTags.includes(tag)) {

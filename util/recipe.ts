@@ -1,4 +1,3 @@
-import { PantryItem, Recipe } from '@/types/interfaces';
 import { FUZZY_SEARCH_THRESHOLD } from '@/util/constants';
 import Fuse from 'fuse.js';
 

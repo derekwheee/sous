@@ -3,15 +3,15 @@ import Heading from '@/components/heading';
 import PantryListing from '@/components/pantry-listing';
 import Screen from '@/components/screen';
 import { useApi } from '@/hooks/use-api';
+import { useHeader } from '@/hooks/use-header';
 import { usePantry } from '@/hooks/use-pantry';
 import globalStyles, { colors, fonts } from '@/styles/global';
-import { ItemCategory, PantryItem, UpsertPantryItem } from '@/types/interfaces';
 import { getDefault } from '@/util/pantry';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigation, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
-import { useLayoutEffect, useRef, useState } from 'react';
-import { Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { useRef, useState } from 'react';
+import { Platform, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 
 const styles = {
     ...globalStyles,
@@ -41,12 +41,12 @@ export default function PantryScreen() {
     const navigation = useNavigation();
     const router = useRouter();
     const { user, getItemCategories } = useApi();
+    const { OS, Version } = Platform;
+
+    const shouldHideSearchBar = OS !== 'ios' || Number(Version) < 26;
 
     const {
-        pantries: {
-            data: pantries,
-            refetch: refetchPantries,
-        },
+        pantries: { data: pantries, refetch: refetchPantries },
         savePantryItem,
     } = usePantry();
 
@@ -58,35 +58,26 @@ export default function PantryScreen() {
 
     const searchBarRef = useRef<any>(null);
 
-    useLayoutEffect(() => {
-        navigation.setOptions({
-            headerSearchBarOptions: {
-                ref: searchBarRef,
-                autoCapitalize: 'none',
-                hideNavigationBar: false,
-                placeholder: 'search pantry...',
-                tintColor: colors.primary,
-                onChangeText: (event: any) => setSearchTerm(event.nativeEvent.text),
-                onCancelButtonPress: () => setSearchTerm(''),
-            },
-            unstable_headerRightItems: () => [
-                {
-                    type: 'button',
-                    label: 'new item',
-                    icon: {
-                        type: 'sfSymbol',
-                        name: 'plus',
-                    },
-                    tintColor: colors.primary,
-                    onPress: () =>
-                        router.push({
-                            pathname: '/pantry/edit',
-                            params: { pantryId: pantry!.id },
-                        }),
+    useHeader({
+        searchBarRef,
+        searchPlaceholder: 'search pantry...',
+        onChangeSearch: (event: any) => setSearchTerm(event.nativeEvent.text),
+        onCancelSearch: () => setSearchTerm(''),
+        dependencies: [router],
+        headerItems: [
+            {
+                label: 'new item',
+                icon: {
+                    name: 'plus',
                 },
-            ],
-        });
-    }, [navigation, router]);
+                onPress: () =>
+                    router.push({
+                        pathname: '/pantry/edit',
+                        params: { pantryId: pantry!.id },
+                    }),
+            },
+        ],
+    });
 
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
     const [searchTerm, setSearchTerm] = useState<string>('');
@@ -107,7 +98,9 @@ export default function PantryScreen() {
             return a.isInStock ? -1 : 1;
         })
         .filter((item) => {
-            return !!searchTerm || (!item.category?.isNonFood && (item.isInStock || item.isFavorite));
+            return (
+                !!searchTerm || (!item.category?.isNonFood && (item.isInStock || item.isFavorite))
+            );
         });
 
     const filteredPantry = searchTerm

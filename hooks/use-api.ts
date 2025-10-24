@@ -1,6 +1,5 @@
 import { useSnackbar } from '@/components/snackbar';
 import { useInvalidateQueries } from '@/hooks/use-invalidate-queries';
-import { UpsertRecipe, User } from '@/types/interfaces';
 import { useAuth } from '@clerk/clerk-expo';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Constants from 'expo-constants';

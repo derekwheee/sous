@@ -1,7 +1,6 @@
 import Text from '@/components/text';
 import { usePantry } from '@/hooks/use-pantry';
 import globalStyles, { colors } from '@/styles/global';
-import { PantryItem } from '@/types/interfaces';
 import Feather from '@expo/vector-icons/Feather';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';

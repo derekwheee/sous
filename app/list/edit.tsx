@@ -5,7 +5,6 @@ import TextInput from '@/components/text-input';
 import { useApi } from '@/hooks/use-api';
 import { usePantry } from '@/hooks/use-pantry';
 import globalStyles, { colors } from '@/styles/global';
-import { ItemCategory, UpsertPantryItem } from '@/types/interfaces';
 import { useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';

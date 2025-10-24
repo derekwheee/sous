@@ -1,4 +1,3 @@
-import { Pantry, UpsertPantryItem } from '@/types/interfaces';
 import { MutationFunction, QueryClient } from '@tanstack/react-query';
 
 function optimisticUpdate(patch: any, previous: any | undefined | null, isDelete: boolean) {
@@ -10,7 +9,7 @@ function optimisticUpdate(patch: any, previous: any | undefined | null, isDelete
         const updated = [...previous];
         const newItem = {
             id: -1,
-            ...patch
+            ...patch,
         };
         return [...updated, newItem];
     } else if (isDelete) {
@@ -24,7 +23,12 @@ function optimisticUpdate(patch: any, previous: any | undefined | null, isDelete
     }
 }
 
-async function optimisticOnMutate<T>(client: QueryClient, queryKey: string[], patch: T, isDelete: boolean) {
+async function optimisticOnMutate<T>(
+    client: QueryClient,
+    queryKey: string[],
+    patch: T,
+    isDelete: boolean
+) {
     await client.cancelQueries({ queryKey });
     const previous = client.getQueryData<T>(queryKey);
 
@@ -38,15 +42,16 @@ export function standardMutation<TData, TVariables>(
     queryClient: QueryClient,
     queryKey: string[],
     options: {
-        invalidateKeys?: string[] | string[][],
-        isDelete: boolean
+        invalidateKeys?: string[] | string[][];
+        isDelete: boolean;
     } = {
-        isDelete: false
+        isDelete: false,
     }
 ) {
     return {
         mutationFn,
-        onMutate: async (patch: TVariables) => optimisticOnMutate<TVariables>(queryClient, queryKey, patch, options.isDelete),
+        onMutate: async (patch: TVariables) =>
+            optimisticOnMutate<TVariables>(queryClient, queryKey, patch, options.isDelete),
         onError: (_: any, __: any, context: { previous: TData | undefined } | undefined) => {
             if (context?.previous) {
                 queryClient.setQueryData(queryKey, context.previous);
@@ -61,7 +66,7 @@ export function standardMutation<TData, TVariables>(
                 queryClient.invalidateQueries({ queryKey });
             }
         },
-    }
+    };
 }
 
 export function pantryItemMutation<TData, TVariables>(
@@ -79,14 +84,15 @@ export function pantryItemMutation<TData, TVariables>(
             const previous = queryClient.getQueryData<Pantry[]>(queryKey);
 
             queryClient.setQueryData<Pantry[]>(queryKey, (previous: Pantry[] | undefined) => {
-
                 if (!previous) return previous;
 
-                const previousPantry = previous.find(p => p.id === pantryId);
+                const previousPantry = previous.find((p) => p.id === pantryId);
 
                 if (!previousPantry) return previous;
 
-                const itemIndex = previousPantry.pantryItems.findIndex((i: any) => i.id === patch.id);
+                const itemIndex = previousPantry.pantryItems.findIndex(
+                    (i: any) => i.id === patch.id
+                );
 
                 if (itemIndex === -1) {
                     const updated = [...previousPantry.pantryItems];
@@ -99,6 +105,7 @@ export function pantryItemMutation<TData, TVariables>(
                         isFavorite: patch.isFavorite ?? false,
                         createdAt: new Date().toISOString(),
                         updatedAt: new Date().toISOString(),
+                        pantryId: pantryId ?? -1,
                     };
                     previousPantry.pantryItems = [...updated, newItem];
                 } else {
@@ -107,7 +114,7 @@ export function pantryItemMutation<TData, TVariables>(
                     previousPantry.pantryItems = updated;
                 }
 
-                return previous.map(p => p.id === pantryId ? previousPantry : p);
+                return previous.map((p) => (p.id === pantryId ? previousPantry : p));
             });
 
             return { previous };
@@ -126,5 +133,5 @@ export function pantryItemMutation<TData, TVariables>(
                 queryClient.invalidateQueries({ queryKey });
             }
         },
-    }
+    };
 }

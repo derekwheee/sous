@@ -4,16 +4,13 @@ import Screen from '@/components/screen';
 import Text from '@/components/text';
 import TimeLabel from '@/components/time-label';
 import { useApi } from '@/hooks/use-api';
+import { useHeader } from '@/hooks/use-header';
 import { usePantry } from '@/hooks/use-pantry';
 import { useRecipe } from '@/hooks/use-recipe';
 import globalStyles, { colors, fonts } from '@/styles/global';
-import {
-    Ingredient as IngredientT,
-    PantryItem
-} from '@/types/interfaces';
 import { highlightInstructions } from '@/util/highligher';
-import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
-import { useLayoutEffect, useState } from 'react';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useState } from 'react';
 import { RefreshControl, StyleSheet, View } from 'react-native';
 
 const styles = {
@@ -45,7 +42,6 @@ const styles = {
 export default function RecipeDetail() {
     const id = Number(useLocalSearchParams<{ id: string }>().id);
 
-    const navigation = useNavigation();
     const router = useRouter();
     const { user } = useApi();
 
@@ -54,60 +50,54 @@ export default function RecipeDetail() {
         deleteRecipe,
     } = useRecipe({ recipeId: id });
 
-    const {
-        pantry,
-        savePantryItem,
-    } = usePantry({ user });
+    const { pantry, savePantryItem } = usePantry();
 
-    useLayoutEffect(() => {
-        navigation.setOptions({
-            unstable_headerRightItems: () => [
-                {
-                    type: 'menu',
-                    label: 'edit recipe',
-                    icon: {
-                        type: 'sfSymbol',
-                        name: 'ellipsis',
-                    },
-                    menu: {
-                        items: [
-                            {
-                                type: 'action',
-                                label: 'I made this',
-                                icon: {
-                                    type: 'sfSymbol',
-                                    name: 'checkmark',
-                                },
-                                onPress: () => router.push(`/recipes/edit/${id}`),
-                            },
-                            {
-                                type: 'action',
-                                label: 'edit recipe',
-                                icon: {
-                                    type: 'sfSymbol',
-                                    name: 'pencil',
-                                },
-                                onPress: () => router.push(`/recipes/edit/${id}`),
-                            },
-                            {
-                                destructive: true,
-                                type: 'action',
-                                label: 'delete recipe',
-                                icon: {
-                                    type: 'sfSymbol',
-                                    name: 'trash',
-                                },
-                                tintColor: colors.primary,
-                                onPress: () => deleteRecipe(id, () => router.push('/recipes')),
-                            },
-                        ],
-                    },
+    useHeader({
+        dependencies: [router],
+        headerItems: [
+            {
+                type: 'menu',
+                label: 'edit recipe',
+                icon: {
+                    name: 'ellipsis',
                 },
-            ],
-        });
-    }, [navigation, router]);
+                menu: {
+                    items: [
+                        {
+                            type: 'action',
+                            label: 'I made this',
+                            icon: {
+                                type: 'sfSymbol',
+                                name: 'checkmark',
+                            },
+                            onPress: () => router.push(`/recipes/edit/${id}`),
+                        },
+                        {
+                            type: 'action',
+                            label: 'edit recipe',
+                            icon: {
+                                type: 'sfSymbol',
+                                name: 'pencil',
+                            },
+                            onPress: () => router.push(`/recipes/edit/${id}`),
+                        },
+                        {
+                            destructive: true,
+                            type: 'action',
+                            label: 'delete recipe',
+                            icon: {
+                                type: 'sfSymbol',
+                                name: 'trash',
+                            },
+                            onPress: () => deleteRecipe(id, () => router.push('/recipes')),
+                        },
+                    ],
+                },
+            },
+        ],
+    });
 
-    const handleAddToShoppingList = async (ingredient: IngredientT, pantryItem?: PantryItem) => {
+    const handleAddToShoppingList = async (ingredient: Ingredient, pantryItem?: PantryItem) => {
         if (pantryItem?.isInShoppingList) {
             return;
         }

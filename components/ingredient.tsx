@@ -1,6 +1,5 @@
 import Text from '@/components/text';
 import globalStyles, { brightness, colors } from '@/styles/global';
-import { Ingredient as IngredientType, Pantry, PantryItem } from '@/types/interfaces';
 import { FUZZY_SEARCH_THRESHOLD } from '@/util/constants';
 import { SymbolView } from 'expo-symbols';
 import Fuse from 'fuse.js';
@@ -26,9 +25,9 @@ const styles = {
 };
 
 interface IngredientProps {
-    ingredient: IngredientType;
+    ingredient: Ingredient;
     pantry?: Pantry;
-    onPress?: (ingredient: IngredientType, pantryItem?: PantryItem) => void;
+    onPress?: (ingredient: Ingredient, pantryItem?: PantryItem) => void;
 }
 
 export default function Ingredient({

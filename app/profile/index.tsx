@@ -1,11 +1,11 @@
 import Heading from '@/components/heading';
 import Screen from '@/components/screen';
 import Text from '@/components/text';
-import globalStyles, { colors, fonts } from '@/styles/global';
+import { useHeader } from '@/hooks/use-header';
+import globalStyles, { fonts } from '@/styles/global';
 import { useClerk, useUser } from '@clerk/clerk-expo';
-import { useNavigation, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
-import { useLayoutEffect } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 
 const styles = {
@@ -41,27 +41,21 @@ const styles = {
 };
 
 export default function ProfileScreen() {
-    const navigation = useNavigation();
     const { signOut } = useClerk();
     const { user } = useUser();
     const router = useRouter();
 
-    useLayoutEffect(() => {
-        navigation.setOptions({
-            unstable_headerRightItems: () => [
-                {
-                    type: 'button',
-                    label: 'sign out',
-                    icon: {
-                        type: 'sfSymbol',
-                        name: 'rectangle.portrait.and.arrow.right',
-                    },
-                    tintColor: colors.primary,
-                    onPress: () => handleSignOut(),
+    useHeader({
+        headerItems: [
+            {
+                label: 'sign out',
+                icon: {
+                    name: 'rectangle.portrait.and.arrow.right',
                 },
-            ],
-        });
-    }, [navigation]);
+                onPress: () => handleSignOut(),
+            },
+        ],
+    });
 
     const handleSignOut = async () => {
         try {

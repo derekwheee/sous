@@ -1,5 +1,4 @@
 import { useApi } from '@/hooks/use-api';
-import { DeleteRecipe, Recipe } from '@/types/interfaces';
 import { standardMutation } from '@/util/query';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';

@@ -1,5 +1,4 @@
 import { useApi } from '@/hooks/use-api';
-import { Pantry, PantryItem, UpsertPantryItem } from '@/types/interfaces';
 import { getDefault } from '@/util/pantry';
 import { pantryItemMutation } from '@/util/query';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';

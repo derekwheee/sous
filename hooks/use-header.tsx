@@ -1,0 +1,124 @@
+import Text from '@/components/text';
+import { colors, fonts } from '@/styles/global';
+import { useNavigation } from 'expo-router';
+import { SymbolView } from 'expo-symbols';
+import React, { useLayoutEffect } from 'react';
+import { Platform, Pressable, View } from 'react-native';
+
+export function useHeader({
+    searchBarRef,
+    searchPlaceholder,
+    onChangeSearch,
+    onCancelSearch,
+    headerItems,
+    dependencies = [],
+}: UseHeaderParams) {
+    const navigation = useNavigation();
+    const { OS, Version } = Platform;
+
+    const isLegacyVersion = OS !== 'ios' || Number(Version) < 26;
+
+    const platformHeaderItems = isLegacyVersion
+        ? mapLegacyHeaderItems(headerItems)
+        : mapLiquidGlassHeaderItems(headerItems);
+
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerSearchBarOptions:
+                !searchBarRef || isLegacyVersion
+                    ? null
+                    : {
+                          ref: searchBarRef,
+                          autoCapitalize: 'none',
+                          placeholder: searchPlaceholder || 'search...',
+                          hideNavigationBar: false,
+                          tintColor: colors.primary,
+                          onChangeText: onChangeSearch,
+                          onCancelButtonPress: onCancelSearch,
+                      },
+            ...platformHeaderItems,
+        });
+    }, [navigation, ...dependencies]);
+
+    return {};
+}
+
+function mapLegacyHeaderItems(headerItems: HeaderItem[]): {
+    headerRight: () => React.ReactNode;
+} {
+    const nestedItems = headerItems.reduce((acc, item) => {
+        if (item.type === 'menu' && item.menu && item.menu.items.length > 0) {
+            acc = [...acc, ...item.menu.items];
+        } else {
+            acc.push(item);
+        }
+        return acc;
+    }, [] as (HeaderItem | HeaderMenuItem)[]);
+
+    return {
+        headerRight: () => (
+            <View
+                style={{
+                    flexDirection: 'row',
+                    gap: 8,
+                }}
+            >
+                {nestedItems.map((item, index) => {
+                    return (
+                        <Pressable
+                            key={index}
+                            onPress={item.onPress}
+                            style={{
+                                flexDirection: 'row',
+                                gap: 8,
+                                padding: 8,
+                                borderRadius: 20,
+                                backgroundColor:
+                                    'tintColor' in item && item.tintColor
+                                        ? item.tintColor
+                                        : colors.primary,
+                            }}
+                        >
+                            {!item.icon && <Text>{item.label}</Text>}
+                            {item.icon && (
+                                <SymbolView
+                                    name={item.icon?.name || ''}
+                                    size={24}
+                                    tintColor='#fff'
+                                />
+                            )}
+                        </Pressable>
+                    );
+                })}
+            </View>
+        ),
+    };
+}
+
+function mapLiquidGlassHeaderItems(headerItems: HeaderItem[]): {
+    unstable_headerRightItems: () => HeaderItem[];
+} {
+    return {
+        unstable_headerRightItems: () =>
+            headerItems.map((item) => {
+                const { labelStyle = {}, icon = {}, ...rest } = item;
+
+                return {
+                    type: 'button',
+                    labelStyle: {
+                        fontFamily: fonts.poppins.medium,
+                        fontSize: 16,
+                        color: colors.primary,
+                        ...labelStyle,
+                    },
+                    icon: {
+                        type: 'sfSymbol',
+                        ...icon,
+                    },
+                    variant: 'prominent',
+                    tintColor: colors.primary,
+                    ...rest,
+                };
+            }),
+    };
+}

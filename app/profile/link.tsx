@@ -1,7 +1,6 @@
 import Screen from '@/components/screen';
 import { useApi } from '@/hooks/use-api';
 import globalStyles from '@/styles/global';
-import { Household } from '@/types/interfaces';
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import QRCodeStyled from 'react-native-qrcode-styled';
 

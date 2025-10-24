@@ -1,6 +1,5 @@
 import Text from '@/components/text';
 import globalStyles, { colors } from '@/styles/global';
-import { PantryItem, Recipe } from '@/types/interfaces';
 import { getAvailableIngredients } from '@/util/recipe';
 import { Link } from 'expo-router';
 import { Pressable, PressableProps, StyleSheet, View } from 'react-native';
