@@ -46,7 +46,13 @@ export function useApi() {
             keys: Keys = ['user']
         ) => apiClient.post(keys, `/household/${id}/join`, { joinToken }),
         // Recipes
-        getRecipes: (keys: Keys = []) => apiClient.get(keys, `/household/${householdId}/recipes`),
+        getRecipes: (keys: Keys = [], keywords?: string) => {
+            let url = `/household/${householdId}/recipes`;
+            if (keywords) {
+                url += `?keywords=${encodeURIComponent(keywords)}`;
+            }
+            return apiClient.get(keys, url);
+        },
         getRecipe: (id: number, keys: Keys = []) =>
             apiClient.get(keys, `/household/${householdId}/recipes/${id}`),
         createRecipe: (recipe: object, keys: Keys = ['recipes']) =>
@@ -76,12 +82,24 @@ export function useApi() {
         // ItemCategories
         getItemCategories: (pantryId: number, keys: Keys = []) =>
             apiClient.get(keys, `/household/${householdId}/pantry/${pantryId}/categories`),
+        getRecipeSuggestions: (
+            pantryId: number,
+            tags: string[],
+            keywords: string,
+            keys: Keys = []
+        ) =>
+            apiClient.get(keys, `/ai/suggestions/${pantryId}`, {
+                query: {
+                    tags,
+                    keywords,
+                },
+            }),
     };
 }
 
 async function makeRequest(
     url: string,
-    options: RequestInit = {},
+    options: { query?: object } & RequestInit = {},
     getToken: (options?: any) => Promise<string | undefined>,
     showSnackbar: any
 ) {
@@ -97,7 +115,19 @@ async function makeRequest(
         };
     }
 
-    const response = await fetch(`${API_HOST}${url}`, options);
+    const { query, ...init } = options;
+
+    const queryString = query
+        ? Object.entries(query)
+              .map(
+                  ([key, value]) =>
+                      `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`
+              )
+              .join('&')
+        : '';
+    url += queryString ? `?${queryString}` : '';
+
+    const response = await fetch(`${API_HOST}${url}`, init);
 
     if (response.status === 401) {
         showSnackbar({
@@ -147,7 +177,8 @@ function requestAndInvalidate<T, Args extends any[]>(
 function createClient(invalidateQueries: (keys: Keys) => void, getToken: any, showSnackbar: any) {
     return {
         get: requestAndInvalidate(
-            (url: string) => makeRequest(url, { method: 'GET' }, getToken, showSnackbar),
+            (url: string, options: { query?: object } & RequestInit = {}) =>
+                makeRequest(url, { method: 'GET', ...options }, getToken, showSnackbar),
             invalidateQueries
         ),
         post: requestAndInvalidate(

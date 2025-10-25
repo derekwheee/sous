@@ -93,22 +93,35 @@ export default function RecipeScreen() {
         searchPlaceholder: 'search recipes...',
         onChangeSearch: (event: any) => setSearchTerm(event.nativeEvent.text),
         onCancelSearch: () => setSearchTerm(''),
-        dependencies: [showTags, router],
+        dependencies: [showTags, router, pantry],
         headerItems: [
             {
-                label: 'filter recipes',
+                label: 'suggest recipes',
                 icon: {
-                    name: 'line.3.horizontal.decrease.circle',
+                    name: 'sparkles',
                 },
-                onPress: () => setShowTags(!showTags),
-                selected: showTags,
+                onPress: () =>
+                    router.push({
+                        pathname: '/recipes/suggest',
+                        params: {
+                            pantryId: pantry!.id,
+                            tags,
+                        },
+                    }),
             },
+            // {
+            //     label: 'filter recipes',
+            //     icon: {
+            //         name: 'line.3.horizontal.decrease.circle',
+            //     },
+            //     onPress: () => setShowTags(!showTags),
+            //     selected: showTags,
+            // },
             {
                 label: 'new recipe',
                 icon: {
                     name: 'plus',
                 },
-                tintColor: colors.primary,
                 onPress: () => router.push('/recipes/new'),
             },
         ],
