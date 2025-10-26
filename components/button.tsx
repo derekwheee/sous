@@ -42,11 +42,26 @@ const styles = {
         outlinedText: {
             color: colors.primary,
         },
+        inverted: {
+            borderColor: '#fff',
+            backgroundColor: '#fff',
+        },
+        outlinedInverted: {
+            borderColor: '#fff',
+            backgroundColor: 'transparent',
+        },
+        invertedText: {
+            color: colors.primary,
+        },
+        outlinedInvertedText: {
+            color: '#fff',
+        },
     }),
 };
 
 export default function Button({
     text,
+    invert = false,
     outlined = false,
     variant = 'button',
     disabled = false,
@@ -56,6 +71,7 @@ export default function Button({
     ...props
 }: {
     text: string;
+    invert?: boolean;
     outlined?: boolean;
     variant?: 'button' | 'pill';
     disabled?: boolean;
@@ -69,6 +85,8 @@ export default function Button({
                 styles[variant],
                 outlined && styles.outlined,
                 disabled && { backgroundColor: '#ddd' },
+                invert && styles.inverted,
+                invert && outlined && styles.outlinedInverted,
                 { ...style },
             ]}
             {...props}
@@ -81,7 +99,16 @@ export default function Button({
                     tintColor={outlined ? colors.primary : '#fff'}
                 />
             )}
-            <Text style={[styles.buttonText, outlined && styles.outlinedText]}>{text}</Text>
+            <Text
+                style={[
+                    styles.buttonText,
+                    outlined && styles.outlinedText,
+                    invert && styles.invertedText,
+                    invert && outlined && styles.outlinedInvertedText,
+                ]}
+            >
+                {text}
+            </Text>
             {rightIcon && (
                 <SymbolView
                     name={rightIcon}

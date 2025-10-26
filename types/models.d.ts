@@ -58,7 +58,7 @@ interface UpsertPantryItem {
 interface Ingredient {
     id?: number;
     sentence?: string;
-    amount?: string;
+    amount?: any;
     unit?: string;
     item?: string;
     preparation?: string;
@@ -67,6 +67,13 @@ interface Ingredient {
     createdAt?: string;
     updatedAt?: string;
     deleteAt?: string;
+    json?: {
+        amount?: {
+            RANGE: boolean;
+            quantity: number;
+            quantity_max?: number;
+        }[];
+    } & any;
 }
 
 interface RecipeTag {
