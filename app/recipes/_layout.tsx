@@ -49,6 +49,13 @@ export default function RecipesLayout() {
                     headerShown: false,
                 }}
             />
+            <Stack.Screen
+                name='suggested'
+                options={{
+                    title: 'Suggested Recipe',
+                    headerShown: true,
+                }}
+            />
         </Stack>
     );
 }

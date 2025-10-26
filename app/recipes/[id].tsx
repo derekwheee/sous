@@ -40,7 +40,28 @@ const styles = {
 };
 
 export default function RecipeDetail() {
-    const id = Number(useLocalSearchParams<{ id: string }>().id);
+    const params = useLocalSearchParams<{ id: string; suggestion: string }>();
+    const id = Number(params.id);
+    const suggestion: RecipeSuggestion | null = params.suggestion
+        ? JSON.parse(params.suggestion)
+        : null;
+
+    console.log(suggestion);
+
+    const suggestedRecipe: Recipe | null = suggestion
+        ? {
+              id: -1,
+              name: suggestion.name,
+              prepTime: suggestion.prepTime || '',
+              cookTime: suggestion.cookTime || '',
+              servings: suggestion.servings || '',
+              ingredients:
+                  suggestion.ingredients?.map((ingredient) => ({ sentence: ingredient })) || [],
+              instructions: suggestion.instructions,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+          }
+        : null;
 
     const router = useRouter();
     const { user } = useApi();
@@ -48,13 +69,18 @@ export default function RecipeDetail() {
     const {
         recipe: { isFetching, data: recipe, refetch },
         deleteRecipe,
-    } = useRecipe({ recipeId: id });
+    } = useRecipe({ recipeId: id, enabled: !suggestion });
 
     const { pantry, savePantryItem } = usePantry();
 
     useHeader({
         dependencies: [router],
-        headerItems: [
+        headerItems: !id ? [
+            {
+                label: 'save recipe',
+                onPress: () => {}
+            }
+        ] : [
             {
                 type: 'menu',
                 label: 'edit recipe',
@@ -108,6 +134,7 @@ export default function RecipeDetail() {
         });
     };
 
+    const renderRecipe = recipe || suggestedRecipe;
     const highlight = (instruction: string) =>
         highlightInstructions(recipe?.ingredients.map((i) => i.item || '') || [], instruction);
 
@@ -115,7 +142,7 @@ export default function RecipeDetail() {
 
     return (
         <Screen
-            isLoading={!user || (isFetching && !recipe)}
+            isLoading={!user || (isFetching && !renderRecipe)}
             refreshControl={
                 <RefreshControl
                     refreshing={isRefreshing}
@@ -126,17 +153,23 @@ export default function RecipeDetail() {
                 />
             }
         >
-            <PageTitle>{recipe?.name}</PageTitle>
+            <PageTitle>{renderRecipe?.name}</PageTitle>
             <View style={[styles.content, styles.timeLabels]}>
-                <TimeLabel label={'prep time'} time={recipe?.prepTime ?? ''} />
-                <TimeLabel label={'cook time'} time={recipe?.cookTime ?? ''} />
+                <TimeLabel label={'prep time'} time={renderRecipe?.prepTime ?? ''} />
+                <TimeLabel label={'cook time'} time={renderRecipe?.cookTime ?? ''} />
             </View>
             <View style={styles.content}>
                 <Text style={styles.h2}>Ingredients</Text>
                 <View>
-                    {recipe?.ingredients?.map((ingredient) => (
+                    {renderRecipe?.ingredients?.map((ingredient, index) => (
                         <Ingredient
-                            key={ingredient.id}
+                            key={
+                                typeof ingredient === 'object' &&
+                                'id' in ingredient &&
+                                ingredient.id
+                                    ? ingredient.id
+                                    : index
+                            }
                             ingredient={ingredient}
                             pantry={pantry}
                             onPress={handleAddToShoppingList}
@@ -147,7 +180,7 @@ export default function RecipeDetail() {
             <View style={styles.content}>
                 <Text style={styles.h2}>Instructions</Text>
                 <View style={{ flex: 1 }}>
-                    {recipe?.instructions?.map((instruction, i) => (
+                    {renderRecipe?.instructions?.map((instruction, i) => (
                         <View key={i} style={styles.instructionContainer}>
                             <Text style={styles.instructionIndex}>{i + 1}</Text>
                             <Text style={styles.instructionText}>
@@ -165,7 +198,7 @@ export default function RecipeDetail() {
                                                               console.log(
                                                                   text,
                                                                   match,
-                                                                  recipe?.ingredients[
+                                                                  renderRecipe?.ingredients[
                                                                       match.refIndex
                                                                   ]?.sentence
                                                               );

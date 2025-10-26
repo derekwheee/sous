@@ -6,7 +6,7 @@ import TimeLabel from '@/components/time-label';
 import { useApi } from '@/hooks/use-api';
 import globalStyles, { brightness, colors, fonts } from '@/styles/global';
 import { useQuery } from '@tanstack/react-query';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
@@ -69,18 +69,8 @@ const styles = {
     }),
 };
 
-interface RecipeSuggestion {
-    name: string;
-    description?: string;
-    prepTime?: string;
-    cookTime?: string;
-    servings?: string;
-    ingredients: string[];
-    instructions: string[];
-    explanation?: string;
-}
-
 export default function SuggestRecipesModal() {
+    const router = useRouter();
     const [suggestionState, setSuggestionState] = useState<RecipeSuggestion[] | null>(null);
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [keywords, setKeywords] = useState<string>('');
@@ -205,9 +195,12 @@ export default function SuggestRecipesModal() {
                                         text='view recipe'
                                         rightIcon='chevron.right'
                                         style={{ flexShrink: 1 }}
-                                        onPress={() => {
-                                            // Handle view recipe action
-                                        }}
+                                        onPress={() => router.push({
+                                            pathname: '/recipes/suggested',
+                                            params: {
+                                                suggestion: JSON.stringify(suggestion),
+                                            }
+                                        })}
                                     />
                                 </View>
                             </View>

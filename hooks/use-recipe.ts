@@ -4,22 +4,23 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import { Alert } from 'react-native';
 
-
-export const useRecipe = ({ recipeId }: { recipeId?: number } = {}) => {
-    
+export const useRecipe = ({
+    recipeId,
+    enabled = true,
+}: { recipeId?: number; enabled?: boolean } = {}) => {
     const queryClient = useQueryClient();
     const { user, getRecipes, getRecipe, deleteRecipe: apiDeleteRecipe } = useApi();
 
     const recipes = useQuery<Recipe[]>({
         queryKey: ['recipes'],
         queryFn: () => getRecipes(),
-        enabled: !!user,
+        enabled: enabled && !!user,
     });
 
     const recipe = useQuery<Recipe>({
         queryKey: ['recipes', recipeId],
         queryFn: () => getRecipe(recipeId!),
-        enabled: !!user && !!recipeId,
+        enabled: enabled && !!user && !!recipeId,
     });
 
     const { mutate: handleDeleteRecipe } = useMutation(

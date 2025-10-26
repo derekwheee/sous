@@ -170,3 +170,14 @@ interface UpsertItemCategory {
     updatedAt?: string;
     deletedAt?: string;
 }
+
+interface RecipeSuggestion {
+    name: string;
+    description?: string;
+    prepTime?: string;
+    cookTime?: string;
+    servings?: string;
+    ingredients: string[];
+    instructions: string[];
+    explanation?: string;
+}
