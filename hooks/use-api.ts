@@ -80,11 +80,6 @@ export function useApi() {
         getPantryItem: (id: number, pantryId: number, keys: Keys = []) =>
             apiClient.get(keys, `/household/${householdId}/pantry/${pantryId}/items/${id}`),
         // ItemCategories
-        /**
-         * @deprecated Use getCategories instead
-         */
-        getItemCategories: (pantryId: number, keys: Keys = []) =>
-            apiClient.get(keys, `/household/${householdId}/pantry/${pantryId}/category`),
         getCategories: (pantryId: number, keys: Keys = []) =>
             apiClient.get(keys, `/household/${householdId}/pantry/${pantryId}/category`),
         getCategory: (pantryId: number, categoryId: number, keys: Keys = []) =>

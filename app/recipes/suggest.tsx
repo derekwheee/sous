@@ -1,4 +1,5 @@
 import Button from '@/components/button';
+import NetworkActivityIndicator from '@/components/network-activity';
 import TagPill from '@/components/tag-pill';
 import Text from '@/components/text';
 import TextInput from '@/components/text-input';
@@ -208,6 +209,7 @@ export default function SuggestRecipesModal() {
                     </ScrollView>
                 </>
             )}
+            <NetworkActivityIndicator />
         </View>
     );
 }

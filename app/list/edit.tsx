@@ -2,10 +2,9 @@ import Autocomplete from '@/components/autocomplete';
 import Loading from '@/components/loading';
 import Text from '@/components/text';
 import TextInput from '@/components/text-input';
-import { useApi } from '@/hooks/use-api';
+import { useCategory } from '@/hooks/use-category';
 import { usePantry } from '@/hooks/use-pantry';
 import globalStyles, { colors } from '@/styles/global';
-import { useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import React, { useEffect, useState } from 'react';
@@ -64,15 +63,13 @@ const SaveItemButton = ({
 export default function EditItemModal() {
     const {
         pantryItemId,
-        pantryId,
         newName,
     }: {
         pantryItemId?: string;
-        pantryId?: string;
         newName?: string;
     } = useLocalSearchParams();
 
-    const { user, getItemCategories } = useApi();
+    const { categories: { data: categories } } = useCategory();
     const router = useRouter();
 
     const {
@@ -83,17 +80,11 @@ export default function EditItemModal() {
         pantryItemId: pantryItemId ? Number(pantryItemId) : undefined,
     });
 
-    const { data: categoryList } = useQuery<ItemCategory[]>({
-        queryKey: ['itemCategories'],
-        queryFn: () => getItemCategories(Number(pantryId)),
-        enabled: !!user && !!pantryId,
-    });
-
     const [isDirty, setIsDirty] = useState(false);
     const [name, setName] = useState(pantryItem?.name || newName || '');
     const [category, setCategory] = useState(
         pantryItem?.category?.name ||
-            categoryList?.find((c) => c.name.toLowerCase() === 'other')?.name
+            categories?.find((c) => c.name.toLowerCase() === 'other')?.name
     );
     const [isInStock, setIsInStock] = useState(!!pantryItem?.isInStock);
     const [isInShoppingList, setIsInShoppingList] = useState(!!pantryItem?.isInShoppingList);
@@ -117,7 +108,7 @@ export default function EditItemModal() {
         isInStock,
         isInShoppingList,
         isFavorite,
-        categoryId: categoryList?.find((cat) => cat.name === category)?.id,
+        categoryId: categories?.find((cat) => cat.name === category)?.id,
     };
 
     const change = (fn: Function) => {
@@ -137,7 +128,7 @@ export default function EditItemModal() {
 
     return (
         <>
-            <Loading isLoading={(pantryItemId && !pantryItem) || !categoryList} />
+            <Loading isLoading={(pantryItemId && !pantryItem) || !categories} />
             <View style={styles.dialog}>
                 <XStack
                     style={{ width: '100%' }}
@@ -184,8 +175,8 @@ export default function EditItemModal() {
                         style={styles.categoryTrigger}
                     >
                         <Text weight='regular'>
-                            {categoryList?.find((c) => c.name === category)?.icon}{' '}
-                            {categoryList?.find((c) => c.name === category)?.name}
+                            {categories?.find((c) => c.name === category)?.icon}{' '}
+                            {categories?.find((c) => c.name === category)?.name}
                         </Text>
                         <SymbolView name='chevron.right' size={16} tintColor={colors.text} />
                     </Pressable>
@@ -245,7 +236,7 @@ export default function EditItemModal() {
                     setShowCategoryInput(false);
                     setCategoryEntry('');
                 }}
-                items={categoryList?.map((cat) => ({
+                items={categories?.map((cat) => ({
                     label: `${cat.icon} ${cat.name}`,
                     value: cat.name,
                 }))}

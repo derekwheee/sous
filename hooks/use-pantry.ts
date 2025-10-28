@@ -81,9 +81,15 @@ export const usePantry = ({ pantryItemId }: { pantryItemId?: number } = {}) => {
     }, []);
 
     return {
-        pantries,
+        pantries: {
+            ...pantries,
+            isBusy: pantries.isFetching || pantries.isLoading || pantries.isPending,
+        },
         pantry,
-        pantryItem,
+        pantryItem: {
+            ...pantryItem,
+            isBusy: pantryItem.isFetching || pantryItem.isLoading || pantryItem.isPending,
+        },
         savePantryItem,
         finishPantryItem,
         deletePantryItem,

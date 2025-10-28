@@ -5,11 +5,10 @@ import { useSnackbar } from '@/components/snackbar';
 import Spinner from '@/components/spinner';
 import Text from '@/components/text';
 import TextInput from '@/components/text-input';
-import { useApi } from '@/hooks/use-api';
 import { useHeader } from '@/hooks/use-header';
+import { useRecipe } from '@/hooks/use-recipe';
 import globalStyles, { brightness, colors } from '@/styles/global';
 import Feather from '@expo/vector-icons/Feather';
-import { useQuery } from '@tanstack/react-query';
 import * as Clipboard from 'expo-clipboard';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
@@ -78,7 +77,12 @@ export default function EditRecipe() {
     const id = params.id ? Number(params.id) : undefined;
     const isNewRecipe = !id;
     const { showSnackbar } = useSnackbar();
-    const { user, getRecipe, upsertRecipe, getAllRecipeTags, importRecipe } = useApi();
+    const {
+        recipe: { data: recipe },
+        importRecipe,
+        saveRecipe,
+        tags: { data: allTags },
+    } = useRecipe({ recipeId: id });
     const router = useRouter();
     const translateY = useRef(new Animated.Value(80)).current;
     const [isSaving, setIsSaving] = useState(false);
@@ -92,18 +96,6 @@ export default function EditRecipe() {
     const [showTagInput, setShowTagInput] = useState(false);
     const [tagEntry, setTagEntry] = useState('');
     const [isImporting, setIsImporting] = useState(false);
-
-    const { data: recipe } = useQuery<Recipe | null>({
-        queryKey: ['recipe', id],
-        queryFn: () => getRecipe(id || 0),
-        enabled: !!user && !!id,
-    });
-
-    const { data: allTags } = useQuery<RecipeTag[]>({
-        queryKey: ['recipe-tags'],
-        queryFn: () => getAllRecipeTags(),
-        enabled: !!user,
-    });
 
     const patched: UpsertRecipe = {
         id,
@@ -126,7 +118,7 @@ export default function EditRecipe() {
             setServings(recipe.servings || '');
             setIngredients(recipe.ingredients.map((i) => i.sentence || ''));
             setInstructions(recipe.instructions || []);
-            setTags(recipe.tags || []);
+            setTags((recipe.tags as UpsertRecipeTag[] | undefined) || []);
         }
     }, [recipe]);
 
@@ -169,7 +161,7 @@ export default function EditRecipe() {
 
     const handleSaveRecipe = async () => {
         setIsSaving(true);
-        const res = await upsertRecipe(patched);
+        const res = await saveRecipe.mutateAsync(patched);
 
         if (res.error) {
             console.log(res.error);
@@ -277,11 +269,11 @@ export default function EditRecipe() {
             return;
         }
 
-        const res: ImportedRecipe = await importRecipe(url);
+        const res: ImportedRecipe = await importRecipe.mutateAsync(url);
 
         if (!res) {
             showSnackbar({
-                message: 'Sorry, we couldn\'t import that recipe. Please try a different link.',
+                message: "Sorry, we couldn't import that recipe. Please try a different link.",
                 type: 'warning',
             });
             setIsImporting(false);
@@ -306,7 +298,7 @@ export default function EditRecipe() {
 
     return (
         <>
-            <Screen isLoading={!user || !!(params?.id && !recipe) || isImporting}>
+            <Screen isLoading={!!(params?.id && !recipe) || isImporting}>
                 <Heading title={params?.id ? 'edit recipe' : 'new recipe'} />
                 <View style={styles.content}>
                     <TextInput

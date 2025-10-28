@@ -68,16 +68,21 @@ export default function RecipeScreen() {
     const router = useRouter();
 
     const {
-        recipes: { data: recipes, isFetching: isRecipesLoading, error: recipesError, refetch },
+        recipes: {
+            data: recipes,
+            isBusy: isRecipesBusy,
+            error: recipesError,
+            refetch,
+        },
         deleteRecipe,
     } = useRecipe();
 
     const {
-        pantries: { error: pantryError, isFetching: isPantryLoading },
+        pantries: { error: pantryError, isBusy: isPantryBusy },
         pantry,
     } = usePantry();
 
-    const isLoading = isRecipesLoading || isPantryLoading;
+    const isLoading = isRecipesBusy || isPantryBusy;
     const pantryItems = pantry?.pantryItems;
 
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);

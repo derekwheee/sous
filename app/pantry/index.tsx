@@ -2,16 +2,15 @@ import Button from '@/components/button';
 import Heading from '@/components/heading';
 import PantryListing from '@/components/pantry-listing';
 import Screen from '@/components/screen';
-import { useApi } from '@/hooks/use-api';
+import { useCategory } from '@/hooks/use-category';
 import { useHeader } from '@/hooks/use-header';
 import { usePantry } from '@/hooks/use-pantry';
 import globalStyles, { colors, fonts } from '@/styles/global';
 import { getDefault } from '@/util/pantry';
-import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useRef, useState } from 'react';
-import { Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 const styles = {
     ...globalStyles,
@@ -38,18 +37,16 @@ const styles = {
 
 export default function PantryScreen() {
     const router = useRouter();
-    const { user, getItemCategories } = useApi();
+    const {
+        categories: { data: categories },
+    } = useCategory();
 
     const {
         pantries: { data: pantries, refetch: refetchPantries },
         savePantryItem,
+        finishPantryItem,
+        deletePantryItem,
     } = usePantry();
-
-    const { data: itemCategories } = useQuery<ItemCategory[]>({
-        queryKey: ['itemCategories'],
-        queryFn: () => getItemCategories(getDefault(pantries)!.id),
-        enabled: !!user && !!pantries && pantries.length > 0,
-    });
 
     const searchBarRef = useRef<any>(null);
 
@@ -102,29 +99,22 @@ export default function PantryScreen() {
         ? sortedPantry?.filter((item) => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
         : sortedPantry;
 
-    const isLoading = !user || !filteredPantry || !itemCategories;
+    const isLoading = !filteredPantry || !categories;
 
     return (
         <Screen
             isLoading={isLoading}
             footerItems={isLegacyVersion ? [<SearchBar key='search-bar' />] : undefined}
-            refreshControl={
-                <RefreshControl
-                    refreshing={isRefreshing}
-                    onRefresh={() => {
-                        setIsRefreshing(true);
-                        refetchPantries().finally(() => setIsRefreshing(false));
-                    }}
-                />
-            }
         >
             <Heading title='Pantry' />
             {!!filteredPantry?.length &&
-                !!itemCategories?.length &&
+                !!categories?.length &&
                 filteredPantry?.map((pantryItem: PantryItem) => (
                     <PantryListing
                         key={pantryItem.id}
                         pantryItem={pantryItem}
+                        finishPantryItem={finishPantryItem}
+                        deletePantryItem={deletePantryItem}
                         onToggleFavorite={handleSaveChanges}
                     />
                 ))}

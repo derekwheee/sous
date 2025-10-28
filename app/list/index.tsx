@@ -2,15 +2,14 @@ import Button from '@/components/button';
 import Heading from '@/components/heading';
 import Screen from '@/components/screen';
 import Text from '@/components/text';
-import { useApi } from '@/hooks/use-api';
+import { useCategory } from '@/hooks/use-category';
 import { useHeader } from '@/hooks/use-header';
 import { usePantry } from '@/hooks/use-pantry';
 import globalStyles, { colors, fonts } from '@/styles/global';
 import Feather from '@expo/vector-icons/Feather';
-import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { createRef, useCallback, useRef, useState } from 'react';
-import { Alert, Pressable, RefreshControl, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import Reanimated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated';
 
@@ -105,18 +104,11 @@ export default function ListScreen() {
         ],
     });
 
-    const { user, getItemCategories } = useApi();
+    const { categories: { data: categoryList } } = useCategory();
     const {
-        pantries: { data: pantries, refetch: refetchPantries },
         pantry,
         savePantryItem,
     } = usePantry();
-
-    const { data: categoryList } = useQuery<ItemCategory[]>({
-        queryKey: ['itemCategories'],
-        queryFn: () => getItemCategories(pantry!.id),
-        enabled: !!user && !!pantries && pantries.length > 0,
-    });
 
     const categories = pantry?.pantryItems
         ?.reduce<any[]>((acc, item: PantryItem) => {
@@ -196,12 +188,11 @@ export default function ListScreen() {
         setNewItemText('');
     };
 
-    const isLoading = !user || !categories;
+    const isLoading = !categoryList || !pantry;
 
     return (
         <Screen
             isLoading={isLoading}
-            refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetchPantries} />}
         >
             <Heading title='Shopping List' />
             {isAddingItems && (

@@ -1,8 +1,9 @@
+import NetworkActivityIndicator from '@/components/network-activity';
 import { SnackbarProvider } from '@/components/snackbar';
 import Tabs from '@/components/tabs';
 import { useApi } from '@/hooks/use-api';
 import Theme from '@/styles/sous-theme';
-import { ClerkProvider, SignedIn, SignedOut, useAuth } from '@clerk/clerk-expo';
+import { ClerkProvider, SignedIn, SignedOut, useAuth, useUser } from '@clerk/clerk-expo';
 import { tokenCache } from '@clerk/clerk-expo/token-cache';
 import { Caprasimo_400Regular } from '@expo-google-fonts/caprasimo';
 import {
@@ -75,18 +76,6 @@ export default function RootLayout() {
         Appearance.setColorScheme('light');
     }, []);
 
-    let [fontsLoaded] = useFonts({
-        Poppins_300Light,
-        Poppins_400Regular,
-        Poppins_500Medium,
-        Poppins_700Bold,
-        Caprasimo_400Regular,
-    });
-
-    if (!fontsLoaded) {
-        return null;
-    }
-
     return (
         <ClerkProvider
             tokenCache={tokenCache}
@@ -95,29 +84,51 @@ export default function RootLayout() {
                 process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY
             }
         >
-            <GestureHandlerRootView style={{ flex: 1 }}>
-                <PortalProvider>
-                    <TamaguiProvider config={config}>
-                        <QueryClientProvider client={queryClient}>
-                            <ThemeProvider value={Theme}>
-                                <SnackbarProvider>
-                                    <SafeAreaProvider>
-                                        <SignedOut>
-                                            <SignedOutRedirectGuard />
-                                            <Slot />
-                                        </SignedOut>
-                                        <SignedIn>
-                                            <SyncUserOnSignIn />
-                                            <Tabs />
-                                        </SignedIn>
-                                        <StatusBar barStyle='dark-content' />
-                                    </SafeAreaProvider>
-                                </SnackbarProvider>
-                            </ThemeProvider>
-                        </QueryClientProvider>
-                    </TamaguiProvider>
-                </PortalProvider>
-            </GestureHandlerRootView>
+            <AppProviders />
         </ClerkProvider>
+    );
+}
+
+function AppProviders() {
+    const { isLoaded } = useUser();
+    let [fontsLoaded] = useFonts({
+        Poppins_300Light,
+        Poppins_400Regular,
+        Poppins_500Medium,
+        Poppins_700Bold,
+        Caprasimo_400Regular,
+    });
+
+    if (!isLoaded) return null;
+
+    if (!fontsLoaded) {
+        return null;
+    }
+
+    return (
+        <GestureHandlerRootView style={{ flex: 1 }}>
+            <PortalProvider>
+                <TamaguiProvider config={config}>
+                    <QueryClientProvider client={queryClient}>
+                        <ThemeProvider value={Theme}>
+                            <SnackbarProvider>
+                                <SafeAreaProvider>
+                                    <SignedOut>
+                                        <SignedOutRedirectGuard />
+                                        <Slot />
+                                    </SignedOut>
+                                    <SignedIn>
+                                        <SyncUserOnSignIn />
+                                        <Tabs />
+                                        <NetworkActivityIndicator />
+                                    </SignedIn>
+                                    <StatusBar barStyle='dark-content' />
+                                </SafeAreaProvider>
+                            </SnackbarProvider>
+                        </ThemeProvider>
+                    </QueryClientProvider>
+                </TamaguiProvider>
+            </PortalProvider>
+        </GestureHandlerRootView>
     );
 }

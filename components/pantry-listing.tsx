@@ -1,5 +1,4 @@
 import Text from '@/components/text';
-import { usePantry } from '@/hooks/use-pantry';
 import globalStyles, { colors } from '@/styles/global';
 import Feather from '@expo/vector-icons/Feather';
 import { useRouter } from 'expo-router';
@@ -62,17 +61,20 @@ const styles = {
 
 export default function PantryListing({
     pantryItem,
+    finishPantryItem,
+    deletePantryItem,
     onToggleFavorite,
     onRemoveItem,
     style = {},
     ...rest
 }: {
     pantryItem: PantryItem;
+    finishPantryItem: (pantryItem:PantryItem) => void;
+    deletePantryItem: (id: number, callback: Function) => void;
     onToggleFavorite: ({ id, isFavorite }: { id: number; isFavorite: boolean }) => void;
     onRemoveItem?: (id: number, ref?: any) => void;
     style?: any;
 } & PressableProps) {
-    const { finishPantryItem, deletePantryItem } = usePantry();
 
     const router = useRouter();
     const [swipeHeight, setSwipeHeight] = useState<number>(0);

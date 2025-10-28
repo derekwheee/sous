@@ -9,7 +9,16 @@ export const useRecipe = ({
     enabled = true,
 }: { recipeId?: number; enabled?: boolean } = {}) => {
     const queryClient = useQueryClient();
-    const { user, getRecipes, getRecipe, deleteRecipe: apiDeleteRecipe } = useApi();
+
+    const {
+        user,
+        getRecipes,
+        getRecipe,
+        upsertRecipe,
+        getAllRecipeTags,
+        importRecipe: apiImportRecipe,
+        deleteRecipe: apiDeleteRecipe,
+    } = useApi();
 
     const recipes = useQuery<Recipe[]>({
         queryKey: ['recipes'],
@@ -23,14 +32,32 @@ export const useRecipe = ({
         enabled: enabled && !!user && !!recipeId,
     });
 
-    const { mutate: handleDeleteRecipe } = useMutation(
-        standardMutation<any, DeleteRecipe>(
+    const tags = useQuery<RecipeTag[]>({
+        queryKey: ['recipeTags'],
+        queryFn: () => getAllRecipeTags(),
+        enabled: enabled && !!user,
+    });
+
+    const saveRecipe = useMutation(
+        standardMutation<any, UpsertRecipe, any>(
+            (patch: UpsertRecipe) => upsertRecipe(patch),
+            queryClient,
+            ['recipes']
+        )
+    );
+
+    const deleteMutation = useMutation(
+        standardMutation<any, DeleteRecipe, any>(
             ({ id }: DeleteRecipe) => apiDeleteRecipe(id),
             queryClient,
             ['recipes'],
             { isDelete: true }
         )
     );
+
+    const importRecipe = useMutation({
+        mutationFn: (url: string) => apiImportRecipe(url),
+    });
 
     const deleteRecipe = useCallback((id: number, cb?: Function) => {
         Alert.alert('Remove item', 'Do you want to remove this item from your list?', [
@@ -42,7 +69,7 @@ export const useRecipe = ({
             {
                 text: 'Delete',
                 onPress: async () => {
-                    await handleDeleteRecipe({ id });
+                    await deleteMutation.mutate({ id });
                     cb?.();
                 },
                 style: 'destructive',
@@ -51,8 +78,30 @@ export const useRecipe = ({
     }, []);
 
     return {
-        recipes,
-        recipe,
-        deleteRecipe,
+        recipes: {
+            ...recipes,
+            isBusy: recipes.isFetching || recipes.isLoading || recipes.isPending,
+        },
+        recipe: {
+            ...recipe,
+            isBusy: recipe.isFetching || recipe.isLoading || recipe.isPending,
+        },
+        importRecipe: {
+            ...importRecipe,
+            isBusy: importRecipe.isPending,
+        },
+        saveRecipe: {
+            ...saveRecipe,
+            isBusy: saveRecipe.isPending,
+        },
+        deleteRecipe: deleteRecipe,
+        deleteMutation: {
+            ...deleteMutation,
+            isBusy: deleteMutation.isPending,
+        },
+        tags: {
+            ...tags,
+            isBusy: tags.isFetching || tags.isLoading || tags.isPending,
+        },
     };
 };
