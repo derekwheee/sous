@@ -70,7 +70,16 @@ export default function ProfileScreen() {
         <Screen>
             <Heading title='welcome,' />
             <Text style={styles.userName}>{user?.firstName || 'friend'}</Text>
-            <Text style={styles.sectionHeading}>household</Text>
+            <Pressable onPress={() => router.push('/profile/categories')} style={styles.menuItem}>
+                <SymbolView name='list.dash' size={24} tintColor='#000' />
+                <Text size={16}>categories</Text>
+                <SymbolView
+                    name='chevron.right'
+                    size={16}
+                    tintColor='#000'
+                    style={{ marginLeft: 'auto' }}
+                />
+            </Pressable>
             <Pressable onPress={() => router.push('/profile/link')} style={styles.menuItem}>
                 <SymbolView name='qrcode' size={24} tintColor='#000' />
                 <Text size={16}>share household</Text>

@@ -1,4 +1,5 @@
 interface UseHeaderParams {
+    gestureEnabled?: boolean;
     searchBarRef?: any;
     searchPlaceholder?: string;
     onChangeSearch?: ({ nativeEvent: { text } }: { nativeEvent: { text: string } }) => void;

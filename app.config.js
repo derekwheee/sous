@@ -7,6 +7,7 @@ export default ({ config }) => ({
     icon: './assets/images/icon-ios.png',
     scheme: 'sous',
     newArchEnabled: true,
+    platform: ['ios'],
     ios: {
         supportsTablet: true,
         bundleIdentifier: 'com.anonymous.sous',

@@ -5,7 +5,7 @@ interface User {
     defaultHouseholdId?: number;
     createdAt: string;
     updatedAt: string;
-    deleteAt?: string;
+    deleteAt?: Date;
     households?: Household[];
 }
 
@@ -15,7 +15,7 @@ interface Household {
     joinToken: string;
     createdAt: string;
     updatedAt: string;
-    deleteAt?: string;
+    deleteAt?: Date;
 }
 
 interface Pantry {
@@ -24,7 +24,7 @@ interface Pantry {
     isDefault: boolean;
     createdAt: string;
     updatedAt: string;
-    deleteAt?: string;
+    deleteAt?: Date;
     pantryItems: PantryItem[];
     itemCategories: ItemCategory[];
 }
@@ -37,7 +37,7 @@ interface PantryItem {
     isInShoppingList: boolean;
     createdAt: string;
     updatedAt: string;
-    deleteAt?: string;
+    deleteAt?: Date;
     pantryId: number;
     categoryId?: number;
     category?: ItemCategory;
@@ -49,7 +49,6 @@ interface UpsertPantryItem {
     isInStock?: boolean;
     isFavorite?: boolean;
     isInShoppingList?: boolean;
-    deleteAt?: string;
     pantryId?: number;
     categoryId?: number;
     deletedAt?: Date;
@@ -64,9 +63,9 @@ interface Ingredient {
     preparation?: string;
     pantryItemId?: number;
     pantryItem?: PantryItem;
-    createdAt?: string;
-    updatedAt?: string;
-    deleteAt?: string;
+    createdAt?: Date;
+    updatedAt?: Date;
+    deleteAt?: Date;
     json?: {
         amount?: {
             RANGE: boolean;
@@ -81,16 +80,16 @@ interface RecipeTag {
     name: string;
     createdAt: string;
     updatedAt: string;
-    deleteAt?: string;
+    deleteAt?: Date;
     recipes?: Recipe[];
 }
 
 interface UpsertRecipeTag {
     id?: number;
     name?: string;
-    createdAt?: string;
-    updatedAt?: string;
-    deleteAt?: string;
+    createdAt?: Date;
+    updatedAt?: Date;
+    deleteAt?: Date;
 }
 
 interface Recipe {
@@ -101,7 +100,7 @@ interface Recipe {
     servings?: string;
     createdAt: string;
     updatedAt: string;
-    deleteAt?: string;
+    deleteAt?: Date;
     ingredients: Ingredient[];
     instructions: string[];
     tags?: RecipeTag[];
@@ -112,7 +111,7 @@ interface CreateRecipe {
     prepTime: string;
     cookTime: string;
     servings?: string;
-    deleteAt?: string;
+    deleteAt?: Date;
     ingredients: string[];
     instructions: string[];
 }
@@ -123,7 +122,7 @@ interface PatchRecipe {
     prepTime?: string;
     cookTime?: string;
     servings?: string;
-    deleteAt?: string;
+    deleteAt?: Date;
     ingredients?: string[];
     instructions?: string[];
     tags?: UpsertRecipeTag[];
@@ -135,7 +134,7 @@ interface UpsertRecipe {
     prepTime?: string;
     cookTime?: string;
     servings?: string;
-    deleteAt?: string;
+    deleteAt?: Date;
     ingredients?: string[];
     instructions?: string[];
     tags?: UpsertRecipeTag[];
@@ -163,19 +162,19 @@ interface ItemCategory {
     isNonFood: boolean;
     createdAt: string;
     updatedAt: string;
-    deletedAt?: string;
+    deletedAt?: Date;
     pantryItems: PantryItem[];
 }
 
 interface UpsertItemCategory {
     id?: number;
     name?: string;
-    sortOrder: number;
+    sortOrder?: number;
     icon?: string;
     isNonFood?: boolean;
-    createdAt?: string;
-    updatedAt?: string;
-    deletedAt?: string;
+    createdAt?: Date;
+    updatedAt?: Date;
+    deletedAt?: Date;
 }
 
 interface RecipeSuggestion {

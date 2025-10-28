@@ -36,7 +36,6 @@ const styles = {
             gap: 8,
             paddingVertical: 16,
             paddingHorizontal: 16,
-            marginBottom: 8,
         },
         deleteAction: {
             alignContent: 'center',
@@ -78,6 +77,7 @@ export default function RecipeScreen() {
         pantry,
     } = usePantry();
 
+    const isLoading = isRecipesLoading || isPantryLoading;
     const pantryItems = pantry?.pantryItems;
 
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
@@ -109,14 +109,6 @@ export default function RecipeScreen() {
                         },
                     }),
             },
-            // {
-            //     label: 'filter recipes',
-            //     icon: {
-            //         name: 'line.3.horizontal.decrease.circle',
-            //     },
-            //     onPress: () => setShowTags(!showTags),
-            //     selected: showTags,
-            // },
             {
                 label: 'new recipe',
                 icon: {
@@ -150,12 +142,6 @@ export default function RecipeScreen() {
 
     if (pantryError) {
         console.log('Error fetching pantry:', pantryError);
-    }
-
-    const isLoading = isRecipesLoading || isPantryLoading;
-
-    if (recipes && !recipes.sort) {
-        console.log(recipes);
     }
 
     const sortedRecipes = recipes?.sort((a, b) => {
@@ -202,6 +188,18 @@ export default function RecipeScreen() {
             }
         >
             <Heading title='Recipes' />
+            <View style={{ paddingHorizontal: 16, marginBottom: showTags ? 0 : 16 }}>
+                <Button
+                    style={{ flex: 1 }}
+                    outlined={!showTags}
+                    variant='pill'
+                    text={`filter recipes${selectedTags.length ? ` (${selectedTags.length})` : ''}`}
+                    leftIcon='line.3.horizontal.decrease'
+                    onPress={() => {
+                        setShowTags(!showTags);
+                    }}
+                />
+            </View>
             {showTags && (
                 <View style={styles.tagContainer}>
                     {tags.map((tag) => (

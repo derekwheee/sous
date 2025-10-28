@@ -36,6 +36,9 @@ export function useSSE() {
                     queryClient?.invalidateQueries({ queryKey: ['pantry'] });
                     queryClient?.invalidateQueries({ queryKey: ['pantryItem'] });
                     break;
+                case SSEMessageType.CATEGORY_UPDATE:
+                    queryClient?.invalidateQueries({ queryKey: ['categories'] });
+                    break;
             }
         });
 

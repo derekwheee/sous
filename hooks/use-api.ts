@@ -80,8 +80,31 @@ export function useApi() {
         getPantryItem: (id: number, pantryId: number, keys: Keys = []) =>
             apiClient.get(keys, `/household/${householdId}/pantry/${pantryId}/items/${id}`),
         // ItemCategories
+        /**
+         * @deprecated Use getCategories instead
+         */
         getItemCategories: (pantryId: number, keys: Keys = []) =>
-            apiClient.get(keys, `/household/${householdId}/pantry/${pantryId}/categories`),
+            apiClient.get(keys, `/household/${householdId}/pantry/${pantryId}/category`),
+        getCategories: (pantryId: number, keys: Keys = []) =>
+            apiClient.get(keys, `/household/${householdId}/pantry/${pantryId}/category`),
+        getCategory: (pantryId: number, categoryId: number, keys: Keys = []) =>
+            apiClient.get(
+                keys,
+                `/household/${householdId}/pantry/${pantryId}/category/${categoryId}`
+            ),
+        upsertCategory: (
+            pantryId: number,
+            category: UpsertItemCategory,
+            keys: Keys = ['categories']
+        ) =>
+            apiClient.post(keys, `/household/${householdId}/pantry/${pantryId}/category`, category),
+        updateSortOrder: (pantryId: number, sortedIds: number[], keys: Keys = ['categories']) =>
+            apiClient.post(
+                keys,
+                `/household/${householdId}/pantry/${pantryId}/category/sort-order`,
+                sortedIds
+            ),
+        // AI
         getRecipeSuggestions: (
             pantryId: number,
             tags: string[],

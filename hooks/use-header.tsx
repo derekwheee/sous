@@ -7,6 +7,7 @@ import React, { useLayoutEffect, useState } from 'react';
 import { Platform, Pressable, View } from 'react-native';
 
 export function useHeader({
+    gestureEnabled = true,
     searchBarRef,
     searchPlaceholder,
     onChangeSearch,
@@ -27,6 +28,7 @@ export function useHeader({
 
     useLayoutEffect(() => {
         navigation.setOptions({
+            gestureEnabled,
             headerSearchBarOptions:
                 !searchBarRef || isLegacyVersion
                     ? null

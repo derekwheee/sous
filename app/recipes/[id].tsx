@@ -50,8 +50,12 @@ export default function RecipeDetail() {
         ? JSON.parse(params.suggestion)
         : null;
 
+
+    const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
     const [scaleValue, setScaleValue] = useState<number | null>(null);
     const [scaledRecipe, setScaledRecipe] = useState<Recipe | null>(null);
+    const [disableScroll, setDisableScroll] = useState<boolean>(false);
+    const [disableSwipe, setDisableSwipe] = useState<boolean>(false);
 
     const scaleRecipe: boolean = scaleValue !== null;
 
@@ -81,7 +85,8 @@ export default function RecipeDetail() {
     const { pantry, savePantryItem } = usePantry();
 
     useHeader({
-        dependencies: [router],
+        gestureEnabled: !disableSwipe,
+        dependencies: [router, disableSwipe],
         headerItems: !id
             ? [
                   {
@@ -159,9 +164,6 @@ export default function RecipeDetail() {
     const highlight = (instruction: string) =>
         highlightInstructions(recipe?.ingredients.map((i) => i.item || '') || [], instruction);
 
-    const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-    const [disableScroll, setDisableScroll] = useState<boolean>(false);
-
     return (
         <Screen
             scrollEnabled={!disableScroll}
@@ -191,10 +193,13 @@ export default function RecipeDetail() {
                             ? 'arrow.up.left.and.arrow.down.right'
                             : 'arrow.down.right.and.arrow.up.left'
                     }
-                    onPress={() => setScaleValue((prev) => (prev !== null ? null : 0))}
+                    onPress={() => {
+                        setDisableSwipe((prev) => !prev);
+                        setScaleValue((prev) => (prev !== null ? null : 0));
+                    }}
                 />
                 <Button
-                    invert={scaleRecipe}
+                    // invert={scaleRecipe}
                     outlined={!scaleRecipe}
                     variant='pill'
                     text={`${scaleServings(scaledRecipe?.servings, scaleValue)} servings`}
@@ -209,11 +214,11 @@ export default function RecipeDetail() {
                         alignItems: 'center',
                         gap: 16,
                         flex: 1,
-                        paddingTop: 58,
+                        paddingTop: 59,
                         paddingBottom: 16,
                         paddingHorizontal: 16,
-                        margin: 16,
-                        marginTop: -42,
+                        marginHorizontal: 16,
+                        marginTop: -43,
                         borderRadius: 20,
                         backgroundColor: colors.primary,
                         zIndex: -1,

@@ -119,12 +119,12 @@ export default StyleSheet.create({
         fontSize: fontSizes.regular,
     },
     button: {
-        backgroundColor: colors.primary,
-        paddingVertical: 12,
+        height: 48,
         paddingHorizontal: 24,
         borderRadius: 8,
         alignItems: 'center',
         justifyContent: 'center',
+        backgroundColor: colors.primary,
     },
     buttonDisabled: {
         backgroundColor: colors.indeterminate,

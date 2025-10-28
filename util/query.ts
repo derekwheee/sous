@@ -1,9 +1,16 @@
 import { MutationFunction, QueryClient } from '@tanstack/react-query';
 
-function optimisticUpdate(patch: any, previous: any | undefined | null, isDelete: boolean) {
+function optimisticUpdate<T, TPatch>(
+    patch: TPatch,
+    previous: any | undefined | null,
+    isDelete: boolean
+): T {
     if (!previous) return previous;
 
-    const itemIndex = previous.findIndex((i: any) => i.id === patch.id);
+    const itemIndex =
+        !!patch && typeof patch === 'object' && patch !== null && 'id' in patch
+            ? previous.findIndex((i: any) => i.id === (patch as any).id)
+            : -1;
 
     if (itemIndex === -1) {
         const updated = [...previous];
@@ -11,33 +18,33 @@ function optimisticUpdate(patch: any, previous: any | undefined | null, isDelete
             id: -1,
             ...patch,
         };
-        return [...updated, newItem];
+        return [...updated, newItem] as T;
     } else if (isDelete) {
         const updated = [...previous];
         updated.splice(itemIndex, 1);
-        return updated;
+        return updated as T;
     } else {
         const updated = [...previous];
         updated[itemIndex] = { ...updated[itemIndex], ...patch };
-        return updated;
+        return updated as T;
     }
 }
 
-async function optimisticOnMutate<T>(
+async function optimisticOnMutate<T, TPatch>(
     client: QueryClient,
     queryKey: string[],
-    patch: T,
+    patch: TPatch,
     isDelete: boolean
 ) {
     await client.cancelQueries({ queryKey });
     const previous = client.getQueryData<T>(queryKey);
 
-    client.setQueryData<T>(queryKey, (old) => optimisticUpdate(patch, old, isDelete));
+    client.setQueryData<T>(queryKey, (old) => optimisticUpdate<T, TPatch>(patch, old, isDelete));
 
     return { previous };
 }
 
-export function standardMutation<TData, TVariables>(
+export function standardMutation<TData, TVariables, TPatch>(
     mutationFn: MutationFunction<TData, TVariables>,
     queryClient: QueryClient,
     queryKey: string[],
@@ -50,8 +57,8 @@ export function standardMutation<TData, TVariables>(
 ) {
     return {
         mutationFn,
-        onMutate: async (patch: TVariables) =>
-            optimisticOnMutate<TVariables>(queryClient, queryKey, patch, options.isDelete),
+        onMutate: async (patch: TPatch): Promise<{ previous: TVariables | undefined }> =>
+            optimisticOnMutate<TVariables, TPatch>(queryClient, queryKey, patch, options.isDelete),
         onError: (_: any, __: any, context: { previous: TData | undefined } | undefined) => {
             if (context?.previous) {
                 queryClient.setQueryData(queryKey, context.previous);
