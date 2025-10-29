@@ -23,6 +23,7 @@ export const usePantry = ({ pantryItemId }: { pantryItemId?: number } = {}) => {
         enabled: !!user && !!pantryItemId && !!pantry?.id,
     });
 
+    // TODO: This mutation doesn't seem to be working with optimistic updates
     const { mutate: savePantryItem, isPending: isPantryItemSaving } = useMutation(
         pantryItemMutation<any, UpsertPantryItem>(
             pantry?.id,

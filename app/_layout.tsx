@@ -1,4 +1,3 @@
-import NetworkActivityIndicator from '@/components/network-activity';
 import { SnackbarProvider } from '@/components/snackbar';
 import Tabs from '@/components/tabs';
 import { useApi } from '@/hooks/use-api';
@@ -82,7 +81,6 @@ function AppProviders() {
                                     <SignedIn>
                                         <SyncUserOnSignIn />
                                         <Tabs />
-                                        <NetworkActivityIndicator />
                                     </SignedIn>
                                     <StatusBar barStyle='dark-content' />
                                 </SafeAreaProvider>

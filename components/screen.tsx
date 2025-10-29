@@ -1,6 +1,7 @@
 import HeaderSpacer from '@/components/header-spacer';
 import Loading from '@/components/loading';
 import { KeyboardAvoidingView, Platform, ScrollView, ScrollViewProps, View } from 'react-native';
+import NetworkActivityIndicator from '@/components/network-activity';
 
 export default function Screen({
     withoutScroll = false,
@@ -49,6 +50,7 @@ export default function Screen({
                 )}
             </KeyboardAvoidingView>
             {footerItems && footerItems.length > 0 && <>{footerItems.map((item) => item)}</>}
+            <NetworkActivityIndicator />
         </>
     );
 }

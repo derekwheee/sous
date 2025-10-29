@@ -230,7 +230,12 @@ export default function ListScreen() {
                                     onPress={
                                         pantryItem.canBeAdded
                                             ? () => handleAddItem(pantryItem.id)
-                                            : undefined
+                                            : () =>
+                                                  savePantryItem({
+                                                      id: pantryItem.id,
+                                                      isInShoppingList: false,
+                                                      isInStock: true,
+                                                  })
                                     }
                                     rightAdornment={
                                         pantryItem.canBeAdded

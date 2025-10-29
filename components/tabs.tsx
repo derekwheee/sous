@@ -9,9 +9,8 @@ import SystemIcon from './system-icon';
 
 const styles = StyleSheet.create({
     tabBar: {
-        backgroundColor: '#FFF',
-        borderTopWidth: 2,
-        borderTopColor: colors.primary,
+        backgroundColor: colors.surface,
+        borderTopWidth: 0,
     },
     tabLabel: {
         fontFamily: fonts.poppins.medium,

@@ -10,10 +10,14 @@
         "android:clean": "expo prebuild --clean && expo run:android",
         "ios": "expo run:ios",
         "ios:clean": "expo prebuild --clean && expo run:ios",
-        "preview:update": "eas update --branch preview --message 'Preview update' --platform ios",
-        "preview:cloud": "eas build -p ios -e preview",
-        "preview:build": "eas build --platform ios --local --profile preview --output ./builds/sous-preview.ipa",
-        "preview:deploy": "ios-deploy --bundle builds/sous-preview.ipa"
+        "ios:preview:update": "eas update --branch preview --message 'Preview update' --platform ios",
+        "ios:preview:cloud": "eas build -p ios -e preview",
+        "ios:preview:build": "eas build --platform ios --local --profile preview --output ./builds/sous-preview-ios.ipa",
+        "ios:preview:deploy": "ios-deploy --bundle builds/sous-preview-ios.ipa",
+        "android:preview:update": "eas update --branch preview --message 'Preview update' --platform android",
+        "android:preview:cloud": "eas build -p android -e preview",
+        "android:preview:build": "eas build --platform android --local --profile preview --output ./builds/sous-preview-android.apk",
+        "android:preview:deploy": "adb install -r builds/sous-preview-android.apk"
     },
     "dependencies": {
         "@clerk/clerk-expo": "^2.16.1",

@@ -4,7 +4,6 @@ import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
 import Animated, {
-    interpolate,
     interpolateColor,
     useAnimatedStyle,
     useSharedValue,
@@ -12,27 +11,32 @@ import Animated, {
     withTiming,
 } from 'react-native-reanimated';
 
+const INDICATOR_ACTIVE_HEIGHT = 16;
+const INDICATOR_IDLE_HEIGHT = 2;
+
 export default function NetworkActivityIndicator() {
     const isFetching = useIsFetching();
     const isMutating = useIsMutating();
     const background = useSharedValue(0);
-    const rotate = useSharedValue(0);
-    const height = useSharedValue(0);
+    const height = useSharedValue(INDICATOR_IDLE_HEIGHT);
 
     const active = isFetching > 0 || isMutating > 0;
 
     useEffect(() => {
-        if (active && height.value === 0) {
-            height.value = withTiming(32, { duration: 300 });
-        } else if (!active && height.value === 32) {
-            height.value = withTiming(0, { duration: 300 });
+        if (active && height.value === INDICATOR_IDLE_HEIGHT) {
+            height.value = withTiming(INDICATOR_ACTIVE_HEIGHT, { duration: 300 });
+        } else if (!active && height.value === INDICATOR_ACTIVE_HEIGHT) {
+            height.value = withTiming(INDICATOR_IDLE_HEIGHT, { duration: 300 });
         }
     }, [isFetching, isMutating, active, height]);
 
     useEffect(() => {
-        background.value = withRepeat(withTiming(1, { duration: 2000 }), -1, true);
-        rotate.value = withRepeat(withTiming(1, { duration: 1000 }), -1, true);
-    }, [background, rotate]);
+        if (active) {
+            background.value = withRepeat(withTiming(1, { duration: 2000 }), -1, true);
+        } else {
+            background.value = withTiming(0, { duration: 300 });
+        }
+    }, [active, background]);
 
     const backgroundStyle = useAnimatedStyle(() => {
         return {
@@ -41,11 +45,6 @@ export default function NetworkActivityIndicator() {
                 [0, 1],
                 [colors.primary, colors.sous]
             ),
-            transform: [
-                {
-                    rotate: `${interpolate(rotate.value, [0, 1], [-0.5, 0.5])}deg`,
-                },
-            ],
         };
     });
 
@@ -61,7 +60,7 @@ export default function NetworkActivityIndicator() {
 const styles = StyleSheet.create({
     overlay: {
         position: 'absolute',
-        bottom: -8,
+        bottom: 0,
         left: 0,
         right: 0,
         alignItems: 'center',
