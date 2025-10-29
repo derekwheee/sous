@@ -1,6 +1,7 @@
 import Button from '@/components/button';
 import Heading from '@/components/heading';
-import PantryListing from '@/components/pantry-listing';
+import List from '@/components/list';
+import ListItem from '@/components/list-item';
 import Screen from '@/components/screen';
 import { useCategory } from '@/hooks/use-category';
 import { useHeader } from '@/hooks/use-header';
@@ -42,7 +43,7 @@ export default function PantryScreen() {
     } = useCategory();
 
     const {
-        pantries: { data: pantries, refetch: refetchPantries },
+        pantries: { data: pantries },
         savePantryItem,
         finishPantryItem,
         deletePantryItem,
@@ -71,7 +72,6 @@ export default function PantryScreen() {
         ],
     });
 
-    const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
     const [searchTerm, setSearchTerm] = useState<string>('');
 
     const handleSaveChanges = (patch: UpsertPantryItem, cb?: Function) => {
@@ -107,17 +107,74 @@ export default function PantryScreen() {
             footerItems={isLegacyVersion ? [<SearchBar key='search-bar' />] : undefined}
         >
             <Heading title='Pantry' />
-            {!!filteredPantry?.length &&
-                !!categories?.length &&
-                filteredPantry?.map((pantryItem: PantryItem) => (
-                    <PantryListing
-                        key={pantryItem.id}
-                        pantryItem={pantryItem}
-                        finishPantryItem={finishPantryItem}
-                        deletePantryItem={deletePantryItem}
-                        onToggleFavorite={handleSaveChanges}
-                    />
-                ))}
+            {!!filteredPantry?.length && !!categories?.length && (
+                <List>
+                    {filteredPantry?.map((pantryItem: PantryItem) => {
+                        return (
+                            <ListItem
+                                key={pantryItem.id}
+                                text={pantryItem.name}
+                                status={pantryItem.isInStock ? 'success' : 'indeterminate'}
+                                rightAdornment={() => (
+                                    <Pressable
+                                        onPress={() =>
+                                            handleSaveChanges({
+                                                id: pantryItem.id,
+                                                isFavorite: !pantryItem.isFavorite,
+                                            })
+                                        }
+                                    >
+                                        <SymbolView
+                                            name={'repeat'}
+                                            size={24}
+                                            tintColor={
+                                                pantryItem.isFavorite ? colors.primary : '#ccc'
+                                            }
+                                        />
+                                    </Pressable>
+                                )}
+                                leftActions={[
+                                    {
+                                        icon: 'slash',
+                                        iconColor: colors.text,
+                                        color: colors.warning,
+                                        onPress: (ref: React.RefObject<any>) => {
+                                            finishPantryItem(pantryItem, () => {
+                                                ref?.current?.close();
+                                            });
+                                        },
+                                    },
+                                ]}
+                                rightActions={[
+                                    {
+                                        icon: 'edit-2',
+                                        color: colors.primary,
+                                        onPress: (ref: React.RefObject<any>) => {
+                                            ref?.current?.close();
+                                            router.push({
+                                                pathname: '/pantry/edit',
+                                                params: {
+                                                    pantryItemId: pantryItem.id,
+                                                    pantryId: pantry!.id,
+                                                },
+                                            });
+                                        },
+                                    },
+                                    {
+                                        icon: 'trash-2',
+                                        color: colors.error,
+                                        onPress: (ref: React.RefObject<any>) => {
+                                            deletePantryItem(pantryItem.id, () => {
+                                                ref?.current?.close();
+                                            });
+                                        },
+                                    },
+                                ]}
+                            />
+                        );
+                    })}
+                </List>
+            )}
             {!filteredPantry?.length && !!searchTerm && (
                 <View style={styles.onboarding}>
                     <Text style={styles.onboardingText}>no items match your search</Text>

@@ -1,6 +1,7 @@
 import Button from '@/components/button';
 import Heading from '@/components/heading';
-import RecipeListing from '@/components/recipe-listing';
+import List from '@/components/list';
+import ListItem from '@/components/list-item';
 import Screen from '@/components/screen';
 import TagPill from '@/components/tag-pill';
 import Text from '@/components/text';
@@ -9,14 +10,11 @@ import { usePantry } from '@/hooks/use-pantry';
 import { useRecipe } from '@/hooks/use-recipe';
 import globalStyles, { colors, fonts } from '@/styles/global';
 import { getAvailableIngredients } from '@/util/recipe';
-import Feather from '@expo/vector-icons/Feather';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
-import { createRef, useCallback, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
-import Reanimated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated';
 
 const styles = {
     ...globalStyles,
@@ -68,12 +66,7 @@ export default function RecipeScreen() {
     const router = useRouter();
 
     const {
-        recipes: {
-            data: recipes,
-            isBusy: isRecipesBusy,
-            error: recipesError,
-            refetch,
-        },
+        recipes: { data: recipes, isBusy: isRecipesBusy, error: recipesError, refetch },
         deleteRecipe,
     } = useRecipe();
 
@@ -89,8 +82,6 @@ export default function RecipeScreen() {
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [showTags, setShowTags] = useState<boolean>(false);
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
-    const [swipeHeight, setSwipeHeight] = useState<number>(0);
-    const swipeRefs = useRef(new Map<number, React.RefObject<any>>());
     const searchBarRef = useRef<any>(null);
 
     const { isLegacyVersion, SearchBar } = useHeader({
@@ -123,15 +114,6 @@ export default function RecipeScreen() {
             },
         ],
     });
-
-    const updateHeight = useCallback(
-        (r: any) => {
-            if (swipeHeight !== r.nativeEvent.layout.height) {
-                setSwipeHeight(r.nativeEvent.layout.height);
-            }
-        },
-        [swipeHeight]
-    );
 
     const toggleTagSelected = (tag: string) => {
         if (selectedTags.includes(tag)) {
@@ -219,39 +201,51 @@ export default function RecipeScreen() {
             )}
             {!!filteredRecipes?.length && (
                 <GestureHandlerRootView>
-                    {filteredRecipes?.map((recipe: Recipe) => {
-                        if (!swipeRefs.current.has(recipe.id)) {
-                            swipeRefs.current.set(recipe.id, createRef<any>());
-                        }
-                        const swipeRef = swipeRefs.current.get(recipe.id);
+                    <List>
+                        {filteredRecipes?.map((recipe: Recipe) => {
+                            const availableIngredients = getAvailableIngredients(
+                                recipe,
+                                pantryItems || []
+                            );
+                            const itemStatus =
+                                availableIngredients.length === recipe.ingredients.length
+                                    ? 'success'
+                                    : availableIngredients.length > 0
+                                    ? 'warning'
+                                    : 'indeterminate';
 
-                        return (
-                            <Swipeable
-                                key={recipe.id}
-                                ref={swipeRef}
-                                renderRightActions={(prog, trans) =>
-                                    RightAction(
-                                        prog,
-                                        trans,
-                                        swipeHeight,
-                                        recipe,
-                                        (id, ref) => {
-                                            deleteRecipe(id, () => ref?.close());
-                                        },
-                                        () => router.push(`/recipes/edit/${recipe.id}`),
-                                        swipeRef
-                                    )
-                                }
-                            >
-                                <RecipeListing
+                            return (
+                                <ListItem
                                     key={recipe.id}
-                                    recipe={recipe}
-                                    pantryItems={pantryItems!}
-                                    onLayout={updateHeight}
+                                    text={recipe.name}
+                                    status={itemStatus}
+                                    onPress={() => router.push(`/recipes/${recipe.id}`)}
+                                    rightAdornment={() => (
+                                        <Text>
+                                            {availableIngredients.length} /{' '}
+                                            {recipe.ingredients.length}
+                                        </Text>
+                                    )}
+                                    rightActions={[
+                                        {
+                                            icon: 'edit-2',
+                                            color: colors.primary,
+                                            onPress: () =>
+                                                router.push(`/recipes/edit/${recipe.id}`),
+                                        },
+                                        {
+                                            icon: 'trash-2',
+                                            color: colors.error,
+                                            onPress: (ref: React.RefObject<any>) =>
+                                                deleteRecipe(recipe.id, () =>
+                                                    ref?.current?.close()
+                                                ),
+                                        },
+                                    ]}
                                 />
-                            </Swipeable>
-                        );
-                    })}
+                            );
+                        })}
+                    </List>
                 </GestureHandlerRootView>
             )}
             {!filteredRecipes?.length && !!searchTerm && (
@@ -288,39 +282,5 @@ export default function RecipeScreen() {
                 </View>
             )}
         </Screen>
-    );
-}
-
-function RightAction(
-    prog: SharedValue<number>,
-    drag: SharedValue<number>,
-    width: number,
-    recipe: Recipe,
-    proposeRemoveItem: (id: number, ref?: any) => void,
-    handleEditItem: () => void,
-    swipeRef?: React.RefObject<any>
-) {
-    const styleAnimation = useAnimatedStyle(() => {
-        return {
-            transform: [{ translateX: drag.value + width * 2 }],
-        };
-    });
-
-    const close = (fn: Function, ...args: any) => {
-        fn(...args);
-        swipeRef?.current?.close();
-    };
-
-    return (
-        <Reanimated.View style={styleAnimation}>
-            <View style={{ flexDirection: 'row' }}>
-                <Pressable onPress={() => close(handleEditItem)}>
-                    <Feather name='edit-2' size={24} color='#fff' style={styles.editAction} />
-                </Pressable>
-                <Pressable onPress={() => close(proposeRemoveItem, recipe.id, swipeRef?.current)}>
-                    <Feather name='trash-2' size={24} color='#fff' style={styles.deleteAction} />
-                </Pressable>
-            </View>
-        </Reanimated.View>
     );
 }

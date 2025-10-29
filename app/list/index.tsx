@@ -1,5 +1,7 @@
 import Button from '@/components/button';
 import Heading from '@/components/heading';
+import List from '@/components/list';
+import ListItem from '@/components/list-item';
 import Screen from '@/components/screen';
 import Text from '@/components/text';
 import { useCategory } from '@/hooks/use-category';
@@ -7,10 +9,10 @@ import { useHeader } from '@/hooks/use-header';
 import { usePantry } from '@/hooks/use-pantry';
 import globalStyles, { colors, fonts } from '@/styles/global';
 import Feather from '@expo/vector-icons/Feather';
-import { router } from 'expo-router';
-import { createRef, useCallback, useRef, useState } from 'react';
+import { router, useRouter } from 'expo-router';
+import { SymbolView } from 'expo-symbols';
+import { useCallback, useRef, useState } from 'react';
 import { Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
-import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import Reanimated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated';
 
 const styles = {
@@ -84,6 +86,7 @@ const styles = {
 };
 
 export default function ListScreen() {
+    const router = useRouter();
     const [isAddingItems, setIsAddingItems] = useState<boolean>(false);
     const [swipeHeight, setSwipeHeight] = useState<number>(0);
     const [newItemText, setNewItemText] = useState<string>('');
@@ -104,11 +107,10 @@ export default function ListScreen() {
         ],
     });
 
-    const { categories: { data: categoryList } } = useCategory();
     const {
-        pantry,
-        savePantryItem,
-    } = usePantry();
+        categories: { data: categoryList },
+    } = useCategory();
+    const { pantry, savePantryItem } = usePantry();
 
     const categories = pantry?.pantryItems
         ?.reduce<any[]>((acc, item: PantryItem) => {
@@ -145,8 +147,6 @@ export default function ListScreen() {
         },
         [swipeHeight]
     );
-
-    const swipeRefs = useRef(new Map<number, React.RefObject<any>>());
 
     const proposeRemoveItem = useCallback((id: number, ref?: any) => {
         if (ref) {
@@ -191,9 +191,7 @@ export default function ListScreen() {
     const isLoading = !categoryList || !pantry;
 
     return (
-        <Screen
-            isLoading={isLoading}
-        >
+        <Screen isLoading={isLoading}>
             <Heading title='Shopping List' />
             {isAddingItems && (
                 <View style={styles.search}>
@@ -224,62 +222,70 @@ export default function ListScreen() {
                         <Text style={styles.categoryText}>{itemCategory.icon}</Text>
                         <Text style={styles.categoryText}>{itemCategory.name}</Text>
                     </View>
-                    {itemCategory.pantryItems
-                        .sort((a, b) => a.name.localeCompare(b.name))
-                        .map((pantryItem: any) => {
-                            if (!swipeRefs.current.has(pantryItem.id)) {
-                                swipeRefs.current.set(pantryItem.id, createRef<any>());
-                            }
-                            const swipeRef = swipeRefs.current.get(pantryItem.id);
-
-                            if (pantryItem.canBeAdded) {
-                                return (
-                                    <Pressable
-                                        key={pantryItem.id}
-                                        style={styles.listItemWrapper}
-                                        onPress={() => handleAddItem(pantryItem.id)}
-                                    >
-                                        <Text
-                                            style={[styles.listItemText, styles.listItemTextDimmed]}
-                                        >
-                                            {pantryItem.name}
-                                        </Text>
-                                        <Feather name='plus' size={24} color={colors.primary} />
-                                    </Pressable>
-                                );
-                            }
-
-                            return (
-                                <Swipeable
+                    <List>
+                        {itemCategory.pantryItems
+                            .sort((a, b) => a.name.localeCompare(b.name))
+                            .map((pantryItem: any) => (
+                                <ListItem
+                                    dimmed={pantryItem.canBeAdded}
                                     key={pantryItem.id}
-                                    ref={swipeRef}
-                                    renderRightActions={(prog, trans) => (
-                                        <RightAction
-                                            prog={prog}
-                                            drag={trans}
-                                            pantryItem={pantryItem}
-                                            width={swipeHeight}
-                                            proposeRemoveItem={proposeRemoveItem}
-                                            swipeRef={swipeRef}
-                                        />
-                                    )}
-                                >
-                                    <Pressable
-                                        onLayout={updateHeight}
-                                        style={styles.listItemWrapper}
-                                        onPress={() =>
-                                            savePantryItem({
-                                                id: pantryItem.id,
-                                                isInShoppingList: false,
-                                                isInStock: true,
-                                            })
-                                        }
-                                    >
-                                        <Text style={styles.listItemText}>{pantryItem.name}</Text>
-                                    </Pressable>
-                                </Swipeable>
-                            );
-                        })}
+                                    text={pantryItem.name}
+                                    onPress={
+                                        pantryItem.canBeAdded
+                                            ? () => handleAddItem(pantryItem.id)
+                                            : undefined
+                                    }
+                                    rightAdornment={
+                                        pantryItem.canBeAdded
+                                            ? () => (
+                                                  <Feather
+                                                      name='plus'
+                                                      size={24}
+                                                      color={colors.primary}
+                                                  />
+                                              )
+                                            : () => (
+                                                  <SymbolView
+                                                      name={'repeat'}
+                                                      size={24}
+                                                      tintColor={
+                                                          pantryItem.isFavorite
+                                                              ? colors.primary
+                                                              : '#ccc'
+                                                      }
+                                                  />
+                                              )
+                                    }
+                                    rightActions={
+                                        !pantryItem.canBeAdded
+                                            ? [
+                                                  {
+                                                      icon: 'edit-2',
+                                                      color: colors.primary,
+                                                      onPress: (ref: React.RefObject<any>) => {
+                                                          ref?.current?.close();
+                                                          router.push({
+                                                              pathname: '/list/edit',
+                                                              params: {
+                                                                  pantryItemId: pantryItem.id,
+                                                                  pantryId: pantryItem.pantryId,
+                                                              },
+                                                          });
+                                                      },
+                                                  },
+                                                  {
+                                                      icon: 'x',
+                                                      color: colors.error,
+                                                      onPress: (ref: React.RefObject<any>) => {
+                                                          proposeRemoveItem(pantryItem.id, ref);
+                                                      },
+                                                  },
+                                              ]
+                                            : undefined
+                                    }
+                                />
+                            ))}
+                    </List>
                 </View>
             ))}
             {!pantry?.pantryItems.length && (

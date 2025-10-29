@@ -22,6 +22,7 @@ export const colors = {
     background: '#F7F7F7',
     text: '#191919',
     indeterminate: '#E8E8E8',
+    surface: '#FFFFFF',
     ...swatches,
 };
 

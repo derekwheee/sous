@@ -1,14 +1,13 @@
-import DragHandle from '@/components/drag-handle';
 import Heading from '@/components/heading';
+import ListItem from '@/components/list-item';
 import Screen from '@/components/screen';
-import Text from '@/components/text';
 import { useCategory } from '@/hooks/use-category';
 import { brightness, colors } from '@/styles/global';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
-import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 import DraggableFlatList, {
     RenderItemParams,
     ScaleDecorator,
@@ -25,7 +24,10 @@ export default function App() {
     const router = useRouter();
     const [data, setData] = useState<Item[]>([]);
     const [isDragReady, setIsDragReady] = useState(false);
-    const { categories: { data: categories }, saveSortOrder, isSortOrderUpdating } = useCategory();
+    const {
+        categories: { data: categories },
+        saveSortOrder,
+    } = useCategory();
     const tabBarHeight = useBottomTabBarHeight();
 
     useEffect(() => {
@@ -49,20 +51,27 @@ export default function App() {
                     disabled={isActive}
                     style={[styles.rowItem, isActive && styles.rowItemActive]}
                 >
-                    <View style={styles.categoryWrapper}>
-                        <DragHandle color={isActive ? colors.background : undefined} />
-                        <Text>{item.icon}</Text>
-                        <Text style={[styles.categoryText, isActive && styles.categoryTextActive]}>
-                            {item.name}
-                        </Text>
-                        <SymbolView
-                            name={item.isNonFood ? 'fork.knife.circle' : 'fork.knife.circle.fill'}
-                            tintColor={
-                                item.isNonFood ? brightness(colors.background, -40) : colors.primary
-                            }
-                            style={{ marginLeft: 'auto' }}
-                        />
-                    </View>
+                    <ListItem
+                        key={item.key}
+                        draggable
+                        highlight={isActive}
+                        text={`${item.icon}  ${item.name}`}
+                        rightAdornment={() => (
+                            <SymbolView
+                                name={
+                                    item.isNonFood ? 'fork.knife.circle' : 'fork.knife.circle.fill'
+                                }
+                                tintColor={
+                                    item.isNonFood
+                                        ? brightness(colors.background, -40)
+                                        : isActive
+                                        ? colors.background
+                                        : colors.primary
+                                }
+                                style={{ marginLeft: 'auto' }}
+                            />
+                        )}
+                    />
                 </TouchableOpacity>
             </ScaleDecorator>
         );
@@ -71,18 +80,16 @@ export default function App() {
     const handleDragEnd = async ({ data: newData }: { data: Item[] }) => {
         setData(newData);
 
-        const sortOrder = newData.map((item) => (Number(item.key)));
+        const sortOrder = newData.map((item) => Number(item.key));
 
         await saveSortOrder(sortOrder);
-    }
-
-    const listRef = useRef(null);
+    };
 
     return (
         <Screen withoutScroll isLoading={!categories || !isDragReady}>
             <Heading title='Categories' />
             <DraggableFlatList
-                onLayout={(e) => setIsDragReady(!!categories)}
+                onLayout={() => setIsDragReady(!!categories)}
                 data={data}
                 onDragEnd={handleDragEnd}
                 keyExtractor={(item) => item.key}
@@ -90,9 +97,8 @@ export default function App() {
                 autoscrollSpeed={200}
                 autoscrollThreshold={200}
                 contentContainerStyle={{
-                    paddingTop: 1,
                     paddingBottom: tabBarHeight + 102,
-                    backgroundColor: brightness(colors.background, -40),
+                    backgroundColor: brightness(colors.background, -20),
                     gap: 1,
                 }}
             />
@@ -103,7 +109,6 @@ export default function App() {
 const styles = StyleSheet.create({
     rowItem: {
         flex: 1,
-        backgroundColor: colors.background,
     },
     rowItemActive: {
         backgroundColor: colors.primary,
