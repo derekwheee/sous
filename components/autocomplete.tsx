@@ -34,7 +34,7 @@ const styles = {
             borderTopLeftRadius: 16,
             borderTopRightRadius: 16,
             backgroundColor: colors.background,
-            zIndex: 300000
+            zIndex: 300000,
         },
         headingText: {
             paddingTop: 32,
@@ -87,7 +87,6 @@ export default function Autocomplete({
     const [height, setHeight] = useState(0);
 
     const vh = (scale: number) => Dimensions.get('window').height * scale;
-    const vw = (scale: number) => Dimensions.get('window').width * scale;
 
     const keyboardPadding = useDerivedValue(() => {
         const target = open ? keyboard.height.value + keyboardOffset : 0;
@@ -104,10 +103,12 @@ export default function Autocomplete({
         }
     }, [open]);
 
-    items = items.map<{ label: string; value: string }>((item) => ({
-        label: item instanceof Object ? item.label : (item as string),
-        value: item instanceof Object ? item.value : (item as string),
-    })).sort((a, b) => a.value.localeCompare(b.value));
+    items = items
+        .map<{ label: string; value: string }>((item) => ({
+            label: item instanceof Object ? item.label : (item as string),
+            value: item instanceof Object ? item.value : (item as string),
+        }))
+        .sort((a, b) => a.value.localeCompare(b.value));
 
     const handleClose = () => {
         inputRef.current?.blur();
@@ -169,9 +170,11 @@ export default function Autocomplete({
                         placeholder={mode === 'create' ? 'search or create...' : 'search...'}
                         rightAdornment={{
                             icon: mode === 'create' ? 'plus.circle.fill' : 'magnifyingglass.circle',
-                            disabledIcon: mode === 'create' ? 'circle.dotted' : 'magnifyingglass.circle',
+                            disabledIcon:
+                                mode === 'create' ? 'circle.dotted' : 'magnifyingglass.circle',
                             disabled: mode === 'create' ? !value : false,
-                            onPress: mode === 'create' ? () => onSelect(value, handleClose) : undefined,
+                            onPress:
+                                mode === 'create' ? () => onSelect(value, handleClose) : undefined,
                         }}
                         style={{ marginBottom: 16 }}
                         returnKeyType={mode === 'create' ? 'done' : 'default'}

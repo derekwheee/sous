@@ -5,7 +5,7 @@ const styles = {
     ...globalStyles,
     ...StyleSheet.create({
         spacer: {
-            height: 100
+            height: 100,
         },
         circle: {
             position: 'absolute',
@@ -15,9 +15,9 @@ const styles = {
             width: '125%',
             aspectRatio: 1,
             borderRadius: 9999,
-            backgroundColor: colors.sous
-        }
-    })
+            backgroundColor: colors.sous,
+        },
+    }),
 };
 
 export default function HeadingBackground() {

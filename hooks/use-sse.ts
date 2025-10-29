@@ -14,6 +14,11 @@ export function useSSE() {
 
     const householdId = (user as User | null)?.defaultHouseholdId || 0;
 
+    const getAuthToken = useCallback(async () => {
+        const authToken = await getToken();
+        setToken(authToken);
+    }, [getToken]);
+
     useEffect(() => {
         if (!token) {
             getAuthToken();
@@ -43,10 +48,5 @@ export function useSSE() {
         });
 
         return () => unsubscribe();
-    }, [token, queryClient, householdId]);
-
-    const getAuthToken = useCallback(async () => {
-        const authToken = await getToken();
-        setToken(authToken);
-    }, [getToken]);
+    }, [token, queryClient, householdId, getAuthToken]);
 }

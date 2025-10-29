@@ -7,7 +7,7 @@ import { usePantry } from '@/hooks/use-pantry';
 import globalStyles, { colors } from '@/styles/global';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Spinner, Switch, XStack, YStack } from 'tamagui';
 
@@ -69,33 +69,40 @@ export default function EditItemModal() {
         newName?: string;
     } = useLocalSearchParams();
 
-    const { categories: { data: categories } } = useCategory();
+    const {
+        categories: { data: categories },
+    } = useCategory();
     const router = useRouter();
 
-    const {
-        pantryItem: { data: pantryItem },
-        savePantryItem,
-        isPantryItemSaving,
-    } = usePantry({
+    const { pantryItem, savePantryItem, isPantryItemSaving } = usePantry({
         pantryItemId: pantryItemId ? Number(pantryItemId) : undefined,
     });
 
     const [isDirty, setIsDirty] = useState(false);
     const [name, setName] = useState(pantryItem?.name || newName || '');
-    const [category, setCategory] = useState(
-        pantryItem?.category?.name ||
-            categories?.find((c) => c.name.toLowerCase() === 'other')?.name
-    );
     const [isInStock, setIsInStock] = useState(!!pantryItem?.isInStock);
     const [isInShoppingList, setIsInShoppingList] = useState(!!pantryItem?.isInShoppingList);
     const [isFavorite, setIsFavorite] = useState(!!pantryItem?.isFavorite);
     const [showCategoryInput, setShowCategoryInput] = useState(false);
     const [categoryEntry, setCategoryEntry] = useState('');
+    const [newCategory, setCategory] = useState('');
+
+    const categoryName = useMemo(
+        () =>
+            newCategory ||
+            pantryItem?.category?.name ||
+            categories?.find((c) => c.name.toLowerCase() === 'other')?.name,
+        [newCategory, categories, pantryItem]
+    );
+
+    const category = useMemo(
+        () => categories?.find((c) => c.name === categoryName || c.name.toLowerCase() === 'other'),
+        [categories, categoryName]
+    );
 
     useEffect(() => {
         if (pantryItem) {
             setName(pantryItem?.name);
-            setCategory(pantryItem?.category?.name);
             setIsInStock(!!pantryItem?.isInStock);
             setIsInShoppingList(!!pantryItem?.isInShoppingList);
             setIsFavorite(!!pantryItem?.isFavorite);
@@ -108,15 +115,13 @@ export default function EditItemModal() {
         isInStock,
         isInShoppingList,
         isFavorite,
-        categoryId: categories?.find((cat) => cat.name === category)?.id,
+        categoryId: category?.id,
     };
 
-    const change = (fn: Function) => {
-        if (!isDirty) {
-            setIsDirty(true);
-        }
+    const change = useCallback((fn: () => void) => {
         fn();
-    };
+        setIsDirty(true);
+    }, []);
 
     const handleSave = (patch: UpsertPantryItem, cb?: Function) => {
         savePantryItem(patch, {
@@ -175,8 +180,7 @@ export default function EditItemModal() {
                         style={styles.categoryTrigger}
                     >
                         <Text weight='regular'>
-                            {categories?.find((c) => c.name === category)?.icon}{' '}
-                            {categories?.find((c) => c.name === category)?.name}
+                            {category?.icon} {category?.name}
                         </Text>
                         <SymbolView name='chevron.right' size={16} tintColor={colors.text} />
                     </Pressable>

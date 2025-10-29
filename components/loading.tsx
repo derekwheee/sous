@@ -69,8 +69,8 @@ export default function PageTitle({ isLoading = false, duration = 300, ...rest }
                 ? -1.5 * measuredHeight
                 : 0
             : !isLoading
-            ? -1000
-            : 0;
+              ? -1000
+              : 0;
         translateY.value = withTiming(target, { duration });
     }, [isLoading, measuredHeight, duration, translateY]);
 

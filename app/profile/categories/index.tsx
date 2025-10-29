@@ -65,8 +65,8 @@ export default function App() {
                                     item.isNonFood
                                         ? brightness(colors.background, -40)
                                         : isActive
-                                        ? colors.background
-                                        : colors.primary
+                                          ? colors.background
+                                          : colors.primary
                                 }
                                 style={{ marginLeft: 'auto' }}
                             />

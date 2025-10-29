@@ -42,12 +42,7 @@ export default function PantryScreen() {
         categories: { data: categories },
     } = useCategory();
 
-    const {
-        pantries: { data: pantries },
-        savePantryItem,
-        finishPantryItem,
-        deletePantryItem,
-    } = usePantry();
+    const { pantries, savePantryItem, finishPantryItem, deletePantryItem } = usePantry();
 
     const searchBarRef = useRef<any>(null);
 
@@ -56,7 +51,6 @@ export default function PantryScreen() {
         searchPlaceholder: 'search pantry...',
         onChangeSearch: (event: any) => setSearchTerm(event.nativeEvent.text),
         onCancelSearch: () => setSearchTerm(''),
-        dependencies: [router],
         headerItems: [
             {
                 label: 'new item',
@@ -191,7 +185,7 @@ export default function PantryScreen() {
                         }}
                     >
                         <Text style={styles.addSearchTermText}>
-                            add "{searchTerm}" to your pantry
+                            add &ldquo;{searchTerm}&rdquo; to your pantry
                         </Text>
                         <SymbolView name='chevron.right' size={12} tintColor={colors.primary} />
                     </Pressable>
@@ -200,7 +194,7 @@ export default function PantryScreen() {
             {!isLoading && !pantry && (
                 <View style={styles.onboarding}>
                     <Text style={styles.onboardingText}>
-                        you don't have anything in your pantry
+                        you don&apos;t have anything in your pantry
                     </Text>
                     <Button
                         text='add your first item'

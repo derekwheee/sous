@@ -2,7 +2,7 @@ import DragHandle from '@/components/drag-handle';
 import Text from '@/components/text';
 import globalStyles, { colors } from '@/styles/global';
 import { Feather } from '@expo/vector-icons';
-import { useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Pressable, PressableProps, StyleSheet, View } from 'react-native';
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import Reanimated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated';
@@ -75,7 +75,7 @@ interface ListItemProps {
     rightActions?: SwipeAction[];
 }
 
-export default function ListItem(props: ListItemProps & PressableProps) {
+function ListItem(props: ListItemProps & PressableProps) {
     const [swipeHeight, setSwipeHeight] = useState<number>(0);
 
     const ref = useRef<any>(null);
@@ -91,6 +91,8 @@ export default function ListItem(props: ListItemProps & PressableProps) {
         <ListItemContent {...props} ref={ref} />
     );
 }
+
+export default React.memo(ListItem);
 
 function ListItemContent({
     key,

@@ -21,13 +21,13 @@ export const useCategory = ({ categoryId }: { categoryId?: number } = {}) => {
     const pantry: Pantry | undefined = getDefault(pantries.data || []);
 
     const categories = useQuery<ItemCategory[]>({
-        queryKey: categoryQueryKey,
+        queryKey: [...categoryQueryKey, pantry?.id],
         queryFn: () => getCategories(pantry?.id!),
         enabled: !!user && !!pantry?.id,
     });
 
     const category = useQuery<ItemCategory>({
-        queryKey: ['categories', categoryId],
+        queryKey: ['categories', categoryId, pantry?.id],
         queryFn: () => getCategory(pantry?.id!, Number(categoryId)),
         enabled: !!user && !!categoryId && !!pantry?.id,
     });
@@ -44,17 +44,14 @@ export const useCategory = ({ categoryId }: { categoryId?: number } = {}) => {
         mutationFn: (sortedIds: number[]) => updateSortOrder(pantry?.id!, sortedIds),
         onMutate: async (sortedIds): Promise<{ previous: ItemCategory[] | undefined }> => {
             await queryClient.cancelQueries({ queryKey: categoryQueryKey });
-            const previous = queryClient.getQueryData<ItemCategory[]>([categoryQueryKey]);
+            const previous = queryClient.getQueryData<ItemCategory[]>(categoryQueryKey);
 
             queryClient.setQueryData<ItemCategory[]>(categoryQueryKey, (old) =>
                 sortedIds
                     .map((id, index) => {
                         const category = old?.find((c) => c.id === id);
                         if (category) {
-                            return {
-                                ...category,
-                                sortOrder: index,
-                            };
+                            return Object.assign({}, category, { sortOrder: index });
                         }
                         return category;
                     })
@@ -73,27 +70,30 @@ export const useCategory = ({ categoryId }: { categoryId?: number } = {}) => {
         },
     });
 
-    const deleteCategory = useCallback((id: number, cb: Function) => {
-        Alert.alert('Remove category', 'Do you want to remove this category from your list?', [
-            {
-                text: 'Cancel',
-                onPress: () => {},
-                style: 'cancel',
-            },
-            {
-                text: 'Delete',
-                onPress: async () => {
-                    await saveCategory({
-                        id,
-                        deletedAt: new Date(),
-                    });
+    const deleteCategory = useCallback(
+        (id: number, cb: Function) => {
+            Alert.alert('Remove category', 'Do you want to remove this category from your list?', [
+                {
+                    text: 'Cancel',
+                    onPress: () => {},
+                    style: 'cancel',
                 },
-                style: 'destructive',
-            },
-        ]);
+                {
+                    text: 'Delete',
+                    onPress: async () => {
+                        await saveCategory({
+                            id,
+                            deletedAt: new Date(),
+                        });
+                    },
+                    style: 'destructive',
+                },
+            ]);
 
-        cb?.();
-    }, []);
+            cb?.();
+        },
+        [saveCategory]
+    );
 
     return {
         pantry,

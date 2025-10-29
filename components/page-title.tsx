@@ -11,12 +11,12 @@ const styles = {
             flexDirection: 'row',
             paddingTop: 32,
             paddingBottom: 32,
-            paddingHorizontal: 16
+            paddingHorizontal: 16,
         },
         actionChipWrapper: {
             flexDirection: 'row',
             gap: 8,
-            marginLeft: 'auto'
+            marginLeft: 'auto',
         },
         actionChip: {
             width: 40,
@@ -26,13 +26,13 @@ const styles = {
             gap: 8,
             padding: 8,
             borderRadius: 24,
-            backgroundColor: colors.primary
+            backgroundColor: colors.primary,
         },
         actionChipText: {
             paddingLeft: 4,
-            color: 'white'
-        }
-    })
+            color: 'white',
+        },
+    }),
 };
 
 export default function PageTitle({
@@ -58,8 +58,13 @@ export default function PageTitle({
                             {label && <Text style={styles.actionChipText}>{label}</Text>}
                             <SymbolView
                                 name={icon}
-                                style={{ width: 24, height: 24, position: 'relative', top: nudge ?? 0 }}
-                                type="palette"
+                                style={{
+                                    width: 24,
+                                    height: 24,
+                                    position: 'relative',
+                                    top: nudge ?? 0,
+                                }}
+                                type='palette'
                                 tintColor={'white'}
                             />
                         </Pressable>

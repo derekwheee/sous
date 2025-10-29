@@ -20,19 +20,19 @@ export const useRecipe = ({
         deleteRecipe: apiDeleteRecipe,
     } = useApi();
 
-    const recipes = useQuery<Recipe[]>({
+    const recipesQuery = useQuery<Recipe[]>({
         queryKey: ['recipes'],
         queryFn: () => getRecipes(),
         enabled: enabled && !!user,
     });
 
-    const recipe = useQuery<Recipe>({
+    const recipeQuery = useQuery<Recipe>({
         queryKey: ['recipes', recipeId],
         queryFn: () => getRecipe(recipeId!),
         enabled: enabled && !!user && !!recipeId,
     });
 
-    const tags = useQuery<RecipeTag[]>({
+    const tagsQuery = useQuery<RecipeTag[]>({
         queryKey: ['recipeTags'],
         queryFn: () => getAllRecipeTags(),
         enabled: enabled && !!user,
@@ -59,33 +59,39 @@ export const useRecipe = ({
         mutationFn: (url: string) => apiImportRecipe(url),
     });
 
-    const deleteRecipe = useCallback((id: number, cb?: Function) => {
-        Alert.alert('Remove item', 'Do you want to remove this item from your list?', [
-            {
-                text: 'Cancel',
-                onPress: () => {},
-                style: 'cancel',
-            },
-            {
-                text: 'Delete',
-                onPress: async () => {
-                    await deleteMutation.mutate({ id });
-                    cb?.();
+    const deleteMutationMutate = deleteMutation.mutate;
+
+    const deleteRecipe = useCallback(
+        (id: number, cb?: Function) => {
+            Alert.alert('Remove item', 'Do you want to remove this item from your list?', [
+                {
+                    text: 'Cancel',
+                    onPress: () => {},
+                    style: 'cancel',
                 },
-                style: 'destructive',
-            },
-        ]);
-    }, []);
+                {
+                    text: 'Delete',
+                    onPress: async () => {
+                        await deleteMutationMutate({ id });
+                        cb?.();
+                    },
+                    style: 'destructive',
+                },
+            ]);
+        },
+        [deleteMutationMutate]
+    );
 
     return {
-        recipes: {
-            ...recipes,
-            isBusy: recipes.isFetching || recipes.isLoading || recipes.isPending,
-        },
-        recipe: {
-            ...recipe,
-            isBusy: recipe.isFetching || recipe.isLoading || recipe.isPending,
-        },
+        recipesQuery,
+        recipesIsBusy: recipesQuery.isFetching || recipesQuery.isLoading || recipesQuery.isPending,
+        recipes: recipesQuery.data,
+        recipeQuery,
+        recipeIsBusy: recipeQuery.isFetching || recipeQuery.isLoading || recipeQuery.isPending,
+        recipe: recipeQuery.data,
+        tagsQuery,
+        tagsIsBusy: tagsQuery.isFetching || tagsQuery.isLoading || tagsQuery.isPending,
+        tags: tagsQuery.data,
         importRecipe: {
             ...importRecipe,
             isBusy: importRecipe.isPending,
@@ -98,10 +104,6 @@ export const useRecipe = ({
         deleteMutation: {
             ...deleteMutation,
             isBusy: deleteMutation.isPending,
-        },
-        tags: {
-            ...tags,
-            isBusy: tags.isFetching || tags.isLoading || tags.isPending,
         },
     };
 };

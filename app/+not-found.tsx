@@ -3,15 +3,17 @@ import { usePathname } from 'expo-router';
 import { View } from 'react-native';
 
 export default function Index() {
-  const pathname = usePathname();
+    const pathname = usePathname();
 
-  console.log(pathname)
+    console.log(pathname);
 
-  // if (pathname === '/') {
-  //   return <Redirect href="/recipes" />;
-  // }
+    // if (pathname === '/') {
+    //   return <Redirect href="/recipes" />;
+    // }
 
-  return <View>
-    <Text>Not Found</Text>
-  </View>;
+    return (
+        <View>
+            <Text>Not Found</Text>
+        </View>
+    );
 }

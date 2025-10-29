@@ -18,12 +18,12 @@ const styles = {
             borderRadius: 32,
         },
         pillText: {
-            paddingRight: 8
+            paddingRight: 8,
         },
         pillIcon: {
             marginLeft: -4,
-        }
-    })
+        },
+    }),
 };
 
 interface PillProps {
@@ -43,7 +43,9 @@ export default function Pill({
     return (
         <Pressable style={styles.pill} onPress={onPress} {...props}>
             <Text style={styles.pillText}>{text}</Text>
-            {icon && <SymbolView name={icon} size={24} tintColor={tintColor} style={styles.pillIcon} />}
+            {icon && (
+                <SymbolView name={icon} size={24} tintColor={tintColor} style={styles.pillIcon} />
+            )}
         </Pressable>
     );
 }

@@ -6,20 +6,20 @@ import { StyleSheet, Text, View } from 'react-native';
 const styles = {
     ...global,
     ...StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: colors.background,
-    },
-    text: {
-        fontFamily: fonts.poppins.regular,
-        color: colors.text,
-    },
-    divider: {
-        backgroundColor: brightness(colors.background, -40),
-    }
-})
+        container: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: colors.background,
+        },
+        text: {
+            fontFamily: fonts.poppins.regular,
+            color: colors.text,
+        },
+        divider: {
+            backgroundColor: brightness(colors.background, -40),
+        },
+    }),
 };
 
 export default function NewScreen() {

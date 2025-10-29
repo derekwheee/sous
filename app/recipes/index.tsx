@@ -12,7 +12,7 @@ import globalStyles, { colors, fonts } from '@/styles/global';
 import { getAvailableIngredients } from '@/util/recipe';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -66,16 +66,19 @@ export default function RecipeScreen() {
     const router = useRouter();
 
     const {
-        recipes: { data: recipes, isBusy: isRecipesBusy, error: recipesError, refetch },
+        recipesQuery: { error: recipesError, refetch },
+        recipesIsBusy,
+        recipes,
         deleteRecipe,
     } = useRecipe();
 
     const {
-        pantries: { error: pantryError, isBusy: isPantryBusy },
+        pantriesQuery: { error: pantryError },
+        pantriesIsBusy,
         pantry,
     } = usePantry();
 
-    const isLoading = isRecipesBusy || isPantryBusy;
+    const isLoading = recipesIsBusy || pantriesIsBusy;
     const pantryItems = pantry?.pantryItems;
 
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
@@ -89,7 +92,6 @@ export default function RecipeScreen() {
         searchPlaceholder: 'search recipes...',
         onChangeSearch: (event: any) => setSearchTerm(event.nativeEvent.text),
         onCancelSearch: () => setSearchTerm(''),
-        dependencies: [showTags, router, pantry],
         headerItems: [
             {
                 label: 'suggest recipes',
@@ -131,34 +133,40 @@ export default function RecipeScreen() {
         console.log('Error fetching pantry:', pantryError);
     }
 
-    const sortedRecipes = recipes?.sort((a, b) => {
-        const aRatio =
-            getAvailableIngredients(a, pantryItems || []).length / (a.ingredients.length || 1);
-        const bRatio =
-            getAvailableIngredients(b, pantryItems || []).length / (b.ingredients.length || 1);
-        if (aRatio === bRatio) {
-            return a.name.localeCompare(b.name);
-        }
-        return bRatio - aRatio;
-    });
+    const sortedRecipes = useMemo(() => {
+        if (!recipes) return [];
+        return [...recipes].sort((a, b) => {
+            const aRatio =
+                getAvailableIngredients(a, pantryItems || []).length / (a.ingredients.length || 1);
+            const bRatio =
+                getAvailableIngredients(b, pantryItems || []).length / (b.ingredients.length || 1);
+            if (aRatio === bRatio) {
+                return a.name.localeCompare(b.name);
+            }
+            return bRatio - aRatio;
+        });
+    }, [recipes, pantryItems]);
 
-    const searchedRecipes = searchTerm
-        ? sortedRecipes?.filter((recipe) =>
-              recipe.name.toLowerCase().includes(searchTerm.toLowerCase())
-          )
-        : sortedRecipes;
+    const searchedRecipes = useMemo(() => {
+        if (!searchTerm) return sortedRecipes;
+        return sortedRecipes?.filter((recipe) =>
+            recipe.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [sortedRecipes, searchTerm]);
 
-    const tags: string[] = Array.from(
-        new Set(searchedRecipes?.flatMap((r) => r.tags?.map((t) => t.name) || []))
-    );
+    const tags = useMemo(() => {
+        return Array.from(
+            new Set(searchedRecipes?.flatMap((r) => r.tags?.map((t) => t.name) || []))
+        );
+    }, [searchedRecipes]);
 
-    const taggedRecipes = searchedRecipes?.filter((recipe) => {
-        if (selectedTags.length === 0) return true;
-        const recipeTagNames = recipe.tags?.map((t) => t.name) || [];
-        return selectedTags.every((tag) => recipeTagNames.includes(tag));
-    });
-
-    const filteredRecipes = taggedRecipes;
+    const filteredRecipes = useMemo(() => {
+        if (!selectedTags.length) return searchedRecipes;
+        return searchedRecipes?.filter((recipe) => {
+            const recipeTagNames = recipe.tags?.map((t) => t.name) || [];
+            return selectedTags.every((tag) => recipeTagNames.includes(tag));
+        });
+    }, [searchedRecipes, selectedTags]);
 
     return (
         <Screen
@@ -211,8 +219,8 @@ export default function RecipeScreen() {
                                 availableIngredients.length === recipe.ingredients.length
                                     ? 'success'
                                     : availableIngredients.length > 0
-                                    ? 'warning'
-                                    : 'indeterminate';
+                                      ? 'warning'
+                                      : 'indeterminate';
 
                             return (
                                 <ListItem
@@ -264,7 +272,7 @@ export default function RecipeScreen() {
                         }}
                     >
                         <Text style={styles.addSearchTermText}>
-                            add a recipe for "{searchTerm}"
+                            add a recipe for &ldquo;{searchTerm}&rdquo;
                         </Text>
                         <SymbolView name='chevron.right' size={12} tintColor={colors.primary} />
                     </Pressable>
@@ -272,7 +280,7 @@ export default function RecipeScreen() {
             )}
             {!isLoading && !recipes?.length && (
                 <View style={styles.onboarding}>
-                    <Text style={styles.onboardingText}>you don't have any recipes yet</Text>
+                    <Text style={styles.onboardingText}>you don&lsquo;t have any recipes yet</Text>
                     <Button
                         text='create your first recipe'
                         onPress={() => router.push('/recipes/new')}

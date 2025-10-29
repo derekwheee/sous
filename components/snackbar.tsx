@@ -94,17 +94,23 @@ export const SnackbarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                     style={[
                         styles.snackbarWrapper,
                         {
-                            transform: [{
-                                translateY: translate.interpolate({
-                                    inputRange: [0, 1],
-                                    outputRange: [(height || 120) * -1, 0],
-                                }),
-                            }],
+                            transform: [
+                                {
+                                    translateY: translate.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: [(height || 120) * -1, 0],
+                                    }),
+                                },
+                            ],
                             backgroundColor: snackbarConfigs[type].backgroundColor,
                         },
                     ]}
                 >
-                    <Pressable style={styles.snackbar} onPress={hideSnackbar} onLayout={(e) => setHeight(e.nativeEvent.layout.height)}>
+                    <Pressable
+                        style={styles.snackbar}
+                        onPress={hideSnackbar}
+                        onLayout={(e) => setHeight(e.nativeEvent.layout.height)}
+                    >
                         <SymbolView
                             name={snackbarConfigs[type].icon}
                             tintColor={snackbarConfigs[type].textColor}

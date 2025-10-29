@@ -71,7 +71,6 @@ export default function ProfileJoinScreen() {
     });
 
     const handleBarcodeScan = ({ data }: BarcodeScanningResult) => {
-
         const parsed = validateBarcodeData(data);
         if (parsed) {
             setJoinObject(parsed);

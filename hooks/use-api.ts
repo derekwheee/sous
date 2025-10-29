@@ -32,7 +32,7 @@ export function useApi() {
         if (!isSignedIn) {
             queryClient.invalidateQueries();
         }
-    }, [isSignedIn, invalidateQueries]);
+    }, [isSignedIn, queryClient]);
 
     const apiClient = createClient(invalidateQueries, getToken, showSnackbar);
 

@@ -101,29 +101,32 @@ export default function LoginScreen() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
-    const onPress = useCallback(async (strategy: 'oauth_google' | 'oauth_apple') => {
-        try {
-            const { createdSessionId, setActive } = await startSSOFlow({
-                strategy,
-                redirectUrl: AuthSession.makeRedirectUri(),
-            });
+    const onPress = useCallback(
+        async (strategy: 'oauth_google' | 'oauth_apple') => {
+            try {
+                const { createdSessionId, setActive } = await startSSOFlow({
+                    strategy,
+                    redirectUrl: AuthSession.makeRedirectUri(),
+                });
 
-            if (!createdSessionId) {
-                console.error('No session created');
-                return;
+                if (!createdSessionId) {
+                    console.error('No session created');
+                    return;
+                }
+
+                setActive!({
+                    session: createdSessionId,
+                    navigate: async () => {
+                        await syncUser();
+                        router.push('/recipes' as any);
+                    },
+                });
+            } catch (err) {
+                console.error(JSON.stringify(err, null, 2));
             }
-
-            setActive!({
-                session: createdSessionId,
-                navigate: async () => {
-                    await syncUser();
-                    router.push('/recipes' as any);
-                },
-            });
-        } catch (err) {
-            console.error(JSON.stringify(err, null, 2));
-        }
-    }, []);
+        },
+        [router, startSSOFlow, syncUser]
+    );
 
     const handleLogin = useCallback(async () => {
         if (!isLoaded) return;
@@ -153,7 +156,7 @@ export default function LoginScreen() {
         } catch (err) {
             console.error(JSON.stringify(err, null, 2));
         }
-    }, [isLoaded, username, password]);
+    }, [isLoaded, username, password, signIn, setActive, router, syncUser]);
 
     return (
         <Screen>

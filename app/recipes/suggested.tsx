@@ -1,3 +1,3 @@
-import RecipeDetail from "./[id]";
+import RecipeDetail from './[id]';
 
 export default RecipeDetail;

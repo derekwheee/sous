@@ -21,7 +21,6 @@ import { useFonts } from 'expo-font';
 import { Slot, useRouter, useSegments } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { Appearance, StatusBar } from 'react-native';
-import 'react-native-gesture-handler';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -29,43 +28,6 @@ import { createTamagui, TamaguiProvider } from 'tamagui';
 
 const queryClient = new QueryClient();
 const config = createTamagui(defaultConfig);
-
-function SignedOutRedirectGuard() {
-    const router = useRouter();
-    const segments = useSegments();
-
-    // consider "login" and the auth grouping as auth routes
-    const isOnAuthRoute = segments.some((s) => s === '(auth)');
-
-    useEffect(() => {
-        // Only navigate when signed out AND not already on an auth route
-        if (!isOnAuthRoute) {
-            // use replace so the back stack doesn't go back to a protected route
-            router.push('/(auth)' as any);
-        }
-    }, [isOnAuthRoute, router]);
-
-    return null;
-}
-
-// add this component (place above RootLayout)
-function SyncUserOnSignIn() {
-    const { userId, isLoaded } = useAuth();
-    const { syncUser } = useApi();
-    const calledRef = useRef(false);
-
-    const mutation = useMutation({
-        mutationFn: () => syncUser(),
-    });
-
-    useEffect(() => {
-        if (!isLoaded || !userId || calledRef.current) return;
-        calledRef.current = true;
-        mutation.mutate();
-    }, [isLoaded, userId, mutation]);
-
-    return null;
-}
 
 export default function RootLayout() {
     if (!Constants.expoConfig?.extra?.clerkKey && !process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY) {
@@ -131,4 +93,40 @@ function AppProviders() {
             </PortalProvider>
         </GestureHandlerRootView>
     );
+}
+
+function SignedOutRedirectGuard() {
+    const router = useRouter();
+    const segments = useSegments();
+
+    // consider "login" and the auth grouping as auth routes
+    const isOnAuthRoute = segments.some((s) => s === '(auth)');
+
+    useEffect(() => {
+        // Only navigate when signed out AND not already on an auth route
+        if (!isOnAuthRoute) {
+            // use replace so the back stack doesn't go back to a protected route
+            router.push('/(auth)' as any);
+        }
+    }, [isOnAuthRoute, router]);
+
+    return null;
+}
+
+function SyncUserOnSignIn() {
+    const { userId, isLoaded } = useAuth();
+    const { syncUser } = useApi();
+    const calledRef = useRef(false);
+
+    const { mutate: syncUserMutate } = useMutation({
+        mutationFn: () => syncUser(),
+    });
+
+    useEffect(() => {
+        if (!isLoaded || !userId || calledRef.current) return;
+        calledRef.current = true;
+        syncUserMutate();
+    }, [isLoaded, userId, syncUserMutate]);
+
+    return null;
 }

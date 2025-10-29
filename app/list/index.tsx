@@ -9,11 +9,10 @@ import { useHeader } from '@/hooks/use-header';
 import { usePantry } from '@/hooks/use-pantry';
 import globalStyles, { colors, fonts } from '@/styles/global';
 import Feather from '@expo/vector-icons/Feather';
-import { router, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useCallback, useRef, useState } from 'react';
-import { Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
-import Reanimated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated';
+import { Alert, StyleSheet, TextInput, View } from 'react-native';
 
 const styles = {
     ...globalStyles,
@@ -88,12 +87,10 @@ const styles = {
 export default function ListScreen() {
     const router = useRouter();
     const [isAddingItems, setIsAddingItems] = useState<boolean>(false);
-    const [swipeHeight, setSwipeHeight] = useState<number>(0);
     const [newItemText, setNewItemText] = useState<string>('');
     const newItemInputRef = useRef<TextInput>(null);
 
     useHeader({
-        dependencies: [isAddingItems],
         headerItems: [
             {
                 label: isAddingItems ? 'done' : 'new item',
@@ -139,40 +136,40 @@ export default function ListScreen() {
         }, [])
         .sort((a, b) => (a.sortOrder ?? 999) - (b.sortOrder ?? 999));
 
-    const updateHeight = useCallback(
-        (r: any) => {
-            if (swipeHeight !== r.nativeEvent.layout.height) {
-                setSwipeHeight(r.nativeEvent.layout.height);
-            }
+    const handleRemoveItem = useCallback(
+        async (id: number) => {
+            await savePantryItem({ id, isInShoppingList: false });
         },
-        [swipeHeight]
+        [savePantryItem]
     );
 
-    const proposeRemoveItem = useCallback((id: number, ref?: any) => {
-        if (ref) {
-            ref.close();
-        }
+    const confirmRemoveItem = useCallback(
+        (id: number) =>
+            Alert.alert('Remove item', 'Do you want to remove this item from your list?', [
+                {
+                    text: 'Cancel',
+                    onPress: () => {},
+                    style: 'cancel',
+                },
+                {
+                    text: 'Delete',
+                    onPress: () => handleRemoveItem(id),
+                    style: 'destructive',
+                },
+            ]),
+        [handleRemoveItem]
+    );
 
-        confirmRemoveItem(id);
-    }, []);
+    const proposeRemoveItem = useCallback(
+        (id: number, ref?: any) => {
+            if (ref) {
+                ref.close();
+            }
 
-    const confirmRemoveItem = (id: number) =>
-        Alert.alert('Remove item', 'Do you want to remove this item from your list?', [
-            {
-                text: 'Cancel',
-                onPress: () => {},
-                style: 'cancel',
-            },
-            {
-                text: 'Delete',
-                onPress: () => handleRemoveItem(id),
-                style: 'destructive',
-            },
-        ]);
-
-    const handleRemoveItem = async (id: number) => {
-        await savePantryItem({ id, isInShoppingList: false });
-    };
+            confirmRemoveItem(id);
+        },
+        [confirmRemoveItem]
+    );
 
     const handleAddItem = async (id: number) => {
         await savePantryItem({ id, isInShoppingList: true });
@@ -291,7 +288,7 @@ export default function ListScreen() {
             {!pantry?.pantryItems.length && (
                 <View style={styles.onboarding}>
                     <Text style={styles.onboardingText}>
-                        you don't have anything in your shopping list
+                        you don&apos;t have anything in your shopping list
                     </Text>
                     <Button text='add your first item' onPress={() => setIsAddingItems(true)} />
                     <Text style={styles.onboardingText}>or</Text>
@@ -299,53 +296,5 @@ export default function ListScreen() {
                 </View>
             )}
         </Screen>
-    );
-}
-
-function RightAction({
-    prog,
-    drag,
-    pantryItem,
-    width,
-    proposeRemoveItem,
-    swipeRef,
-}: {
-    prog: SharedValue<number>;
-    drag: SharedValue<number>;
-    pantryItem: PantryItem;
-    width: number;
-    proposeRemoveItem: (id: number, ref?: any) => void;
-    swipeRef?: React.RefObject<any>;
-}) {
-    const styleAnimation = useAnimatedStyle(() => {
-        return {
-            transform: [{ translateX: drag.value + width * 2 }],
-        };
-    });
-
-    swipeRef?.current?.close;
-
-    return (
-        <Reanimated.View style={styleAnimation}>
-            <View style={{ flexDirection: 'row' }}>
-                <Pressable
-                    onPress={() => {
-                        swipeRef?.current?.close();
-                        router.push({
-                            pathname: '/list/edit',
-                            params: {
-                                pantryItemId: pantryItem.id,
-                                pantryId: pantryItem.pantryId,
-                            },
-                        });
-                    }}
-                >
-                    <Feather name='edit-2' size={24} color='#fff' style={styles.editAction} />
-                </Pressable>
-                <Pressable onPress={() => proposeRemoveItem(pantryItem.id, swipeRef?.current)}>
-                    <Feather name='trash-2' size={24} color='#fff' style={styles.deleteAction} />
-                </Pressable>
-            </View>
-        </Reanimated.View>
     );
 }

@@ -13,7 +13,6 @@ export function useHeader({
     onChangeSearch,
     onCancelSearch,
     headerItems = [],
-    dependencies = [],
 }: UseHeaderParams = {}): UseHeader {
     const navigation = useNavigation();
     const { OS, Version } = Platform;
@@ -43,7 +42,17 @@ export function useHeader({
                       },
             ...platformHeaderItems,
         });
-    }, [navigation, ...dependencies]);
+    }, [
+        navigation,
+        gestureEnabled,
+        searchBarRef,
+        searchPlaceholder,
+        onChangeSearch,
+        onCancelSearch,
+        platformHeaderItems,
+        isLegacyVersion,
+        headerItems,
+    ]);
 
     return {
         isLegacyVersion,
@@ -69,14 +78,17 @@ export function useHeader({
 function mapLegacyHeaderItems(headerItems: HeaderItem[]): {
     headerRight: () => React.ReactNode;
 } {
-    const nestedItems = headerItems.reduce((acc, item) => {
-        if (item.type === 'menu' && item.menu && item.menu.items.length > 0) {
-            acc = [...acc, ...item.menu.items];
-        } else {
-            acc.push(item);
-        }
-        return acc;
-    }, [] as (HeaderItem | HeaderMenuItem)[]);
+    const nestedItems = headerItems.reduce(
+        (acc, item) => {
+            if (item.type === 'menu' && item.menu && item.menu.items.length > 0) {
+                acc = [...acc, ...item.menu.items];
+            } else {
+                acc.push(item);
+            }
+            return acc;
+        },
+        [] as (HeaderItem | HeaderMenuItem)[]
+    );
 
     return {
         headerRight: () => (

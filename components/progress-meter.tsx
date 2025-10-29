@@ -3,13 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 
-interface ProgressCircleProps {
-    radius: number;
-    strokeWidth: number;
-    progress: number; // Should be a value between 0 and 1
-    color: string;
-}
-
 export default function ProgressMeter({
     size = 32,
     progress,

@@ -77,12 +77,7 @@ export default function EditRecipe() {
     const id = params.id ? Number(params.id) : undefined;
     const isNewRecipe = !id;
     const { showSnackbar } = useSnackbar();
-    const {
-        recipe: { data: recipe },
-        importRecipe,
-        saveRecipe,
-        tags: { data: allTags },
-    } = useRecipe({ recipeId: id });
+    const { recipe, importRecipe, saveRecipe, tags: allTags } = useRecipe({ recipeId: id });
     const router = useRouter();
     const translateY = useRef(new Animated.Value(80)).current;
     const [isSaving, setIsSaving] = useState(false);
@@ -120,7 +115,7 @@ export default function EditRecipe() {
             setInstructions(recipe.instructions || []);
             setTags((recipe.tags as UpsertRecipeTag[] | undefined) || []);
         }
-    }, [recipe]);
+    }, [recipe, params.newName]);
 
     useEffect(() => {
         Animated.timing(translateY, {

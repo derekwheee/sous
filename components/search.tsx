@@ -10,34 +10,31 @@ const styles = {
             alignItems: 'center',
             gap: 8,
             padding: 14,
-            backgroundColor: colors.primary
+            backgroundColor: colors.primary,
         },
         searchInput: {
             flexGrow: 1,
-            color: 'white'
-        }
-    })
+            color: 'white',
+        },
+    }),
 };
 
 export default function SearchBar({
     value,
     onChangeText,
-    inputProps = {}
+    inputProps = {},
 }: {
-    value?: string
-    onChangeText: (text: string) => void
-    inputProps?: TextInputProps
+    value?: string;
+    onChangeText: (text: string) => void;
+    inputProps?: TextInputProps;
 }) {
-
-
-
     return (
         <View style={styles.search}>
-            <Feather name="search" size={24} color="white" />
+            <Feather name='search' size={24} color='white' />
             <TextInput
                 style={[styles.searchInput]}
-                placeholder="search"
-                placeholderTextColor="rgba(255, 255, 255, 0.7)"
+                placeholder='search'
+                placeholderTextColor='rgba(255, 255, 255, 0.7)'
                 autoCapitalize='none'
                 clearButtonMode='never'
                 selectionColor={'white'}
@@ -46,10 +43,15 @@ export default function SearchBar({
                 {...inputProps}
             />
             {value && (
-                <Feather name="x" size={24} color="white" onPress={() => {
-                    onChangeText('');
-                }} />
+                <Feather
+                    name='x'
+                    size={24}
+                    color='white'
+                    onPress={() => {
+                        onChangeText('');
+                    }}
+                />
             )}
         </View>
     );
-};
+}

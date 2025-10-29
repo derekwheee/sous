@@ -10,21 +10,21 @@ export default function ListLayout() {
                 headerShadowVisible: false,
                 headerBackButtonDisplayMode: 'minimal',
                 headerBlurEffect: 'none',
-                headerBackground: () => <HeaderBackground />
+                headerBackground: () => <HeaderBackground />,
             }}
         >
             <Stack.Screen
-                name="index"
+                name='index'
                 options={{
-                    title: 'List'
+                    title: 'List',
                 }}
             />
             <Stack.Screen
-                name="edit"
+                name='edit'
                 options={{
                     title: 'Edit Item',
                     presentation: 'modal',
-                    headerShown: false
+                    headerShown: false,
                 }}
             />
         </Stack>

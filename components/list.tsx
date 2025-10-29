@@ -16,10 +16,5 @@ interface ListProps {
 }
 
 export default function List({ children }: ListProps) {
-
-    return (
-        <View style={styles.list}>
-            {children}
-        </View>
-    );
+    return <View style={styles.list}>{children}</View>;
 }

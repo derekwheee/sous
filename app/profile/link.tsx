@@ -9,7 +9,7 @@ const styles = {
     ...StyleSheet.create({
         container: {
             flex: 1,
-            justifyContent: 'center'
+            justifyContent: 'center',
         },
         qrWrapper: {
             justifyContent: 'center',
@@ -17,13 +17,12 @@ const styles = {
             alignSelf: 'center',
             aspectRatio: 1,
             backgroundColor: '#e6e6e6',
-            borderRadius: 999
-        }
-    })
+            borderRadius: 999,
+        },
+    }),
 };
 
 export default function ProfileLinkScreen() {
-
     const { user } = useApi();
     const { width } = useWindowDimensions();
 
@@ -35,7 +34,10 @@ export default function ProfileLinkScreen() {
                 {!!household && (
                     <View style={{ ...styles.qrWrapper, width: width * 0.85 }}>
                         <QRCodeStyled
-                            data={JSON.stringify({ id: household.id, joinToken: household.joinToken })}
+                            data={JSON.stringify({
+                                id: household.id,
+                                joinToken: household.joinToken,
+                            })}
                             size={200}
                             color='#000'
                         />

@@ -4,9 +4,7 @@ import { StyleSheet, View, ViewProps } from 'react-native';
 
 const styles = {
     ...globalStyles,
-    ...StyleSheet.create({
-
-    }),
+    ...StyleSheet.create({}),
 };
 
 interface HeadingProps {

@@ -5,9 +5,9 @@ export default function Spinner({
     color = '#fff',
     ...props
 }: {
-    size?: number | 'small' | 'large',
-    color?: string,
-    props?: ViewProps
+    size?: number | 'small' | 'large';
+    color?: string;
+    props?: ViewProps;
 }) {
     return (
         <View {...props}>

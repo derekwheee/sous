@@ -5,13 +5,11 @@ const styles = {
     ...globalStyles,
     ...StyleSheet.create({
         spacer: {
-            height: 100
-        }
-    })
+            height: 100,
+        },
+    }),
 };
 
 export default function HeaderSpacer() {
-    return (
-        <View style={styles.spacer} />
-    );
+    return <View style={styles.spacer} />;
 }

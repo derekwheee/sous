@@ -83,7 +83,7 @@ export default function EditItemModal() {
             setSortOrder(nextSortOrder);
         }
         console.log({ categoryId, category });
-    }, [category?.name]);
+    }, [categoryId, category, categories, nextSortOrder]);
 
     const patch: UpsertItemCategory = {
         id: category?.id,
@@ -110,7 +110,7 @@ export default function EditItemModal() {
 
     return (
         <>
-            <Loading isLoading={(!!categoryId && !category)} />
+            <Loading isLoading={!!categoryId && !category} />
             <View style={styles.dialog} key={category?.id ?? 'new'}>
                 <XStack
                     style={{ width: '100%' }}

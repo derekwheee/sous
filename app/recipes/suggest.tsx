@@ -92,7 +92,7 @@ export default function SuggestRecipesModal() {
         isFetching,
         refetch: getSuggestions,
     } = useQuery({
-        queryKey: ['suggestions', pantryId],
+        queryKey: ['suggestions', pantryId, selectedTags, keywords],
         queryFn: () => getRecipeSuggestions(Number(pantryId), selectedTags, keywords),
         enabled: false,
     });
@@ -196,12 +196,14 @@ export default function SuggestRecipesModal() {
                                         text='view recipe'
                                         rightIcon='chevron.right'
                                         style={{ flexShrink: 1 }}
-                                        onPress={() => router.push({
-                                            pathname: '/recipes/suggested',
-                                            params: {
-                                                suggestion: JSON.stringify(suggestion),
-                                            }
-                                        })}
+                                        onPress={() =>
+                                            router.push({
+                                                pathname: '/recipes/suggested',
+                                                params: {
+                                                    suggestion: JSON.stringify(suggestion),
+                                                },
+                                            })
+                                        }
                                     />
                                 </View>
                             </View>

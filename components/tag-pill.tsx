@@ -15,12 +15,12 @@ const styles = {
             backgroundColor: colors.primary,
         },
         pillText: {
-            color: '#000'
+            color: '#000',
         },
         pillTextActive: {
-            color: '#fff'
-        }
-    })
+            color: '#fff',
+        },
+    }),
 };
 
 export default function TagPill({
@@ -28,8 +28,8 @@ export default function TagPill({
     isActive = false,
     ...props
 }: {
-    text?: string,
-    isActive?: boolean
+    text?: string;
+    isActive?: boolean;
 } & PressableProps) {
     return (
         <Pressable style={[styles.pill, isActive && styles.pillActive]} {...props}>

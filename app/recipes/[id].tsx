@@ -11,7 +11,7 @@ import { useRecipe } from '@/hooks/use-recipe';
 import globalStyles, { brightness, colors, fonts } from '@/styles/global';
 import { highlightInstructions } from '@/util/highligher';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import Fraction from 'fraction.js';
+import { Fraction } from 'fraction.js';
 import { useEffect, useState } from 'react';
 import { RefreshControl, StyleSheet, View } from 'react-native';
 import { Slider } from 'tamagui';
@@ -50,7 +50,6 @@ export default function RecipeDetail() {
         ? JSON.parse(params.suggestion)
         : null;
 
-
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
     const [scaleValue, setScaleValue] = useState<number | null>(null);
     const [scaledRecipe, setScaledRecipe] = useState<Recipe | null>(null);
@@ -78,7 +77,9 @@ export default function RecipeDetail() {
     const { user } = useApi();
 
     const {
-        recipe: { isFetching, data: recipe, refetch },
+        recipeQuery: { refetch },
+        recipeIsBusy,
+        recipe,
         deleteRecipe,
     } = useRecipe({ recipeId: id, enabled: !suggestion });
 
@@ -86,7 +87,6 @@ export default function RecipeDetail() {
 
     useHeader({
         gestureEnabled: !disableSwipe,
-        dependencies: [router, disableSwipe],
         headerItems: !id
             ? [
                   {
@@ -167,7 +167,7 @@ export default function RecipeDetail() {
     return (
         <Screen
             scrollEnabled={!disableScroll}
-            isLoading={!user || (isFetching || !scaledRecipe)}
+            isLoading={!user || recipeIsBusy || !scaledRecipe}
             refreshControl={
                 <RefreshControl
                     refreshing={isRefreshing}

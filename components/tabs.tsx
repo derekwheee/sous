@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
 
 export default function TabRouter() {
     const { isSignedIn = false } = useAuth();
-    
+
     useSSE();
 
     return (

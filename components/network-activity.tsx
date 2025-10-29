@@ -27,12 +27,12 @@ export default function NetworkActivityIndicator() {
         } else if (!active && height.value === 32) {
             height.value = withTiming(0, { duration: 300 });
         }
-    }, [isFetching, isMutating]);
+    }, [isFetching, isMutating, active, height]);
 
     useEffect(() => {
         background.value = withRepeat(withTiming(1, { duration: 2000 }), -1, true);
         rotate.value = withRepeat(withTiming(1, { duration: 1000 }), -1, true);
-    }, []);
+    }, [background, rotate]);
 
     const backgroundStyle = useAnimatedStyle(() => {
         return {

@@ -36,7 +36,7 @@ export default function SaveButton({
             }, 1000);
             return () => clearTimeout(timeout);
         }
-    }, [isSaving]);
+    }, [isSaving, previousProps]);
 
     return (
         <Pressable
