@@ -74,4 +74,4 @@ export const SousTheme: Theme = {
     fonts,
 };
 
-export default SousTheme
+export default SousTheme;
