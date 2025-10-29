@@ -1,32 +1,32 @@
-import { SFSymbol, SymbolView } from 'expo-symbols';
 import React, { createContext, useCallback, useContext, useState } from 'react';
 import { Animated, Pressable, StyleSheet } from 'react-native';
 import Text from './text';
+import SystemIcon from './system-icon';
 
 type SnackbarConfig = {
-    icon: SFSymbol;
+    icon: any[];
     backgroundColor: string;
     textColor: string;
 };
 
 const snackbarConfigs: Record<string, SnackbarConfig> = {
     success: {
-        icon: 'checkmark.circle',
+        icon: ['checkmark.circle', 'check-circle'],
         backgroundColor: 'rgb(68, 132, 86)',
         textColor: '#fff',
     },
     error: {
-        icon: 'exclamationmark.triangle',
+        icon: ['exclamationmark.triangle', 'error-circle'],
         backgroundColor: 'rgb(200, 72, 86)',
         textColor: '#fff',
     },
     warning: {
-        icon: 'info.square',
+        icon: ['info.square', 'warning-amber'],
         backgroundColor: 'rgb(242, 180, 71)',
         textColor: '#000',
     },
     info: {
-        icon: 'info.circle',
+        icon: ['info.circle', 'info-outline'],
         backgroundColor: 'rgb(49, 113, 220)',
         textColor: '#fff',
     },
@@ -111,17 +111,18 @@ export const SnackbarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                         onPress={hideSnackbar}
                         onLayout={(e) => setHeight(e.nativeEvent.layout.height)}
                     >
-                        <SymbolView
-                            name={snackbarConfigs[type].icon}
-                            tintColor={snackbarConfigs[type].textColor}
+                        <SystemIcon
+                            ios={snackbarConfigs[type].icon[0]}
+                            android={snackbarConfigs[type].icon[1]}
+                            color={snackbarConfigs[type].textColor}
                             size={24}
                         />
                         <Text style={[styles.message, { color: snackbarConfigs[type].textColor }]}>
                             {message}
                         </Text>
-                        <SymbolView
-                            name='xmark'
-                            tintColor={snackbarConfigs[type].textColor}
+                        <SystemIcon
+                            ios='xmark'
+                            android='close'
                             size={24}
                             style={{ marginLeft: 'auto' }}
                         />

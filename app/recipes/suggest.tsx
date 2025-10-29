@@ -1,5 +1,6 @@
 import Button from '@/components/button';
 import NetworkActivityIndicator from '@/components/network-activity';
+import SystemIcon from '@/components/system-icon';
 import TagPill from '@/components/tag-pill';
 import Text from '@/components/text';
 import TextInput from '@/components/text-input';
@@ -8,7 +9,6 @@ import { useApi } from '@/hooks/use-api';
 import globalStyles, { brightness, colors, fonts } from '@/styles/global';
 import { useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
@@ -114,13 +114,23 @@ export default function SuggestRecipesModal() {
     return (
         <View style={styles.dialog}>
             <View style={styles.titleWrapper}>
-                <SymbolView name='sparkles' size={32} tintColor={colors.primary} />
+                <SystemIcon
+                    ios='sparkles'
+                    android='star-four-points-outline'
+                    size={32}
+                    color={colors.primary}
+                />
                 <Text style={styles.title}>suggested recipes</Text>
             </View>
             {isFetching && (
                 <View style={styles.loadingWrapper}>
                     <View style={styles.sparkleContainer}>
-                        <SymbolView name='sparkles' size={196} tintColor={colors.primary} />
+                        <SystemIcon
+                            ios='sparkles'
+                            android='star-four-points-outline'
+                            size={196}
+                            color={colors.primary}
+                        />
                     </View>
                 </View>
             )}
@@ -144,7 +154,7 @@ export default function SuggestRecipesModal() {
                         onChangeText={(text) => setKeywords(text)}
                     />
                     <Button
-                        leftIcon='sparkles'
+                        leftIcon={['sparkles', 'star-four-points-outline']}
                         text='suggest recipes'
                         onPress={() => getSuggestions()}
                     />
@@ -155,7 +165,7 @@ export default function SuggestRecipesModal() {
                     <Button
                         variant='pill'
                         text='start over'
-                        leftIcon='arrow.clockwise'
+                        leftIcon={['arrow.clockwise', 'reload']}
                         style={{ marginBottom: 16 }}
                         onPress={() => setSuggestionState(null)}
                     />
@@ -194,7 +204,7 @@ export default function SuggestRecipesModal() {
                                         outlined
                                         variant='pill'
                                         text='view recipe'
-                                        rightIcon='chevron.right'
+                                        rightIcon={['chevron.right', 'chevron-right']}
                                         style={{ flexShrink: 1 }}
                                         onPress={() =>
                                             router.push({

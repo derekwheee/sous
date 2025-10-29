@@ -1,8 +1,8 @@
 import SearchBar from '@/components/search-bar';
+import SystemIcon from '@/components/system-icon';
 import Text from '@/components/text';
 import { colors, fonts } from '@/styles/global';
 import { useNavigation } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
 import React, { useLayoutEffect, useState } from 'react';
 import { Platform, Pressable, View } from 'react-native';
 
@@ -126,10 +126,11 @@ function mapLegacyHeaderItems(headerItems: HeaderItem[]): {
                                 </Text>
                             )}
                             {item.icon && (
-                                <SymbolView
-                                    name={item.icon?.name || ''}
+                                <SystemIcon
+                                    ios={item.icon?.name[0] || ''}
+                                    android={item.icon?.name[1] || ''}
                                     size={24}
-                                    tintColor='#fff'
+                                    color={colors.surface}
                                 />
                             )}
                         </Pressable>
@@ -146,7 +147,7 @@ function mapLiquidGlassHeaderItems(headerItems: HeaderItem[]): {
     return {
         unstable_headerRightItems: () =>
             headerItems.map((item) => {
-                const { labelStyle = {}, icon = {}, ...rest } = item;
+                const { labelStyle = {}, icon, ...rest } = item;
 
                 return {
                     type: 'button',
@@ -159,7 +160,8 @@ function mapLiquidGlassHeaderItems(headerItems: HeaderItem[]): {
                     icon: icon
                         ? {
                               type: 'sfSymbol',
-                              ...icon,
+                              name:
+                                  icon.name && Array.isArray(icon.name) ? icon.name[0] : icon.name,
                           }
                         : undefined,
                     variant: 'prominent',

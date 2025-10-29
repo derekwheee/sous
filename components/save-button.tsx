@@ -1,10 +1,10 @@
 import Text from '@/components/text';
 import { usePrevious } from '@/hooks/use-previous';
 import globalStyles, { colors } from '@/styles/global';
-import { SymbolView } from 'expo-symbols';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 import { Spinner } from 'tamagui';
+import SystemIcon from './system-icon';
 
 const styles = {
     ...globalStyles,
@@ -55,7 +55,9 @@ export default function SaveButton({
             {!showSuccess && !isSaving && (
                 <Text style={[styles.buttonText, disabled && styles.buttonTextDisabled]}>save</Text>
             )}
-            {showSuccess && <SymbolView name='checkmark' size={24} tintColor={colors.background} />}
+            {showSuccess && (
+                <SystemIcon ios='checkmark' android='check' size={24} color={colors.surface} />
+            )}
         </Pressable>
     );
 }

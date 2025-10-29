@@ -3,6 +3,7 @@ import Heading from '@/components/heading';
 import Screen from '@/components/screen';
 import { useSnackbar } from '@/components/snackbar';
 import Spinner from '@/components/spinner';
+import SystemIcon from '@/components/system-icon';
 import Text from '@/components/text';
 import TextInput from '@/components/text-input';
 import { useHeader } from '@/hooks/use-header';
@@ -11,7 +12,6 @@ import globalStyles, { brightness, colors } from '@/styles/global';
 import Feather from '@expo/vector-icons/Feather';
 import * as Clipboard from 'expo-clipboard';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Animated, Pressable, StyleSheet, View } from 'react-native';
 
@@ -131,7 +131,7 @@ export default function EditRecipe() {
                   {
                       label: 'import',
                       icon: {
-                          name: 'square.and.arrow.down',
+                          name: ['square.and.arrow.down', 'cloud-download-outline'],
                       },
                       onPress: async () => {
                           const pasted = await Clipboard.getStringAsync();
@@ -147,7 +147,7 @@ export default function EditRecipe() {
                   {
                       label: 'view',
                       icon: {
-                          name: 'arrow.right',
+                          name: ['arrow.right', 'arrow-forward'],
                       },
                       onPress: () => router.push(`/recipes/${id}`),
                   },
@@ -389,7 +389,12 @@ export default function EditRecipe() {
                                     onPress={() => handleRemoveTag(i)}
                                 >
                                     <Text>{tag.name}</Text>
-                                    <SymbolView name='x.circle.fill' size={24} tintColor='#000' />
+                                    <SystemIcon
+                                        ios='x.circle.fill'
+                                        android='close-circle'
+                                        size={24}
+                                        color={colors.text}
+                                    />
                                 </Pressable>
                             ))}
                         </View>

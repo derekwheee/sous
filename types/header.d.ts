@@ -16,11 +16,7 @@ interface UseHeader {
 interface HeaderMenuItem {
     type: 'action' | 'submenu';
     label?: string;
-    icon?: {
-        type: 'sfSymbol' | 'image';
-        name?: string;
-        source?: any;
-    };
+    icon?: { name: any[] };
     onPress?: () => void;
     state?: 'on' | 'off' | 'mixed';
     disabled?: boolean;
@@ -40,11 +36,7 @@ interface HeaderItem {
         fontWeight?: string;
         color?: string;
     };
-    icon?: {
-        type?: 'sfSymbol' | 'image';
-        name?: any;
-        source?: any;
-    };
+    icon?: { name: any[] };
     variant?: 'prominent' | 'plain' | 'done';
     tintColor?: string;
     disabled?: boolean;

@@ -11,10 +11,10 @@ import { useRecipe } from '@/hooks/use-recipe';
 import globalStyles, { colors, fonts } from '@/styles/global';
 import { getAvailableIngredients } from '@/util/recipe';
 import { useRouter } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
 import { useMemo, useRef, useState } from 'react';
 import { Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import SystemIcon from '@/components/system-icon';
 
 const styles = {
     ...globalStyles,
@@ -96,7 +96,7 @@ export default function RecipeScreen() {
             {
                 label: 'suggest recipes',
                 icon: {
-                    name: 'sparkles',
+                    name: ['sparkles', 'star-four-points-outline'],
                 },
                 onPress: () =>
                     router.push({
@@ -110,7 +110,7 @@ export default function RecipeScreen() {
             {
                 label: 'new recipe',
                 icon: {
-                    name: 'plus',
+                    name: ['plus', 'plus'],
                 },
                 onPress: () => router.push('/recipes/new'),
             },
@@ -189,7 +189,7 @@ export default function RecipeScreen() {
                     outlined={!showTags}
                     variant='pill'
                     text={`filter recipes${selectedTags.length ? ` (${selectedTags.length})` : ''}`}
-                    leftIcon='line.3.horizontal.decrease'
+                    leftIcon={['line.3.horizontal.decrease', 'filter-list']}
                     onPress={() => {
                         setShowTags(!showTags);
                     }}
@@ -274,7 +274,12 @@ export default function RecipeScreen() {
                         <Text style={styles.addSearchTermText}>
                             add a recipe for &ldquo;{searchTerm}&rdquo;
                         </Text>
-                        <SymbolView name='chevron.right' size={12} tintColor={colors.primary} />
+                        <SystemIcon
+                            ios='chevron.right'
+                            android='chevron-right'
+                            size={12}
+                            color={colors.primary}
+                        />
                     </Pressable>
                 </View>
             )}

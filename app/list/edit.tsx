@@ -1,12 +1,12 @@
 import Autocomplete from '@/components/autocomplete';
 import Loading from '@/components/loading';
+import SystemIcon from '@/components/system-icon';
 import Text from '@/components/text';
 import TextInput from '@/components/text-input';
 import { useCategory } from '@/hooks/use-category';
 import { usePantry } from '@/hooks/use-pantry';
 import globalStyles, { colors } from '@/styles/global';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Spinner, Switch, XStack, YStack } from 'tamagui';
@@ -167,10 +167,11 @@ export default function EditItemModal() {
                                 top: -4,
                             }}
                         >
-                            <SymbolView
-                                name={isFavorite ? 'repeat.circle.fill' : 'repeat.circle'}
+                            <SystemIcon
+                                ios={isFavorite ? 'repeat.circle.fill' : 'repeat.circle'}
+                                android={'repeat'}
                                 size={40}
-                                tintColor={isFavorite ? colors.primary : '#ccc'}
+                                color={isFavorite ? colors.primary : '#ccc'}
                             />
                         </Pressable>
                     </XStack>
@@ -182,7 +183,12 @@ export default function EditItemModal() {
                         <Text weight='regular'>
                             {category?.icon} {category?.name}
                         </Text>
-                        <SymbolView name='chevron.right' size={16} tintColor={colors.text} />
+                        <SystemIcon
+                            ios='chevron.right'
+                            android='chevron-right'
+                            size={16}
+                            color={colors.text}
+                        />
                     </Pressable>
                 </YStack>
                 <YStack gap='$2'>

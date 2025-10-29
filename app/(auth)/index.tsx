@@ -8,11 +8,11 @@ import { useSSO, useSignIn } from '@clerk/clerk-expo';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import * as AuthSession from 'expo-auth-session';
 import { useRouter } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
 import * as WebBrowser from 'expo-web-browser';
 import { useCallback, useEffect, useState } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { XStack, YStack } from 'tamagui';
+import SystemIcon from '@/components/system-icon';
 
 const styles = {
     ...globalStyles,
@@ -165,11 +165,11 @@ export default function LoginScreen() {
                 <Text style={styles.welcomeLogo}>sous</Text>
                 <XStack gap={8}>
                     <Pressable style={styles.appleButton} onPress={() => onPress('oauth_apple')}>
-                        <SymbolView
-                            name='apple.logo'
-                            style={{ width: 24, height: 24 }}
-                            type='palette'
-                            tintColor={'#fff'}
+                        <SystemIcon
+                            ios='apple.logo'
+                            android='apple'
+                            size={24}
+                            color={colors.surface}
                         />
                         <Text style={styles.appleButtonText}>Apple</Text>
                     </Pressable>

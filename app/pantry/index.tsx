@@ -3,13 +3,13 @@ import Heading from '@/components/heading';
 import List from '@/components/list';
 import ListItem from '@/components/list-item';
 import Screen from '@/components/screen';
+import SystemIcon from '@/components/system-icon';
 import { useCategory } from '@/hooks/use-category';
 import { useHeader } from '@/hooks/use-header';
 import { usePantry } from '@/hooks/use-pantry';
 import globalStyles, { colors, fonts } from '@/styles/global';
 import { getDefault } from '@/util/pantry';
 import { useRouter } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
 import { useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -55,7 +55,7 @@ export default function PantryScreen() {
             {
                 label: 'new item',
                 icon: {
-                    name: 'plus',
+                    name: ['plus', 'plus'],
                 },
                 onPress: () =>
                     router.push({
@@ -118,12 +118,11 @@ export default function PantryScreen() {
                                             })
                                         }
                                     >
-                                        <SymbolView
-                                            name={'repeat'}
+                                        <SystemIcon
+                                            ios='repeat'
+                                            android='repeat'
                                             size={24}
-                                            tintColor={
-                                                pantryItem.isFavorite ? colors.primary : '#ccc'
-                                            }
+                                            color={pantryItem.isFavorite ? colors.primary : '#ccc'}
                                         />
                                     </Pressable>
                                 )}
@@ -187,7 +186,12 @@ export default function PantryScreen() {
                         <Text style={styles.addSearchTermText}>
                             add &ldquo;{searchTerm}&rdquo; to your pantry
                         </Text>
-                        <SymbolView name='chevron.right' size={12} tintColor={colors.primary} />
+                        <SystemIcon
+                            ios='chevron.right'
+                            android='chevron-right'
+                            size={12}
+                            color={colors.primary}
+                        />
                     </Pressable>
                 </View>
             )}

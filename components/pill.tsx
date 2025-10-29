@@ -1,7 +1,7 @@
 import Text from '@/components/text';
 import globalStyles, { brightness, colors } from '@/styles/global';
-import { SymbolView } from 'expo-symbols';
 import { Pressable, PressableProps, StyleSheet } from 'react-native';
+import SystemIcon from './system-icon';
 
 const styles = {
     ...globalStyles,
@@ -28,7 +28,7 @@ const styles = {
 
 interface PillProps {
     text: string;
-    icon?: any;
+    icon?: any[];
     tintColor?: string;
     onPress?: () => void;
 }
@@ -44,7 +44,13 @@ export default function Pill({
         <Pressable style={styles.pill} onPress={onPress} {...props}>
             <Text style={styles.pillText}>{text}</Text>
             {icon && (
-                <SymbolView name={icon} size={24} tintColor={tintColor} style={styles.pillIcon} />
+                <SystemIcon
+                    ios={icon[0]}
+                    android={icon[1]}
+                    size={24}
+                    color={tintColor}
+                    style={styles.pillIcon}
+                />
             )}
         </Pressable>
     );

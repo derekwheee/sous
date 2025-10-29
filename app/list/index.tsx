@@ -3,6 +3,7 @@ import Heading from '@/components/heading';
 import List from '@/components/list';
 import ListItem from '@/components/list-item';
 import Screen from '@/components/screen';
+import SystemIcon from '@/components/system-icon';
 import Text from '@/components/text';
 import { useCategory } from '@/hooks/use-category';
 import { useHeader } from '@/hooks/use-header';
@@ -10,7 +11,6 @@ import { usePantry } from '@/hooks/use-pantry';
 import globalStyles, { colors, fonts } from '@/styles/global';
 import Feather from '@expo/vector-icons/Feather';
 import { useRouter } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
 import { useCallback, useRef, useState } from 'react';
 import { Alert, StyleSheet, TextInput, View } from 'react-native';
 
@@ -97,7 +97,7 @@ export default function ListScreen() {
                 icon: isAddingItems
                     ? undefined
                     : {
-                          name: 'plus',
+                          name: ['plus', 'plus'],
                       },
                 onPress: () => setIsAddingItems(!isAddingItems),
             },
@@ -242,10 +242,11 @@ export default function ListScreen() {
                                                   />
                                               )
                                             : () => (
-                                                  <SymbolView
-                                                      name={'repeat'}
+                                                  <SystemIcon
+                                                      ios={'repeat'}
+                                                      android={'repeat'}
                                                       size={24}
-                                                      tintColor={
+                                                      color={
                                                           pantryItem.isFavorite
                                                               ? colors.primary
                                                               : '#ccc'

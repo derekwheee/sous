@@ -1,9 +1,9 @@
 import Text from '@/components/text';
 import globalStyles, { brightness, colors } from '@/styles/global';
 import { FUZZY_SEARCH_THRESHOLD } from '@/util/constants';
-import { SymbolView } from 'expo-symbols';
 import Fuse from 'fuse.js';
 import { StyleSheet, View, ViewProps } from 'react-native';
+import SystemIcon from './system-icon';
 
 const styles = {
     ...globalStyles,
@@ -44,27 +44,28 @@ export default function Ingredient({
     const matched = fuse.search(`${ingredient.item || ''}`);
     const pantryItem = matched[0]?.item;
 
-    let icon: any;
+    let icon: any[];
     let tintColor: string;
 
     if (pantryItem?.isInShoppingList) {
-        icon = 'cart.circle';
+        icon = ['cart.circle', 'cart-check'];
         tintColor = brightness(colors.text, 150);
     } else if (pantryItem?.isInStock) {
-        icon = 'plus.arrow.trianglehead.clockwise';
+        icon = ['plus.arrow.trianglehead.clockwise', 'checkbox-marked-circle-plus-outline'];
         tintColor = colors.success;
     } else {
-        icon = 'plus.circle';
+        icon = ['plus.circle', 'plus-circle-outline'];
         tintColor = colors.text;
     }
 
     return (
         <View style={styles.wrapper} {...rest}>
-            <SymbolView
-                name={icon}
+            <SystemIcon
+                ios={icon[0]}
+                android={icon[1]}
                 size={24}
-                tintColor={tintColor}
-                onTouchEnd={() => onPress && onPress(ingredient, pantryItem)}
+                color={tintColor}
+                onPress={() => onPress && onPress(ingredient, pantryItem)}
             />
             {ingredient.sentence && (
                 <Text style={styles.ingredientText}>{ingredient.sentence}</Text>

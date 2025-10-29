@@ -1,7 +1,7 @@
 import Text from '@/components/text';
 import globalStyles, { colors, fonts } from '@/styles/global';
-import { SymbolView } from 'expo-symbols';
 import { Pressable, PressableProps, StyleSheet } from 'react-native';
+import SystemIcon from './system-icon';
 
 const styles = {
     ...globalStyles,
@@ -75,8 +75,8 @@ export default function Button({
     outlined?: boolean;
     variant?: 'button' | 'pill';
     disabled?: boolean;
-    leftIcon?: any;
-    rightIcon?: any;
+    leftIcon?: any[];
+    rightIcon?: any[];
     style?: object;
 } & PressableProps) {
     return (
@@ -93,10 +93,11 @@ export default function Button({
             disabled={disabled}
         >
             {leftIcon && (
-                <SymbolView
-                    name={leftIcon}
+                <SystemIcon
+                    ios={leftIcon[0]}
+                    android={leftIcon[1]}
                     size={variant === 'pill' ? 16 : 24}
-                    tintColor={outlined ? colors.primary : '#fff'}
+                    color={outlined ? colors.primary : '#fff'}
                 />
             )}
             <Text
@@ -110,10 +111,11 @@ export default function Button({
                 {text}
             </Text>
             {rightIcon && (
-                <SymbolView
-                    name={rightIcon}
+                <SystemIcon
+                    ios={rightIcon[0]}
+                    android={rightIcon[1]}
                     size={variant === 'pill' ? 16 : 24}
-                    tintColor={outlined ? colors.primary : '#fff'}
+                    color={outlined ? colors.primary : '#fff'}
                 />
             )}
         </Pressable>

@@ -1,6 +1,5 @@
 import Text from '@/components/text';
 import globalStyles, { brightness, colors, fonts } from '@/styles/global';
-import { SymbolView } from 'expo-symbols';
 import {
     TextInput as _TextInput,
     TextInputProps as _TextInputProps,
@@ -8,6 +7,7 @@ import {
     View,
     ViewProps,
 } from 'react-native';
+import SystemIcon from './system-icon';
 
 const styles = {
     ...globalStyles,
@@ -76,21 +76,26 @@ export default function TextInput({
             )}
             <View>
                 {leftAdornment && (
-                    <SymbolView
-                        name={
+                    <SystemIcon
+                        ios={
                             leftAdornment.disabled
                                 ? leftAdornment.disabledIcon || 'circle.dotted'
                                 : leftAdornment.icon || 'circle'
                         }
+                        android={
+                            leftAdornment.disabled
+                                ? leftAdornment.disabledIcon || 'dots-circle'
+                                : leftAdornment.icon || 'circle-outline'
+                        }
                         size={40}
-                        tintColor={
+                        color={
                             leftAdornment.disabled
                                 ? leftAdornment.disabledTintColor ||
                                   brightness(colors.background, -100)
                                 : leftAdornment.tintColor || colors.primary
                         }
                         style={styles.adornmentRight}
-                        onTouchEnd={leftAdornment.onPress}
+                        onPress={leftAdornment.onPress}
                     />
                 )}
                 <_TextInput
@@ -104,21 +109,26 @@ export default function TextInput({
                     {...rest}
                 />
                 {rightAdornment && (
-                    <SymbolView
-                        name={
+                    <SystemIcon
+                        ios={
                             rightAdornment.disabled
                                 ? rightAdornment.disabledIcon || 'arrow.right.circle.dotted'
                                 : rightAdornment.icon || 'arrow.right.circle.fill'
                         }
+                        android={
+                            rightAdornment.disabled
+                                ? rightAdornment.disabledIcon || 'arrow-right-circle-outline'
+                                : rightAdornment.icon || 'arrow-right-circle'
+                        }
                         size={40}
-                        tintColor={
+                        color={
                             rightAdornment.disabled
                                 ? rightAdornment.disabledTintColor ||
                                   brightness(colors.background, -100)
                                 : rightAdornment.tintColor || colors.primary
                         }
                         style={styles.adornmentRight}
-                        onTouchEnd={rightAdornment.onPress}
+                        onPress={rightAdornment.onPress}
                     />
                 )}
             </View>

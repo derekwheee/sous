@@ -1,11 +1,11 @@
 import Heading from '@/components/heading';
 import ListItem from '@/components/list-item';
 import Screen from '@/components/screen';
+import SystemIcon from '@/components/system-icon';
 import { useCategory } from '@/hooks/use-category';
 import { brightness, colors } from '@/styles/global';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useRouter } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
 import { useEffect, useState } from 'react';
 import { StyleSheet, TouchableOpacity } from 'react-native';
 import DraggableFlatList, {
@@ -57,11 +57,12 @@ export default function App() {
                         highlight={isActive}
                         text={`${item.icon}  ${item.name}`}
                         rightAdornment={() => (
-                            <SymbolView
-                                name={
+                            <SystemIcon
+                                ios={
                                     item.isNonFood ? 'fork.knife.circle' : 'fork.knife.circle.fill'
                                 }
-                                tintColor={
+                                android='silverware-fork-knife'
+                                color={
                                     item.isNonFood
                                         ? brightness(colors.background, -40)
                                         : isActive

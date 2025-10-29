@@ -2,10 +2,10 @@ import { useSSE } from '@/hooks/use-sse';
 import { colors, fonts } from '@/styles/global';
 import { useAuth } from '@clerk/clerk-expo';
 import { Tabs } from 'expo-router/tabs';
-import { SymbolView } from 'expo-symbols';
 import { StyleSheet } from 'react-native';
 import 'react-native-gesture-handler';
 import 'react-native-reanimated';
+import SystemIcon from './system-icon';
 
 const styles = StyleSheet.create({
     tabBar: {
@@ -41,14 +41,11 @@ export default function TabRouter() {
                     options={{
                         tabBarLabel: 'Recipes',
                         tabBarIcon: ({ color, size }) => (
-                            <SymbolView
-                                name='book'
-                                style={{
-                                    width: size,
-                                    height: size,
-                                }}
-                                type='palette'
-                                tintColor={color}
+                            <SystemIcon
+                                ios='book'
+                                android='book-open-variant-outline'
+                                size={size}
+                                color={color}
                             />
                         ),
                     }}
@@ -58,14 +55,11 @@ export default function TabRouter() {
                     options={{
                         tabBarLabel: 'Pantry',
                         tabBarIcon: ({ color, size }) => (
-                            <SymbolView
-                                name='refrigerator'
-                                style={{
-                                    width: size,
-                                    height: size,
-                                }}
-                                type='palette'
-                                tintColor={color}
+                            <SystemIcon
+                                ios='refrigerator'
+                                android='fridge-outline'
+                                size={size}
+                                color={color}
                             />
                         ),
                     }}
@@ -75,14 +69,11 @@ export default function TabRouter() {
                     options={{
                         tabBarLabel: 'List',
                         tabBarIcon: ({ color, size }) => (
-                            <SymbolView
-                                name='cart'
-                                style={{
-                                    width: size,
-                                    height: size,
-                                }}
-                                type='palette'
-                                tintColor={color}
+                            <SystemIcon
+                                ios='cart'
+                                android='cart-outline'
+                                size={size}
+                                color={color}
                             />
                         ),
                     }}
@@ -92,14 +83,11 @@ export default function TabRouter() {
                     options={{
                         tabBarLabel: 'Profile',
                         tabBarIcon: ({ color, size }) => (
-                            <SymbolView
-                                name='smiley'
-                                style={{
-                                    width: size,
-                                    height: size,
-                                }}
-                                type='palette'
-                                tintColor={color}
+                            <SystemIcon
+                                ios='smiley'
+                                android='emoticon-happy-outline'
+                                size={size}
+                                color={color}
                             />
                         ),
                     }}

@@ -49,7 +49,7 @@ type Props = ViewProps & {
     duration?: number;
 };
 
-export default function PageTitle({ isLoading = false, duration = 300, ...rest }: Props) {
+export default function LoadingOverlay({ isLoading = false, duration = 300, ...rest }: Props) {
     const [measuredHeight, setMeasuredHeight] = useState(0);
     const [showLongWaitMessage, setShowLongWaitMessage] = useState(false);
     const translateY = useSharedValue(0);

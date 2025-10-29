@@ -99,7 +99,7 @@ export default function RecipeDetail() {
                       type: 'menu',
                       label: 'edit recipe',
                       icon: {
-                          name: 'ellipsis',
+                          name: ['ellipsis', 'dots-horizontal'],
                       },
                       menu: {
                           items: [
@@ -107,8 +107,7 @@ export default function RecipeDetail() {
                                   type: 'action',
                                   label: 'I made this',
                                   icon: {
-                                      type: 'sfSymbol',
-                                      name: 'checkmark',
+                                      name: ['checkmark', 'check'],
                                   },
                                   onPress: () => router.push(`/recipes/edit/${id}`),
                               },
@@ -116,8 +115,7 @@ export default function RecipeDetail() {
                                   type: 'action',
                                   label: 'edit recipe',
                                   icon: {
-                                      type: 'sfSymbol',
-                                      name: 'pencil',
+                                      name: ['pencil', 'pencil'],
                                   },
                                   onPress: () => router.push(`/recipes/edit/${id}`),
                               },
@@ -126,8 +124,7 @@ export default function RecipeDetail() {
                                   type: 'action',
                                   label: 'delete recipe',
                                   icon: {
-                                      type: 'sfSymbol',
-                                      name: 'trash',
+                                      name: ['trash', 'trash-can-outline'],
                                   },
                                   onPress: () => deleteRecipe(id, () => router.push('/recipes')),
                               },
@@ -190,8 +187,8 @@ export default function RecipeDetail() {
                     text='scale recipe'
                     leftIcon={
                         !scaleRecipe
-                            ? 'arrow.up.left.and.arrow.down.right'
-                            : 'arrow.down.right.and.arrow.up.left'
+                            ? ['arrow.up.left.and.arrow.down.right', 'open-in-full']
+                            : ['arrow.down.right.and.arrow.up.left', 'close-fullscreen']
                     }
                     onPress={() => {
                         setDisableSwipe((prev) => !prev);

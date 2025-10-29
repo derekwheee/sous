@@ -1,11 +1,11 @@
 import Heading from '@/components/heading';
 import Screen from '@/components/screen';
+import SystemIcon from '@/components/system-icon';
 import Text from '@/components/text';
 import { useHeader } from '@/hooks/use-header';
-import globalStyles, { fonts } from '@/styles/global';
+import globalStyles, { colors, fonts } from '@/styles/global';
 import { useClerk, useUser } from '@clerk/clerk-expo';
 import { useRouter } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
 import { Pressable, StyleSheet } from 'react-native';
 
 const styles = {
@@ -50,7 +50,7 @@ export default function ProfileScreen() {
             {
                 label: 'sign out',
                 icon: {
-                    name: 'rectangle.portrait.and.arrow.right',
+                    name: ['rectangle.portrait.and.arrow.right', 'logout'],
                 },
                 onPress: () => handleSignOut(),
             },
@@ -71,32 +71,45 @@ export default function ProfileScreen() {
             <Heading title='welcome,' />
             <Text style={styles.userName}>{user?.firstName || 'friend'}</Text>
             <Pressable onPress={() => router.push('/profile/categories')} style={styles.menuItem}>
-                <SymbolView name='list.dash' size={24} tintColor='#000' />
+                <SystemIcon
+                    ios='list.dash'
+                    android='format-list-bulleted'
+                    size={24}
+                    color={colors.text}
+                />
                 <Text size={16}>categories</Text>
-                <SymbolView
-                    name='chevron.right'
+                <SystemIcon
+                    ios='chevron.right'
+                    android='chevron-right'
                     size={16}
-                    tintColor='#000'
+                    color={colors.text}
                     style={{ marginLeft: 'auto' }}
                 />
             </Pressable>
             <Pressable onPress={() => router.push('/profile/link')} style={styles.menuItem}>
-                <SymbolView name='qrcode' size={24} tintColor='#000' />
+                <SystemIcon ios='qrcode' android='qrcode' size={24} color={colors.text} />
                 <Text size={16}>share household</Text>
-                <SymbolView
-                    name='chevron.right'
+                <SystemIcon
+                    ios='chevron.right'
+                    android='chevron-right'
                     size={16}
-                    tintColor='#000'
+                    color={colors.text}
                     style={{ marginLeft: 'auto' }}
                 />
             </Pressable>
             <Pressable onPress={() => router.push('/profile/join')} style={styles.menuItem}>
-                <SymbolView name='qrcode.viewfinder' size={24} tintColor='#000' />
+                <SystemIcon
+                    ios='qrcode.viewfinder'
+                    android='qr-code-scanner'
+                    size={24}
+                    color={colors.text}
+                />
                 <Text size={16}>join a household</Text>
-                <SymbolView
-                    name='chevron.right'
+                <SystemIcon
+                    ios='chevron.right'
+                    android='chevron-right'
                     size={16}
-                    tintColor='#000'
+                    color={colors.text}
                     style={{ marginLeft: 'auto' }}
                 />
             </Pressable>

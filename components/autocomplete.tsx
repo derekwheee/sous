@@ -2,7 +2,6 @@ import Pill from '@/components/pill';
 import Text from '@/components/text';
 import TextInput from '@/components/text-input';
 import globalStyles, { colors, fonts } from '@/styles/global';
-import { SymbolView } from 'expo-symbols';
 import React, { ReactElement, useEffect, useRef, useState } from 'react';
 import { Dimensions, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, {
@@ -11,6 +10,7 @@ import Animated, {
     useDerivedValue,
     withSpring,
 } from 'react-native-reanimated';
+import SystemIcon from './system-icon';
 
 const styles = {
     ...globalStyles,
@@ -141,12 +141,7 @@ export default function Autocomplete({
                 onLayout={(e) => setHeight(e.nativeEvent.layout.height)}
             >
                 <Pressable style={styles.closeButton} onPress={handleClose}>
-                    <SymbolView
-                        name='xmark'
-                        size={24}
-                        tintColor={colors.text}
-                        onTouchEnd={handleClose}
-                    />
+                    <SystemIcon ios='xmark' android='close' size={24} color={colors.text} />
                 </Pressable>
                 {label && <Text style={styles.headingText}>{label}</Text>}
                 <ScrollView style={{ maxHeight: vh(0.3) }} keyboardShouldPersistTaps='handled'>
@@ -155,7 +150,7 @@ export default function Autocomplete({
                             <Pill
                                 key={`${item}-pill-${i}`}
                                 text={item.label}
-                                icon='pointer.arrow.ipad.rays'
+                                icon={['pointer.arrow.ipad.rays', 'cursor-default-click']}
                                 tintColor={colors.primary}
                                 onPress={() => onSelect(item.value, handleClose)}
                             />
