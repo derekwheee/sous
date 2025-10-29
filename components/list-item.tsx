@@ -135,12 +135,14 @@ function ListItemContent({
             </View>
         </>
     );
+
     return !!onPress ? (
         <Pressable
             key={key}
             ref={ref}
             style={[styles.wrapper, highlight && styles.wrapperHighlight]}
             onLayout={onLayout}
+            onPress={onPress}
         >
             <Content />
         </Pressable>
