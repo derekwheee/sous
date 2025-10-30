@@ -71,7 +71,7 @@ export const useCategory = ({ categoryId }: { categoryId?: number } = {}) => {
     });
 
     const deleteCategory = useCallback(
-        (id: number, cb: Function) => {
+        (id: number, cb?: Function) => {
             Alert.alert('Remove category', 'Do you want to remove this category from your list?', [
                 {
                     text: 'Cancel',

@@ -27,6 +27,14 @@ export default function PantryLayout() {
                     headerShown: false,
                 }}
             />
+            <Stack.Screen
+                name='categories/new'
+                options={{
+                    title: 'New Category',
+                    presentation: 'modal',
+                    headerShown: false,
+                }}
+            />
         </Stack>
     );
 }

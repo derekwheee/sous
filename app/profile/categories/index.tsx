@@ -3,6 +3,7 @@ import ListItem from '@/components/list-item';
 import Screen from '@/components/screen';
 import SystemIcon from '@/components/system-icon';
 import { useCategory } from '@/hooks/use-category';
+import { useHeader } from '@/hooks/use-header';
 import { brightness, colors } from '@/styles/global';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useRouter } from 'expo-router';
@@ -20,15 +21,28 @@ type Item = {
     isNonFood: boolean;
 };
 
-export default function App() {
+export default function CategoriesPage() {
     const router = useRouter();
     const [data, setData] = useState<Item[]>([]);
     const [isDragReady, setIsDragReady] = useState(false);
     const {
         categories: { data: categories },
         saveSortOrder,
+        deleteCategory,
     } = useCategory();
     const tabBarHeight = useBottomTabBarHeight();
+
+    useHeader({
+        headerItems: [
+            {
+                label: 'new category',
+                icon: {
+                    name: ['plus', 'plus'],
+                },
+                onPress: () => router.push('/profile/categories/new'),
+            },
+        ],
+    });
 
     useEffect(() => {
         if (categories) {
@@ -72,6 +86,13 @@ export default function App() {
                                 style={{ marginLeft: 'auto' }}
                             />
                         )}
+                        rightActions={[
+                            {
+                                icon: 'trash-2',
+                                color: colors.error,
+                                onPress: () => deleteCategory(Number(item.key)),
+                            },
+                        ]}
                     />
                 </TouchableOpacity>
             </ScaleDecorator>

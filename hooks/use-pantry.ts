@@ -1,6 +1,5 @@
 import { useApi } from '@/hooks/use-api';
 import { getDefault } from '@/util/pantry';
-import { pantryItemMutation } from '@/util/query';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import { Alert } from 'react-native';
@@ -10,7 +9,7 @@ export const usePantry = ({ pantryItemId }: { pantryItemId?: number } = {}) => {
     const { user, getPantries, getPantryItem, upsertPantryItem } = useApi();
 
     const pantriesQuery = useQuery<Pantry[]>({
-        queryKey: ['pantry'],
+        queryKey: ['pantries'],
         queryFn: () => getPantries(),
         enabled: !!user,
     });
@@ -23,15 +22,54 @@ export const usePantry = ({ pantryItemId }: { pantryItemId?: number } = {}) => {
         enabled: !!user && !!pantryItemId && !!pantry?.id,
     });
 
-    // TODO: This mutation doesn't seem to be working with optimistic updates
-    const { mutate: savePantryItem, isPending: isPantryItemSaving } = useMutation(
-        pantryItemMutation<any, UpsertPantryItem>(
-            pantry?.id,
-            (patch: UpsertPantryItem) => upsertPantryItem(pantry?.id!, patch),
-            queryClient,
-            ['pantry']
-        )
-    );
+    const { mutate: savePantryItem, isPending: isPantryItemSaving } = useMutation({
+        mutationFn: (patch: UpsertPantryItem) => upsertPantryItem(pantry?.id!, patch),
+        onMutate: async (patch: UpsertPantryItem) => {
+            await queryClient.cancelQueries({ queryKey: ['pantries'] });
+            await queryClient.cancelQueries({ queryKey: ['pantryItem', patch.id, pantry?.id] });
+
+            const prevPantries = queryClient.getQueryData<Pantry[]>(['pantries']);
+            const prevItem = queryClient.getQueryData<PantryItem>([
+                'pantryItem',
+                patch.id,
+                pantry?.id,
+            ]);
+
+            if (prevPantries) {
+                queryClient.setQueryData<Pantry[]>(['pantries'], (old) =>
+                    old
+                        ? old.map((pantry) => ({
+                              ...pantry,
+                              pantryItems: pantry.pantryItems.map((item) =>
+                                  item.id === patch.id ? { ...item, ...patch } : item
+                              ),
+                          }))
+                        : old
+                );
+            }
+
+            if (prevItem) {
+                queryClient.setQueryData<PantryItem>(['pantryItem', patch.id, pantry?.id], {
+                    ...prevItem,
+                    ...patch,
+                });
+            }
+
+            return { prevPantries, prevItem };
+        },
+        onError: (_, updatedItem, context) => {
+            if (context?.prevPantries) {
+                queryClient.setQueryData(['pantries'], context.prevPantries);
+            }
+            if (context?.prevItem) {
+                queryClient.setQueryData(['pantryItem', updatedItem.id], context.prevItem);
+            }
+        },
+        onSettled: (_, __, updatedItem) => {
+            queryClient.invalidateQueries({ queryKey: ['pantry', pantry?.id] });
+            queryClient.invalidateQueries({ queryKey: ['pantryItem', updatedItem.id] });
+        },
+    });
 
     const finishPantryItem = useCallback(
         (pantryItem: PantryItem, cb?: Function) => {

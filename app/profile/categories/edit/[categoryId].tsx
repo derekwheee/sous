@@ -82,7 +82,6 @@ export default function EditItemModal() {
             // New category
             setSortOrder(nextSortOrder);
         }
-        console.log({ categoryId, category });
     }, [categoryId, category, categories, nextSortOrder]);
 
     const patch: UpsertItemCategory = {

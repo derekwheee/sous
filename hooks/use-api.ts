@@ -72,7 +72,7 @@ export function useApi() {
         getPantries: (keys: Keys = []) => apiClient.get(keys, `/household/${householdId}/pantry`),
         upsertPantryItem: (
             pantryId: number,
-            item: object,
+            item: UpsertPantryItem,
             keys: Keys = ['pantry', 'list', 'itemCategories']
         ) => apiClient.post(keys, `/household/${householdId}/pantry/${pantryId}`, item),
         getPantryItems: (pantryId: number, keys: Keys = []) =>
@@ -112,6 +112,8 @@ export function useApi() {
                     keywords,
                 },
             }),
+        getExpiringPantryItems: (pantryId: number, keys: Keys = []) =>
+            apiClient.get(keys, `/ai/expiring-items/${pantryId}`),
     };
 }
 

@@ -6,6 +6,9 @@ import { StyleSheet } from 'react-native';
 import 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import SystemIcon from './system-icon';
+import { useAI } from '@/hooks/use-ai';
+import { usePantry } from '@/hooks/use-pantry';
+import { useEffect } from 'react';
 
 const styles = StyleSheet.create({
     tabBar: {
@@ -22,6 +25,15 @@ export default function TabRouter() {
     const { isSignedIn = false } = useAuth();
 
     useSSE();
+
+    const { pantry } = usePantry();
+    const { fetchExpiringPantryItems } = useAI({ pantryId: pantry?.id });
+
+    useEffect(() => {
+        if (pantry?.id) {
+            fetchExpiringPantryItems();
+        }
+    }, [pantry?.id, fetchExpiringPantryItems]);
 
     return (
         <Tabs

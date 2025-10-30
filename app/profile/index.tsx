@@ -1,4 +1,6 @@
 import Heading from '@/components/heading';
+import List from '@/components/list';
+import ListItem from '@/components/list-item';
 import Screen from '@/components/screen';
 import SystemIcon from '@/components/system-icon';
 import Text from '@/components/text';
@@ -6,7 +8,7 @@ import { useHeader } from '@/hooks/use-header';
 import globalStyles, { colors, fonts } from '@/styles/global';
 import { useClerk, useUser } from '@clerk/clerk-expo';
 import { useRouter } from 'expo-router';
-import { Pressable, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 const styles = {
     ...globalStyles,
@@ -66,53 +68,59 @@ export default function ProfileScreen() {
         }
     };
 
+    interface ListItem {
+        text: string;
+        icon: any[];
+        onPress?: () => void;
+    }
+
+    const listItems: ListItem[] = [
+        {
+            text: 'categories',
+            icon: ['list.dash', 'format-list-bulleted'],
+            onPress: () => router.push('/profile/categories'),
+        },
+        {
+            text: 'share household',
+            icon: ['qrcode', 'qrcode'],
+            onPress: () => router.push('/profile/link'),
+        },
+        {
+            text: 'join a household',
+            icon: ['qrcode.viewfinder', 'qr-code-scanner'],
+            onPress: () => router.push('/profile/join'),
+        },
+    ];
+
     return (
         <Screen>
             <Heading title='welcome,' />
             <Text style={styles.userName}>{user?.firstName || 'friend'}</Text>
-            <Pressable onPress={() => router.push('/profile/categories')} style={styles.menuItem}>
-                <SystemIcon
-                    ios='list.dash'
-                    android='format-list-bulleted'
-                    size={24}
-                    color={colors.text}
-                />
-                <Text size={16}>categories</Text>
-                <SystemIcon
-                    ios='chevron.right'
-                    android='chevron-right'
-                    size={16}
-                    color={colors.text}
-                    style={{ marginLeft: 'auto' }}
-                />
-            </Pressable>
-            <Pressable onPress={() => router.push('/profile/link')} style={styles.menuItem}>
-                <SystemIcon ios='qrcode' android='qrcode' size={24} color={colors.text} />
-                <Text size={16}>share household</Text>
-                <SystemIcon
-                    ios='chevron.right'
-                    android='chevron-right'
-                    size={16}
-                    color={colors.text}
-                    style={{ marginLeft: 'auto' }}
-                />
-            </Pressable>
-            <Pressable onPress={() => router.push('/profile/join')} style={styles.menuItem}>
-                <SystemIcon
-                    ios='qrcode.viewfinder'
-                    android='qr-code-scanner'
-                    size={24}
-                    color={colors.text}
-                />
-                <Text size={16}>join a household</Text>
-                <SystemIcon
-                    ios='chevron.right'
-                    android='chevron-right'
-                    size={16}
-                    color={colors.text}
-                    style={{ marginLeft: 'auto' }}
-                />
-            </Pressable>
+            <List>
+                {listItems.map((item, i) => (
+                    <ListItem
+                        key={i}
+                        text={item.text}
+                        onPress={item.onPress}
+                        leftAdornment={
+                            <SystemIcon
+                                ios={item.icon[0]}
+                                android={item.icon[1]}
+                                size={24}
+                                color={colors.text}
+                            />
+                        }
+                        rightAdornment={
+                            <SystemIcon
+                                ios='chevron.right'
+                                android='chevron-right'
+                                size={16}
+                                color={colors.text}
+                            />
+                        }
+                    />
+                ))}
+            </List>
         </Screen>
     );
 }

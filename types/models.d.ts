@@ -35,8 +35,9 @@ interface PantryItem {
     isInStock: boolean;
     isFavorite: boolean;
     isInShoppingList: boolean;
-    createdAt: string;
-    updatedAt: string;
+    purchasedAt?: Date;
+    createdAt: Date;
+    updatedAt: Date;
     deleteAt?: Date;
     pantryId: number;
     categoryId?: number;
@@ -49,6 +50,9 @@ interface UpsertPantryItem {
     isInStock?: boolean;
     isFavorite?: boolean;
     isInShoppingList?: boolean;
+    purchasedAt?: Date;
+    createdAt?: Date;
+    updatedAt?: Date;
     pantryId?: number;
     categoryId?: number;
     deletedAt?: Date;

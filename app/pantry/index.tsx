@@ -8,10 +8,10 @@ import { useCategory } from '@/hooks/use-category';
 import { useHeader } from '@/hooks/use-header';
 import { usePantry } from '@/hooks/use-pantry';
 import globalStyles, { colors, fonts } from '@/styles/global';
-import { getDefault } from '@/util/pantry';
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useAI } from '@/hooks/use-ai';
 
 const styles = {
     ...globalStyles,
@@ -42,7 +42,8 @@ export default function PantryScreen() {
         categories: { data: categories },
     } = useCategory();
 
-    const { pantries, savePantryItem, finishPantryItem, deletePantryItem } = usePantry();
+    const { pantry, savePantryItem, finishPantryItem, deletePantryItem } = usePantry();
+    const { expiringPantryItems } = useAI({ pantryId: pantry?.id });
 
     const searchBarRef = useRef<any>(null);
 
@@ -74,7 +75,6 @@ export default function PantryScreen() {
         });
     };
 
-    const pantry = getDefault(pantries);
     const pantryItems = pantry?.pantryItems;
     const sortedPantry = pantryItems
         ?.sort((a, b) => {
@@ -110,21 +110,41 @@ export default function PantryScreen() {
                                 text={pantryItem.name}
                                 status={pantryItem.isInStock ? 'success' : 'indeterminate'}
                                 rightAdornment={() => (
-                                    <Pressable
-                                        onPress={() =>
-                                            handleSaveChanges({
-                                                id: pantryItem.id,
-                                                isFavorite: !pantryItem.isFavorite,
-                                            })
-                                        }
+                                    <View
+                                        style={{
+                                            flexDirection: 'row',
+                                            gap: 12,
+                                            alignItems: 'center',
+                                        }}
                                     >
-                                        <SystemIcon
-                                            ios='repeat'
-                                            android='repeat'
-                                            size={24}
-                                            color={pantryItem.isFavorite ? colors.primary : '#ccc'}
-                                        />
-                                    </Pressable>
+                                        {expiringPantryItems?.some(
+                                            (i: any) => i.id === pantryItem.id
+                                        ) && (
+                                            <SystemIcon
+                                                ios='exclamationmark.triangle.fill'
+                                                android='alert-circle-outline'
+                                                color={colors.warning}
+                                                size={24}
+                                            />
+                                        )}
+                                        <Pressable
+                                            onPress={() =>
+                                                handleSaveChanges({
+                                                    id: pantryItem.id,
+                                                    isFavorite: !pantryItem.isFavorite,
+                                                })
+                                            }
+                                        >
+                                            <SystemIcon
+                                                ios='repeat'
+                                                android='repeat'
+                                                size={24}
+                                                color={
+                                                    pantryItem.isFavorite ? colors.primary : '#ccc'
+                                                }
+                                            />
+                                        </Pressable>
+                                    </View>
                                 )}
                                 leftActions={[
                                     {

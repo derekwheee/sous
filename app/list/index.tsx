@@ -235,6 +235,7 @@ export default function ListScreen() {
                                                       id: pantryItem.id,
                                                       isInShoppingList: false,
                                                       isInStock: true,
+                                                      purchasedAt: new Date(),
                                                   })
                                     }
                                     rightAdornment={

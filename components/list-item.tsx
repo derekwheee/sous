@@ -40,6 +40,7 @@ const styles = {
         textDimmed: {
             opacity: 0.5,
         },
+        leftAdornment: {},
         rightAdornment: {
             marginLeft: 'auto',
         },
@@ -67,6 +68,9 @@ interface ListItemProps {
     dimmed?: boolean;
     highlight?: boolean;
     draggable?: boolean;
+    leftAdornment?:
+        | React.ReactNode
+        | ((props: { highlight: boolean; status?: string }) => React.ReactNode);
     rightAdornment?:
         | React.ReactNode
         | ((props: { highlight: boolean; status?: string }) => React.ReactNode);
@@ -101,6 +105,7 @@ function ListItemContent({
     dimmed = false,
     highlight = false,
     draggable = false,
+    leftAdornment,
     rightAdornment,
     ref,
     onLayout,
@@ -109,6 +114,13 @@ function ListItemContent({
     const Content = () => (
         <>
             {!!draggable && <DragHandle color={highlight ? colors.background : colors.text} />}
+            {!!leftAdornment && (
+                <View style={styles.leftAdornment}>
+                    {typeof leftAdornment === 'function'
+                        ? (leftAdornment as any)({ highlight, status })
+                        : leftAdornment}
+                </View>
+            )}
             {!!status && (
                 <View
                     style={[
