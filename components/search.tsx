@@ -1,22 +1,26 @@
-import globalStyles, { colors } from '@/styles/global';
+import globalStyles from '@/styles/global';
 import Feather from '@expo/vector-icons/Feather';
 import { StyleSheet, TextInput, TextInputProps, View } from 'react-native';
+import { useColors } from '@/hooks/use-colors';
 
-const styles = {
-    ...globalStyles,
-    ...StyleSheet.create({
-        search: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 8,
-            padding: 14,
-            backgroundColor: colors.primary,
-        },
-        searchInput: {
-            flexGrow: 1,
-            color: 'white',
-        },
-    }),
+const useStyles = () => {
+    const colors = useColors();
+    return {
+        ...globalStyles(colors),
+        ...StyleSheet.create({
+            search: {
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 8,
+                padding: 14,
+                backgroundColor: colors.primary,
+            },
+            searchInput: {
+                flexGrow: 1,
+                color: 'white',
+            },
+        }),
+    };
 };
 
 export default function SearchBar({
@@ -28,6 +32,7 @@ export default function SearchBar({
     onChangeText: (text: string) => void;
     inputProps?: TextInputProps;
 }) {
+    const styles = useStyles();
     return (
         <View style={styles.search}>
             <Feather name='search' size={24} color='white' />

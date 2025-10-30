@@ -1,6 +1,6 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Appearance } from 'react-native';
 
-export const swatches = {
+export const lightSwatch: Swatch = {
     blue: '#4051ff',
     yellow: '#ffd541',
     purple: '#4e0250',
@@ -16,14 +16,40 @@ export const swatches = {
     k: 'rgb(0, 0, 0)',
 };
 
-export const colors = {
-    sous: swatches.yellow,
-    primary: swatches.blue,
+export const lightColors: Palette = {
+    sous: lightSwatch.yellow,
+    primary: lightSwatch.blue,
     background: '#F7F7F7',
     text: '#191919',
     indeterminate: '#E8E8E8',
     surface: '#FFFFFF',
-    ...swatches,
+    ...lightSwatch,
+};
+
+export const darkSwatch: Swatch = {
+    blue: '#5B6FFF',
+    yellow: '#FFD85A',
+    purple: '#B35BB8',
+    green: '#6EDCA3',
+    pink: '#FFB6AE',
+    success: '#6EDCA3',
+    warning: '#FFD85A',
+    info: '#7ADBE5',
+    error: '#FF5A5B',
+    c: 'rgb(100, 255, 255)',
+    m: 'rgb(255, 100, 255)',
+    y: 'rgb(255, 255, 120)',
+    k: 'rgb(255, 255, 255)',
+};
+
+export const darkColors: Palette = {
+    sous: darkSwatch.yellow,
+    primary: darkSwatch.blue,
+    background: '#0E0E10',
+    text: '#F3F3F3',
+    indeterminate: '#2B2B2E',
+    surface: '#1A1A1D',
+    ...darkSwatch,
 };
 
 export const sizes = {
@@ -57,94 +83,100 @@ export const fonts = {
     caprasimo: 'Caprasimo_400Regular',
 };
 
-export default StyleSheet.create({
-    // Containers
-    container: {
-        flex: 1,
-    },
-    content: {
-        paddingHorizontal: 16,
-    },
+export default function (colors: Palette) {
+    return StyleSheet.create({
+        // Containers
+        container: {
+            flex: 1,
+        },
+        content: {
+            paddingHorizontal: 16,
+        },
 
-    // Typography
-    text: {
-        fontFamily: 'Poppins_300Light',
-        fontSize: fontSizes.regular,
-        color: colors.text,
-    },
-    link: {
-        color: colors.primary,
-    },
-    title: {
-        flexShrink: 1,
-        fontFamily: 'Caprasimo_400Regular',
-        fontSize: fontSizes.title,
-        color: colors.text,
-        textTransform: 'lowercase',
-    },
-    h1: {
-        fontFamily: 'Poppins_500Medium',
-        fontSize: fontSizes.h1,
-        color: colors.text,
-        textTransform: 'lowercase',
-    },
-    h2: {
-        paddingVertical: 16,
-        fontFamily: 'Poppins_500Medium',
-        fontSize: fontSizes.h2,
-        color: colors.text,
-        textTransform: 'lowercase',
-    },
-    h3: {
-        marginBottom: 16,
-        fontFamily: 'Poppins_500Medium',
-        fontSize: fontSizes.h3,
-        color: colors.text,
-        textTransform: 'lowercase',
-    },
-    heading: {
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginVertical: 16,
-        paddingHorizontal: 16,
-    },
-    dialogHeading: {
-        fontFamily: fonts.poppins.medium,
-        fontSize: fontSizes.h2,
-        color: colors.text,
-        textTransform: 'lowercase',
-    },
-    dialogDescription: {
-        fontFamily: fonts.poppins.regular,
-        fontSize: fontSizes.regular,
-    },
-    button: {
-        height: 48,
-        paddingHorizontal: 24,
-        borderRadius: 8,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: colors.primary,
-    },
-    buttonDisabled: {
-        backgroundColor: colors.indeterminate,
-    },
-    buttonText: {
-        color: '#fff',
-        fontFamily: fonts.poppins.medium,
-        fontSize: fontSizes.regular,
-        textTransform: 'lowercase',
-    },
-    buttonTextDisabled: {
-        color: '#999',
-    },
-});
+        // Typography
+        text: {
+            fontFamily: 'Poppins_300Light',
+            fontSize: fontSizes.regular,
+            color: colors.text,
+        },
+        link: {
+            color: colors.primary,
+        },
+        title: {
+            flexShrink: 1,
+            fontFamily: 'Caprasimo_400Regular',
+            fontSize: fontSizes.title,
+            color: colors.text,
+            textTransform: 'lowercase',
+        },
+        h1: {
+            fontFamily: 'Poppins_500Medium',
+            fontSize: fontSizes.h1,
+            color: colors.text,
+            textTransform: 'lowercase',
+        },
+        h2: {
+            paddingVertical: 16,
+            fontFamily: 'Poppins_500Medium',
+            fontSize: fontSizes.h2,
+            color: colors.text,
+            textTransform: 'lowercase',
+        },
+        h3: {
+            marginBottom: 16,
+            fontFamily: 'Poppins_500Medium',
+            fontSize: fontSizes.h3,
+            color: colors.text,
+            textTransform: 'lowercase',
+        },
+        heading: {
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginVertical: 16,
+            paddingHorizontal: 16,
+        },
+        dialogHeading: {
+            fontFamily: fonts.poppins.medium,
+            fontSize: fontSizes.h2,
+            color: colors.text,
+            textTransform: 'lowercase',
+        },
+        dialogDescription: {
+            fontFamily: fonts.poppins.regular,
+            fontSize: fontSizes.regular,
+        },
+        button: {
+            height: 48,
+            paddingHorizontal: 24,
+            borderRadius: 8,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: colors.primary,
+        },
+        buttonDisabled: {
+            backgroundColor: colors.indeterminate,
+        },
+        buttonText: {
+            color: colors.surface,
+            fontFamily: fonts.poppins.medium,
+            fontSize: fontSizes.regular,
+            textTransform: 'lowercase',
+        },
+        buttonTextDisabled: {
+            color: brightness(colors.text, 128),
+        },
+    });
+}
 
 export function brightness(color: string, amount: number) {
     const isHex = color.startsWith('#');
     const isRgb = color.startsWith('rgb');
     const rgb = { r: 0, g: 0, b: 0, a: 1 };
+
+    const scheme = Appearance.getColorScheme();
+
+    amount = scheme === 'dark' ? amount * -1 : amount;
 
     if (isHex) {
         color = color.slice(1);

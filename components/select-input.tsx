@@ -1,33 +1,37 @@
 import Text from '@/components/text';
-import globalStyles, { colors, fonts } from '@/styles/global';
+import globalStyles, { brightness, fonts } from '@/styles/global';
 import { StyleSheet, View } from 'react-native';
 import { Adapt, Select, Sheet } from 'tamagui';
+import { useColors } from '@/hooks/use-colors';
 
-const styles = {
-    ...globalStyles,
-    ...StyleSheet.create({
-        trigger: {
-            display: 'flex',
-            width: '100%',
-            marginBottom: 32,
-            borderColor: colors.primary,
-            borderBottomWidth: 2,
-            borderRadius: 0,
-            padding: 16,
-            backgroundColor: '#eee',
-        },
-        triggerText: {
-            padding: 0,
-            fontFamily: fonts.poppins.regular,
-            fontSize: 16,
-            color: colors.text,
-        },
-        itemText: {
-            fontFamily: fonts.poppins.regular,
-            fontSize: 16,
-            color: colors.text,
-        },
-    }),
+const useStyles = () => {
+    const colors = useColors();
+    return {
+        ...globalStyles(colors),
+        ...StyleSheet.create({
+            trigger: {
+                display: 'flex',
+                width: '100%',
+                marginBottom: 32,
+                borderColor: colors.primary,
+                borderBottomWidth: 2,
+                borderRadius: 0,
+                padding: 16,
+                backgroundColor: brightness(colors.background, -10),
+            },
+            triggerText: {
+                padding: 0,
+                fontFamily: fonts.poppins.regular,
+                fontSize: 16,
+                color: colors.text,
+            },
+            itemText: {
+                fontFamily: fonts.poppins.regular,
+                fontSize: 16,
+                color: colors.text,
+            },
+        }),
+    };
 };
 
 export default function SelectInput({
@@ -49,6 +53,7 @@ export default function SelectInput({
     style?: object;
     props?: React.ComponentProps<typeof Select>;
 }) {
+    const styles = useStyles();
     return (
         <>
             {label && (

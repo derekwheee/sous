@@ -1,5 +1,11 @@
 import styles, { fonts } from '@/styles/global';
 import { Text as _Text, TextProps as _TextProps } from 'react-native';
+import { useColors } from '@/hooks/use-colors';
+
+const useStyles = () => {
+    const colors = useColors();
+    return styles(colors);
+};
 
 interface TextProps {
     size?: number;
@@ -15,6 +21,7 @@ export default function Text({
     style,
     ...rest
 }: TextProps & _TextProps) {
+    const styles = useStyles();
     return (
         <_Text
             style={[

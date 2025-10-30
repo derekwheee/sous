@@ -7,36 +7,42 @@ import SystemIcon from '@/components/system-icon';
 import { useCategory } from '@/hooks/use-category';
 import { useHeader } from '@/hooks/use-header';
 import { usePantry } from '@/hooks/use-pantry';
-import globalStyles, { colors, fonts } from '@/styles/global';
+import globalStyles, { brightness, fonts } from '@/styles/global';
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useAI } from '@/hooks/use-ai';
+import { useColors } from '@/hooks/use-colors';
 
-const styles = {
-    ...globalStyles,
-    ...StyleSheet.create({
-        onboarding: {
-            alignItems: 'center',
-            marginVertical: 128,
-            gap: 16,
-        },
-        onboardingText: {
-            fontSize: 16,
-            fontFamily: fonts.caprasimo,
-        },
-        addSearchTerm: {
-            flexDirection: 'row',
-            gap: 4,
-            alignItems: 'center',
-        },
-        addSearchTermText: {
-            color: colors.primary,
-        },
-    }),
+const useStyles = () => {
+    const colors = useColors();
+    return {
+        ...globalStyles(colors),
+        ...StyleSheet.create({
+            onboarding: {
+                alignItems: 'center',
+                marginVertical: 128,
+                gap: 16,
+            },
+            onboardingText: {
+                fontSize: 16,
+                fontFamily: fonts.caprasimo,
+            },
+            addSearchTerm: {
+                flexDirection: 'row',
+                gap: 4,
+                alignItems: 'center',
+            },
+            addSearchTermText: {
+                color: colors.primary,
+            },
+        }),
+    };
 };
 
 export default function PantryScreen() {
+    const styles = useStyles();
+    const colors = useColors();
     const router = useRouter();
     const {
         categories: { data: categories },
@@ -121,9 +127,9 @@ export default function PantryScreen() {
                                             (i: any) => i.id === pantryItem.id
                                         ) && (
                                             <SystemIcon
-                                                ios='exclamationmark.triangle.fill'
+                                                ios='calendar.badge.exclamationmark'
                                                 android='alert-circle-outline'
-                                                color={colors.warning}
+                                                color={colors.pink}
                                                 size={24}
                                             />
                                         )}
@@ -140,7 +146,9 @@ export default function PantryScreen() {
                                                 android='repeat'
                                                 size={24}
                                                 color={
-                                                    pantryItem.isFavorite ? colors.primary : '#ccc'
+                                                    pantryItem.isFavorite
+                                                        ? colors.primary
+                                                        : brightness(colors.background, -40)
                                                 }
                                             />
                                         </Pressable>

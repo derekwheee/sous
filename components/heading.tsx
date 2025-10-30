@@ -1,10 +1,14 @@
 import Text from '@/components/text';
 import globalStyles from '@/styles/global';
 import { StyleSheet, View, ViewProps } from 'react-native';
+import { useColors } from '@/hooks/use-colors';
 
-const styles = {
-    ...globalStyles,
-    ...StyleSheet.create({}),
+const useStyles = () => {
+    const colors = useColors();
+    return {
+        ...globalStyles(colors),
+        ...StyleSheet.create({}),
+    };
 };
 
 interface HeadingProps {
@@ -12,6 +16,7 @@ interface HeadingProps {
 }
 
 export default function Heading({ title, ...rest }: HeadingProps & ViewProps) {
+    const styles = useStyles();
     return (
         <View style={styles.heading} {...rest}>
             <Text style={styles.h1}>{title}</Text>

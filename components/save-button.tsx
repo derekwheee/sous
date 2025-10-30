@@ -1,14 +1,18 @@
 import Text from '@/components/text';
 import { usePrevious } from '@/hooks/use-previous';
-import globalStyles, { colors } from '@/styles/global';
+import globalStyles from '@/styles/global';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 import { Spinner } from 'tamagui';
 import SystemIcon from './system-icon';
+import { useColors } from '@/hooks/use-colors';
 
-const styles = {
-    ...globalStyles,
-    ...StyleSheet.create({}),
+const useStyles = () => {
+    const colors = useColors();
+    return {
+        ...globalStyles(colors),
+        ...StyleSheet.create({}),
+    };
 };
 
 export default function SaveButton({
@@ -22,6 +26,8 @@ export default function SaveButton({
     isSaving: boolean;
     props?: React.ComponentProps<typeof Pressable>;
 }) {
+    const styles = useStyles();
+    const colors = useColors();
     const [showSuccess, setShowSuccess] = useState(false);
     const previousProps = usePrevious<{ disabled: boolean; isSaving: boolean } | null>({
         disabled,
@@ -50,7 +56,7 @@ export default function SaveButton({
             onPress={onPressSave}
         >
             {!showSuccess && isSaving && (
-                <Spinner size='small' color='#000' style={{ padding: 2 }} />
+                <Spinner size='small' color={colors.text} style={{ padding: 2 }} />
             )}
             {!showSuccess && !isSaving && (
                 <Text style={[styles.buttonText, disabled && styles.buttonTextDisabled]}>save</Text>

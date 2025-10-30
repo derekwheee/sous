@@ -1,27 +1,31 @@
 import Text from '@/components/text';
-import globalStyles, { brightness, colors } from '@/styles/global';
+import globalStyles, { brightness } from '@/styles/global';
 import { FUZZY_SEARCH_THRESHOLD } from '@/util/constants';
 import Fuse from 'fuse.js';
 import { StyleSheet, View, ViewProps } from 'react-native';
 import SystemIcon from './system-icon';
+import { useColors } from '@/hooks/use-colors';
 
-const styles = {
-    ...globalStyles,
-    ...StyleSheet.create({
-        wrapper: {
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            marginVertical: 4,
-            gap: 4,
-        },
-        icon: {
-            marginRight: 16,
-        },
-        ingredientText: {
-            flexShrink: 1,
-        },
-    }),
+const useStyles = () => {
+    const colors = useColors();
+    return {
+        ...globalStyles(colors),
+        ...StyleSheet.create({
+            wrapper: {
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginVertical: 4,
+                gap: 4,
+            },
+            icon: {
+                marginRight: 16,
+            },
+            ingredientText: {
+                flexShrink: 1,
+            },
+        }),
+    };
 };
 
 interface IngredientProps {
@@ -36,6 +40,9 @@ export default function Ingredient({
     onPress,
     ...rest
 }: IngredientProps & ViewProps) {
+    const styles = useStyles();
+    const colors = useColors();
+
     const fuse = new Fuse(pantry?.pantryItems || [], {
         keys: ['name'],
         threshold: FUZZY_SEARCH_THRESHOLD,

@@ -1,5 +1,5 @@
 import Text from '@/components/text';
-import globalStyles, { brightness, colors, fonts } from '@/styles/global';
+import globalStyles, { brightness, fonts } from '@/styles/global';
 import {
     TextInput as _TextInput,
     TextInputProps as _TextInputProps,
@@ -8,35 +8,39 @@ import {
     ViewProps,
 } from 'react-native';
 import SystemIcon from './system-icon';
+import { useColors } from '@/hooks/use-colors';
 
-const styles = {
-    ...globalStyles,
-    ...StyleSheet.create({
-        wrapper: {
-            display: 'flex',
-            width: '100%',
-            flexShrink: 1,
-            marginBottom: 32,
-        },
-        input: {
-            width: '100%',
-            margin: 0,
-            borderColor: colors.primary,
-            borderBottomWidth: 2,
-            padding: 16,
-            backgroundColor: '#eee',
-            fontFamily: fonts.poppins.regular,
-            fontSize: 16,
-            color: colors.text,
-        },
-        adornments: {},
-        adornmentRight: {
-            position: 'absolute',
-            right: 8,
-            top: '50%',
-            transform: [{ translateY: '-50%' }],
-        },
-    }),
+const useStyles = () => {
+    const colors = useColors();
+    return {
+        ...globalStyles(colors),
+        ...StyleSheet.create({
+            wrapper: {
+                display: 'flex',
+                width: '100%',
+                flexShrink: 1,
+                marginBottom: 32,
+            },
+            input: {
+                width: '100%',
+                margin: 0,
+                borderColor: colors.primary,
+                borderBottomWidth: 2,
+                padding: 16,
+                backgroundColor: brightness(colors.background, -10),
+                fontFamily: fonts.poppins.regular,
+                fontSize: 16,
+                color: colors.text,
+            },
+            adornments: {},
+            adornmentRight: {
+                position: 'absolute',
+                right: 8,
+                top: '50%',
+                transform: [{ translateY: '-50%' }],
+            },
+        }),
+    };
 };
 
 interface TextInputProps {
@@ -67,6 +71,9 @@ export default function TextInput({
     leftAdornment,
     ...rest
 }: TextInputProps & ViewProps & _TextInputProps) {
+    const styles = useStyles();
+    const colors = useColors();
+
     return (
         <View style={[styles.wrapper, style]} {...rest}>
             {label && (
@@ -104,7 +111,7 @@ export default function TextInput({
                     style={styles.input}
                     onChangeText={onChangeText}
                     value={value}
-                    placeholderTextColor='#ccc'
+                    placeholderTextColor={brightness(colors.text, -40)}
                     autoCapitalize='none'
                     {...rest}
                 />

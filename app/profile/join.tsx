@@ -7,24 +7,28 @@ import { BarcodeScanningResult, CameraView, useCameraPermissions } from 'expo-ca
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { useColors } from '@/hooks/use-colors';
 
-const styles = {
-    ...globalStyles,
-    ...StyleSheet.create({
-        container: {
-            flex: 1,
-            justifyContent: 'center',
-            padding: 64,
-            alignItems: 'center',
-            gap: 16,
-        },
-        shareText: {
-            fontFamily: fonts.caprasimo,
-            fontSize: 32,
-            textAlign: 'center',
-            marginVertical: 32,
-        },
-    }),
+const useStyles = () => {
+    const colors = useColors();
+    return {
+        ...globalStyles(colors),
+        ...StyleSheet.create({
+            container: {
+                flex: 1,
+                justifyContent: 'center',
+                padding: 64,
+                alignItems: 'center',
+                gap: 16,
+            },
+            shareText: {
+                fontFamily: fonts.caprasimo,
+                fontSize: 32,
+                textAlign: 'center',
+                marginVertical: 32,
+            },
+        }),
+    };
 };
 
 function validateBarcodeData(data: string): { id: string; joinToken: string } | null {
@@ -44,6 +48,7 @@ function delay(ms: number): Promise<void> {
 }
 
 export default function ProfileJoinScreen() {
+    const styles = useStyles();
     const router = useRouter();
     const queryClient = useQueryClient();
     const { user, getUser, joinHousehold } = useApi();

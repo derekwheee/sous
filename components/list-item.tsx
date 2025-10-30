@@ -1,57 +1,61 @@
 import DragHandle from '@/components/drag-handle';
 import Text from '@/components/text';
-import globalStyles, { colors } from '@/styles/global';
+import globalStyles from '@/styles/global';
 import { Feather } from '@expo/vector-icons';
 import React, { useRef, useState } from 'react';
 import { Pressable, PressableProps, StyleSheet, View } from 'react-native';
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import Reanimated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated';
+import { useColors } from '@/hooks/use-colors';
 
-const styles = {
-    ...globalStyles,
-    ...StyleSheet.create({
-        wrapper: {
-            flexGrow: 1,
-            display: 'flex',
-            flexDirection: 'row',
-            gap: 16,
-            alignItems: 'center',
-            padding: 16,
-            backgroundColor: colors.surface,
-        },
-        wrapperHighlight: {
-            backgroundColor: colors.primary,
-            borderBottomColor: colors.primary,
-        },
-        statusDot: {
-            width: 16,
-            height: 16,
-            borderRadius: 8,
-            backgroundColor: colors.success,
-        },
-        text: {
-            flexShrink: 1,
-            fontSize: 16,
-            textTransform: 'lowercase',
-        },
-        textHighlight: {
-            color: colors.background,
-        },
-        textDimmed: {
-            opacity: 0.5,
-        },
-        leftAdornment: {},
-        rightAdornment: {
-            marginLeft: 'auto',
-        },
-        actionButton: {
-            alignContent: 'center',
-            justifyContent: 'center',
-            padding: 16,
-            aspectRatio: 1,
-            height: '100%',
-        },
-    }),
+const useStyles = () => {
+    const colors = useColors();
+    return {
+        ...globalStyles(colors),
+        ...StyleSheet.create({
+            wrapper: {
+                flexGrow: 1,
+                display: 'flex',
+                flexDirection: 'row',
+                gap: 16,
+                alignItems: 'center',
+                padding: 16,
+                backgroundColor: colors.surface,
+            },
+            wrapperHighlight: {
+                backgroundColor: colors.primary,
+                borderBottomColor: colors.primary,
+            },
+            statusDot: {
+                width: 16,
+                height: 16,
+                borderRadius: 8,
+                backgroundColor: colors.success,
+            },
+            text: {
+                flexShrink: 1,
+                fontSize: 16,
+                textTransform: 'lowercase',
+            },
+            textHighlight: {
+                color: colors.background,
+            },
+            textDimmed: {
+                opacity: 0.5,
+            },
+            leftAdornment: {},
+            rightAdornment: {
+                marginLeft: 'auto',
+            },
+            actionButton: {
+                alignContent: 'center',
+                justifyContent: 'center',
+                padding: 16,
+                aspectRatio: 1,
+                height: '100%',
+            },
+        }),
+    };
 };
 
 interface SwipeAction {
@@ -111,6 +115,9 @@ function ListItemContent({
     onLayout,
     onPress,
 }: ListItemProps & PressableProps & { ref?: React.RefObject<any> }) {
+    const styles = useStyles();
+    const colors = useColors();
+
     const Content = () => (
         <>
             {!!draggable && <DragHandle color={highlight ? colors.background : colors.text} />}
@@ -207,6 +214,8 @@ interface ActionsProps {
 }
 
 function Actions({ drag, width = 64, swipeRef, actions }: ActionsProps) {
+    const styles = useStyles();
+    const colors = useColors();
     const styleAnimation = useAnimatedStyle(() => {
         return {
             transform: [{ translateX: drag.value + width * actions?.length! }],

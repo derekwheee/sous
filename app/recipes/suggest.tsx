@@ -6,71 +6,77 @@ import Text from '@/components/text';
 import TextInput from '@/components/text-input';
 import TimeLabel from '@/components/time-label';
 import { useApi } from '@/hooks/use-api';
-import globalStyles, { brightness, colors, fonts } from '@/styles/global';
+import globalStyles, { brightness, fonts } from '@/styles/global';
 import { useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
+import { useColors } from '@/hooks/use-colors';
 
-const styles = {
-    ...globalStyles,
-    ...StyleSheet.create({
-        dialog: {
-            flex: 1,
-            paddingTop: 48,
-            paddingHorizontal: 16,
-        },
-        sparkleContainer: {
-            width: 196 + 64,
-            padding: 32,
-            borderRadius: (196 + 64) / 2,
-            backgroundColor: brightness(colors.background, -20),
-        },
-        suggestionsWrapper: {
-            marginBottom: 16,
-            padding: 16,
-            borderRadius: 8,
-            backgroundColor: brightness(colors.background, -20),
-        },
-        titleWrapper: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 8,
-            marginBottom: 16,
-        },
-        title: {
-            fontSize: 24,
-            fontFamily: fonts.poppins.medium,
-        },
-        tagContainer: {
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            gap: 8,
-            marginBottom: 16,
-        },
-        recipeTitle: {
-            marginBottom: 8,
-            fontSize: 20,
-            fontFamily: fonts.poppins.medium,
-            textTransform: 'lowercase',
-        },
-        recipeDescription: {
-            marginTop: 8,
-        },
-        sectionHeading: {
-            marginBottom: 8,
-            fontFamily: fonts.poppins.medium,
-        },
-        loadingWrapper: {
-            flex: 1,
-            paddingBottom: 96,
-            justifyContent: 'center',
-            alignItems: 'center',
-        },
-    }),
+const useStyles = () => {
+    const colors = useColors();
+    return {
+        ...globalStyles(colors),
+        ...StyleSheet.create({
+            dialog: {
+                flex: 1,
+                paddingTop: 48,
+                paddingHorizontal: 16,
+            },
+            sparkleContainer: {
+                width: 196 + 64,
+                padding: 32,
+                borderRadius: (196 + 64) / 2,
+                backgroundColor: brightness(colors.background, -20),
+            },
+            suggestionsWrapper: {
+                marginBottom: 16,
+                padding: 16,
+                borderRadius: 8,
+                backgroundColor: brightness(colors.background, -20),
+            },
+            titleWrapper: {
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 8,
+                marginBottom: 16,
+            },
+            title: {
+                fontSize: 24,
+                fontFamily: fonts.poppins.medium,
+            },
+            tagContainer: {
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                gap: 8,
+                marginBottom: 16,
+            },
+            recipeTitle: {
+                marginBottom: 8,
+                fontSize: 20,
+                fontFamily: fonts.poppins.medium,
+                textTransform: 'lowercase',
+            },
+            recipeDescription: {
+                marginTop: 8,
+            },
+            sectionHeading: {
+                marginBottom: 8,
+                fontFamily: fonts.poppins.medium,
+            },
+            loadingWrapper: {
+                flex: 1,
+                paddingBottom: 96,
+                justifyContent: 'center',
+                alignItems: 'center',
+            },
+        }),
+    };
 };
 
 export default function SuggestRecipesModal() {
+    const styles = useStyles();
+    const colors = useColors();
     const router = useRouter();
     const [suggestionState, setSuggestionState] = useState<RecipeSuggestion[] | null>(null);
     const [selectedTags, setSelectedTags] = useState<string[]>([]);

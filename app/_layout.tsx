@@ -19,11 +19,12 @@ import Constants from 'expo-constants';
 import { useFonts } from 'expo-font';
 import { Slot, useRouter, useSegments } from 'expo-router';
 import { useEffect, useRef } from 'react';
-import { Appearance, StatusBar } from 'react-native';
+import { StatusBar } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { createTamagui, TamaguiProvider } from 'tamagui';
+import { useColors } from '@/hooks/use-colors';
 
 const queryClient = new QueryClient();
 const config = createTamagui(defaultConfig);
@@ -32,10 +33,6 @@ export default function RootLayout() {
     if (!Constants.expoConfig?.extra?.clerkKey && !process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY) {
         throw new Error('Missing authentication token');
     }
-
-    useEffect(() => {
-        Appearance.setColorScheme('light');
-    }, []);
 
     return (
         <ClerkProvider
@@ -51,6 +48,7 @@ export default function RootLayout() {
 }
 
 function AppProviders() {
+    const colors = useColors();
     const { isLoaded } = useUser();
     let [fontsLoaded] = useFonts({
         Poppins_300Light,
@@ -71,7 +69,7 @@ function AppProviders() {
             <PortalProvider>
                 <TamaguiProvider config={config}>
                     <QueryClientProvider client={queryClient}>
-                        <ThemeProvider value={Theme}>
+                        <ThemeProvider value={Theme(colors)}>
                             <SnackbarProvider>
                                 <SafeAreaProvider>
                                     <SignedOut>

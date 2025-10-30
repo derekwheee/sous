@@ -3,46 +3,40 @@ import SaveButton from '@/components/save-button';
 import Text from '@/components/text';
 import TextInput from '@/components/text-input';
 import { useCategory } from '@/hooks/use-category';
-import globalStyles, { brightness, colors } from '@/styles/global';
+import globalStyles, { brightness } from '@/styles/global';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { EmojiPopup } from 'react-native-emoji-popup';
 import { Switch, XStack, YStack } from 'tamagui';
+import { useColors } from '@/hooks/use-colors';
 
-const styles = {
-    ...globalStyles,
-    ...StyleSheet.create({
-        dialog: {
-            paddingTop: 48,
-            paddingBottom: 32,
-            paddingHorizontal: 16,
-        },
-        categoryTrigger: {
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            borderColor: colors.primary,
-            borderBottomWidth: 2,
-            padding: 16,
-            backgroundColor: '#eee',
-            marginBottom: 32,
-        },
-        emojiTrigger: {
-            position: 'relative',
-            top: -4,
-            aspectRatio: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            borderWidth: 2,
-            borderColor: brightness(colors.background, -40),
-            borderRadius: 999,
-            backgroundColor: brightness(colors.background, -20),
-        },
-        emojiText: {
-            fontSize: 36,
-        },
-    }),
+const useStyles = () => {
+    const colors = useColors();
+    return {
+        ...globalStyles(colors),
+        ...StyleSheet.create({
+            dialog: {
+                paddingTop: 48,
+                paddingBottom: 32,
+                paddingHorizontal: 16,
+            },
+            emojiTrigger: {
+                position: 'relative',
+                top: -4,
+                aspectRatio: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+                borderWidth: 2,
+                borderColor: brightness(colors.background, -40),
+                borderRadius: 999,
+                backgroundColor: brightness(colors.background, -20),
+            },
+            emojiText: {
+                fontSize: 36,
+            },
+        }),
+    };
 };
 
 export default function EditItemModal() {
@@ -65,6 +59,8 @@ export default function EditItemModal() {
         ? Math.max(...categories.map((c) => c.sortOrder || 0)) + 1
         : -1;
 
+    const styles = useStyles();
+    const colors = useColors();
     const [isDirty, setIsDirty] = useState(false);
     const [name, setName] = useState(category?.name || '');
     const [icon, setIcon] = useState(category?.icon || '❓');
@@ -147,14 +143,18 @@ export default function EditItemModal() {
                         <Switch
                             id='isNonFood'
                             size='$2'
-                            borderColor={isNonFood ? colors.primary : '#ccc'}
+                            borderColor={
+                                isNonFood ? colors.primary : brightness(colors.background, -40)
+                            }
                             onCheckedChange={(checked) => change(() => setIsNonFood(!!checked))}
                             checked={isNonFood}
                         >
                             <Switch.Thumb
                                 animation='quicker'
                                 style={{
-                                    backgroundColor: isNonFood ? colors.primary : '#ccc',
+                                    backgroundColor: isNonFood
+                                        ? colors.primary
+                                        : brightness(colors.background, -40),
                                 }}
                             />
                         </Switch>

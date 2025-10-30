@@ -4,7 +4,7 @@ import Screen from '@/components/screen';
 import SystemIcon from '@/components/system-icon';
 import { useCategory } from '@/hooks/use-category';
 import { useHeader } from '@/hooks/use-header';
-import { brightness, colors } from '@/styles/global';
+import { brightness } from '@/styles/global';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -13,6 +13,33 @@ import DraggableFlatList, {
     RenderItemParams,
     ScaleDecorator,
 } from 'react-native-draggable-flatlist';
+import { useColors } from '@/hooks/use-colors';
+
+const useStyles = () => {
+    const colors = useColors();
+    return StyleSheet.create({
+        rowItem: {
+            flex: 1,
+        },
+        rowItemActive: {
+            backgroundColor: colors.primary,
+        },
+        categoryWrapper: {
+            width: '100%',
+            flexGrow: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 16,
+            padding: 16,
+        },
+        categoryText: {
+            textTransform: 'lowercase',
+        },
+        categoryTextActive: {
+            color: colors.background,
+        },
+    });
+};
 
 type Item = {
     key: string;
@@ -22,6 +49,8 @@ type Item = {
 };
 
 export default function CategoriesPage() {
+    const styles = useStyles();
+    const colors = useColors();
     const router = useRouter();
     const [data, setData] = useState<Item[]>([]);
     const [isDragReady, setIsDragReady] = useState(false);
@@ -127,26 +156,3 @@ export default function CategoriesPage() {
         </Screen>
     );
 }
-
-const styles = StyleSheet.create({
-    rowItem: {
-        flex: 1,
-    },
-    rowItemActive: {
-        backgroundColor: colors.primary,
-    },
-    categoryWrapper: {
-        width: '100%',
-        flexGrow: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 16,
-        padding: 16,
-    },
-    categoryText: {
-        textTransform: 'lowercase',
-    },
-    categoryTextActive: {
-        color: colors.background,
-    },
-});

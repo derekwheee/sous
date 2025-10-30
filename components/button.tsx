@@ -1,62 +1,66 @@
 import Text from '@/components/text';
-import globalStyles, { colors, fonts } from '@/styles/global';
+import globalStyles, { brightness, fonts } from '@/styles/global';
 import { Pressable, PressableProps, StyleSheet } from 'react-native';
 import SystemIcon from './system-icon';
+import { useColors } from '@/hooks/use-colors';
 
-const styles = {
-    ...globalStyles,
-    ...StyleSheet.create({
-        button: {
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: 8,
-            paddingVertical: 16,
-            paddingHorizontal: 32,
-            borderRadius: 8,
-            backgroundColor: colors.primary,
-        },
-        pill: {
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: 8,
-            paddingVertical: 8,
-            paddingHorizontal: 16,
-            borderRadius: 9999,
-            borderWidth: 2,
-            borderColor: colors.primary,
-            backgroundColor: colors.primary,
-        },
-        outlined: {
-            borderWidth: 2,
-            borderColor: colors.primary,
-            backgroundColor: 'transparent',
-        },
-        buttonText: {
-            color: '#fff',
-            fontFamily: fonts.poppins.medium,
-            fontSize: 16,
-            textAlign: 'center',
-        },
-        outlinedText: {
-            color: colors.primary,
-        },
-        inverted: {
-            borderColor: '#fff',
-            backgroundColor: '#fff',
-        },
-        outlinedInverted: {
-            borderColor: '#fff',
-            backgroundColor: 'transparent',
-        },
-        invertedText: {
-            color: colors.primary,
-        },
-        outlinedInvertedText: {
-            color: '#fff',
-        },
-    }),
+const useStyles = () => {
+    const colors = useColors();
+    return {
+        ...globalStyles(colors),
+        ...StyleSheet.create({
+            button: {
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: 8,
+                paddingVertical: 16,
+                paddingHorizontal: 32,
+                borderRadius: 8,
+                backgroundColor: colors.primary,
+            },
+            pill: {
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: 8,
+                paddingVertical: 8,
+                paddingHorizontal: 16,
+                borderRadius: 9999,
+                borderWidth: 2,
+                borderColor: colors.primary,
+                backgroundColor: colors.primary,
+            },
+            outlined: {
+                borderWidth: 2,
+                borderColor: colors.primary,
+                backgroundColor: 'transparent',
+            },
+            buttonText: {
+                color: colors.surface,
+                fontFamily: fonts.poppins.medium,
+                fontSize: 16,
+                textAlign: 'center',
+            },
+            outlinedText: {
+                color: colors.primary,
+            },
+            inverted: {
+                borderColor: colors.surface,
+                backgroundColor: colors.surface,
+            },
+            outlinedInverted: {
+                borderColor: colors.surface,
+                backgroundColor: 'transparent',
+            },
+            invertedText: {
+                color: colors.primary,
+            },
+            outlinedInvertedText: {
+                color: colors.surface,
+            },
+        }),
+    };
 };
 
 export default function Button({
@@ -79,12 +83,15 @@ export default function Button({
     rightIcon?: any[];
     style?: object;
 } & PressableProps) {
+    const styles = useStyles();
+    const colors = useColors();
+
     return (
         <Pressable
             style={[
                 styles[variant],
                 outlined && styles.outlined,
-                disabled && { backgroundColor: '#ddd' },
+                disabled && { backgroundColor: brightness(colors.background, -20) },
                 invert && styles.inverted,
                 invert && outlined && styles.outlinedInverted,
                 { ...style },
@@ -97,7 +104,7 @@ export default function Button({
                     ios={leftIcon[0]}
                     android={leftIcon[1]}
                     size={variant === 'pill' ? 16 : 24}
-                    color={outlined ? colors.primary : '#fff'}
+                    color={outlined ? colors.primary : colors.surface}
                 />
             )}
             <Text
@@ -115,7 +122,7 @@ export default function Button({
                     ios={rightIcon[0]}
                     android={rightIcon[1]}
                     size={variant === 'pill' ? 16 : 24}
-                    color={outlined ? colors.primary : '#fff'}
+                    color={outlined ? colors.primary : colors.surface}
                 />
             )}
         </Pressable>

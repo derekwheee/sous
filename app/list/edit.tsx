@@ -5,31 +5,35 @@ import Text from '@/components/text';
 import TextInput from '@/components/text-input';
 import { useCategory } from '@/hooks/use-category';
 import { usePantry } from '@/hooks/use-pantry';
-import globalStyles, { colors } from '@/styles/global';
+import globalStyles, { brightness } from '@/styles/global';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Spinner, Switch, XStack, YStack } from 'tamagui';
+import { useColors } from '@/hooks/use-colors';
 
-const styles = {
-    ...globalStyles,
-    ...StyleSheet.create({
-        dialog: {
-            paddingTop: 48,
-            paddingBottom: 32,
-            paddingHorizontal: 16,
-        },
-        categoryTrigger: {
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            borderColor: colors.primary,
-            borderBottomWidth: 2,
-            padding: 16,
-            backgroundColor: '#eee',
-            marginBottom: 32,
-        },
-    }),
+const useStyles = () => {
+    const colors = useColors();
+    return {
+        ...globalStyles(colors),
+        ...StyleSheet.create({
+            dialog: {
+                paddingTop: 48,
+                paddingBottom: 32,
+                paddingHorizontal: 16,
+            },
+            categoryTrigger: {
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                borderColor: colors.primary,
+                borderBottomWidth: 2,
+                padding: 16,
+                backgroundColor: brightness(colors.background, -10),
+                marginBottom: 32,
+            },
+        }),
+    };
 };
 
 const SaveItemButton = ({
@@ -45,6 +49,9 @@ const SaveItemButton = ({
     isSaving: boolean;
     props?: React.ComponentProps<typeof Pressable>;
 }) => {
+    const styles = useStyles();
+    const colors = useColors();
+
     return (
         <Pressable
             style={[styles.button, disabled && styles.buttonDisabled]}
@@ -52,7 +59,7 @@ const SaveItemButton = ({
             {...props}
             onPress={() => onPressSave(onPress)}
         >
-            {isSaving && <Spinner size='small' color='#000' />}
+            {isSaving && <Spinner size='small' color={colors.text} />}
             {!isSaving && (
                 <Text style={[styles.buttonText, disabled && styles.buttonTextDisabled]}>save</Text>
             )}
@@ -78,6 +85,8 @@ export default function EditItemModal() {
         pantryItemId: pantryItemId ? Number(pantryItemId) : undefined,
     });
 
+    const styles = useStyles();
+    const colors = useColors();
     const [isDirty, setIsDirty] = useState(false);
     const [name, setName] = useState(pantryItem?.name || newName || '');
     const [isInStock, setIsInStock] = useState(!!pantryItem?.isInStock);
@@ -171,7 +180,9 @@ export default function EditItemModal() {
                                 ios={isFavorite ? 'repeat.circle.fill' : 'repeat.circle'}
                                 android={'repeat'}
                                 size={40}
-                                color={isFavorite ? colors.primary : '#ccc'}
+                                color={
+                                    isFavorite ? colors.primary : brightness(colors.background, -40)
+                                }
                             />
                         </Pressable>
                     </XStack>
@@ -196,14 +207,18 @@ export default function EditItemModal() {
                         <Switch
                             id='isInStock'
                             size='$2'
-                            borderColor={isInStock ? colors.primary : '#ccc'}
+                            borderColor={
+                                isInStock ? colors.primary : brightness(colors.background, -40)
+                            }
                             onCheckedChange={(checked) => change(() => setIsInStock(!!checked))}
                             checked={isInStock}
                         >
                             <Switch.Thumb
                                 animation='quicker'
                                 style={{
-                                    backgroundColor: isInStock ? colors.primary : '#ccc',
+                                    backgroundColor: isInStock
+                                        ? colors.primary
+                                        : brightness(colors.background, -40),
                                 }}
                             />
                         </Switch>
@@ -213,7 +228,11 @@ export default function EditItemModal() {
                         <Switch
                             id='isInShoppingList'
                             size='$2'
-                            borderColor={isInShoppingList ? colors.primary : '#ccc'}
+                            borderColor={
+                                isInShoppingList
+                                    ? colors.primary
+                                    : brightness(colors.background, -40)
+                            }
                             onCheckedChange={(checked) =>
                                 change(() => setIsInShoppingList(!!checked))
                             }
@@ -222,7 +241,9 @@ export default function EditItemModal() {
                             <Switch.Thumb
                                 animation='quicker'
                                 style={{
-                                    backgroundColor: isInShoppingList ? colors.primary : '#ccc',
+                                    backgroundColor: isInShoppingList
+                                        ? colors.primary
+                                        : brightness(colors.background, -40),
                                 }}
                             />
                         </Switch>

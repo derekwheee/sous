@@ -8,71 +8,77 @@ import Text from '@/components/text';
 import TextInput from '@/components/text-input';
 import { useHeader } from '@/hooks/use-header';
 import { useRecipe } from '@/hooks/use-recipe';
-import globalStyles, { brightness, colors } from '@/styles/global';
+import globalStyles, { brightness } from '@/styles/global';
 import Feather from '@expo/vector-icons/Feather';
 import * as Clipboard from 'expo-clipboard';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Animated, Pressable, StyleSheet, View } from 'react-native';
+import { useColors } from '@/hooks/use-colors';
 
-const styles = {
-    ...globalStyles,
-    ...StyleSheet.create({
-        ingredientContainer: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: 32,
-        },
-        addButton: {
-            marginBottom: 32,
-            paddingVertical: 0,
-        },
-        addButtonText: {
-            textTransform: 'lowercase',
-            color: colors.primary,
-        },
-        removeButton: {
-            width: 32,
-            height: 32,
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginLeft: 8,
-            borderRadius: 16,
-            backgroundColor: '#eee',
-        },
-        saveRecipeButton: {
-            height: 80,
-            backgroundColor: colors.primary,
-            alignItems: 'center',
-            justifyContent: 'center',
-        },
-        saveRecipeButtonText: {
-            fontSize: 24,
-            fontFamily: 'Poppins_500Medium',
-            textTransform: 'lowercase',
-            color: '#fff',
-        },
-        tagWrapper: {
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            gap: 8,
-            marginBottom: 16,
-        },
-        tagContainer: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 8,
-            paddingLeft: 16,
-            paddingRight: 4,
-            paddingVertical: 4,
-            borderRadius: 32,
-            backgroundColor: brightness(colors.green, 40),
-        },
-    }),
+const useStyles = () => {
+    const colors = useColors();
+    return {
+        ...globalStyles(colors),
+        ...StyleSheet.create({
+            ingredientContainer: {
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: 32,
+            },
+            addButton: {
+                marginBottom: 32,
+                paddingVertical: 0,
+            },
+            addButtonText: {
+                textTransform: 'lowercase',
+                color: colors.primary,
+            },
+            removeButton: {
+                width: 32,
+                height: 32,
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginLeft: 8,
+                borderRadius: 16,
+                backgroundColor: brightness(colors.background, -10),
+            },
+            saveRecipeButton: {
+                height: 80,
+                backgroundColor: colors.primary,
+                alignItems: 'center',
+                justifyContent: 'center',
+            },
+            saveRecipeButtonText: {
+                fontSize: 24,
+                fontFamily: 'Poppins_500Medium',
+                textTransform: 'lowercase',
+                color: colors.surface,
+            },
+            tagWrapper: {
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                gap: 8,
+                marginBottom: 16,
+            },
+            tagContainer: {
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 8,
+                paddingLeft: 16,
+                paddingRight: 4,
+                paddingVertical: 4,
+                borderRadius: 32,
+                backgroundColor: brightness(colors.green, 40),
+            },
+        }),
+    };
 };
 
 export default function EditRecipe() {
+    const styles = useStyles();
+    const colors = useColors();
     const params = useLocalSearchParams<{ id: string; newName: string }>();
     const id = params.id ? Number(params.id) : undefined;
     const isNewRecipe = !id;

@@ -8,39 +8,43 @@ import { useApi } from '@/hooks/use-api';
 import { useHeader } from '@/hooks/use-header';
 import { usePantry } from '@/hooks/use-pantry';
 import { useRecipe } from '@/hooks/use-recipe';
-import globalStyles, { brightness, colors, fonts } from '@/styles/global';
+import globalStyles, { brightness, fonts } from '@/styles/global';
 import { highlightInstructions } from '@/util/highligher';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Fraction } from 'fraction.js';
 import { useEffect, useState } from 'react';
 import { RefreshControl, StyleSheet, View } from 'react-native';
 import { Slider } from 'tamagui';
+import { useColors } from '@/hooks/use-colors';
 
-const styles = {
-    ...globalStyles,
-    ...StyleSheet.create({
-        timeLabels: {
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            marginBottom: 16,
-        },
-        instructionContainer: {
-            flex: 1,
-            flexDirection: 'row',
-            marginBottom: 16,
-        },
-        instructionIndex: {
-            position: 'relative',
-            top: -8,
-            width: 48,
-            fontFamily: fonts.poppins.bold,
-            fontSize: 32,
-        },
-        instructionText: {
-            flexShrink: 1,
-            fontSize: 14,
-        },
-    }),
+const useStyles = () => {
+    const colors = useColors();
+    return {
+        ...globalStyles(colors),
+        ...StyleSheet.create({
+            timeLabels: {
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginBottom: 16,
+            },
+            instructionContainer: {
+                flex: 1,
+                flexDirection: 'row',
+                marginBottom: 16,
+            },
+            instructionIndex: {
+                position: 'relative',
+                top: -8,
+                width: 48,
+                fontFamily: fonts.poppins.bold,
+                fontSize: 32,
+            },
+            instructionText: {
+                flexShrink: 1,
+                fontSize: 14,
+            },
+        }),
+    };
 };
 
 export default function RecipeDetail() {
@@ -50,6 +54,8 @@ export default function RecipeDetail() {
         ? JSON.parse(params.suggestion)
         : null;
 
+    const styles = useStyles();
+    const colors = useColors();
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
     const [scaleValue, setScaleValue] = useState<number | null>(null);
     const [scaledRecipe, setScaledRecipe] = useState<Recipe | null>(null);
@@ -247,7 +253,7 @@ export default function RecipeDetail() {
                             circular
                             chromeless
                             style={{
-                                backgroundColor: '#fff',
+                                backgroundColor: colors.surface,
                             }}
                         />
                     </Slider>

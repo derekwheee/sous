@@ -1,7 +1,7 @@
 import Pill from '@/components/pill';
 import Text from '@/components/text';
 import TextInput from '@/components/text-input';
-import globalStyles, { colors, fonts } from '@/styles/global';
+import globalStyles, { fonts } from '@/styles/global';
 import React, { ReactElement, useEffect, useRef, useState } from 'react';
 import { Dimensions, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, {
@@ -11,53 +11,57 @@ import Animated, {
     withSpring,
 } from 'react-native-reanimated';
 import SystemIcon from './system-icon';
+import { useColors } from '@/hooks/use-colors';
 
-const styles = {
-    ...globalStyles,
-    ...StyleSheet.create({
-        underlay: {
-            flex: 1,
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.5)',
-        },
-        wrapper: {
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            paddingTop: 8,
-            paddingHorizontal: 16,
-            borderTopLeftRadius: 16,
-            borderTopRightRadius: 16,
-            backgroundColor: colors.background,
-            zIndex: 300000,
-        },
-        headingText: {
-            paddingTop: 32,
-            paddingBottom: 16,
-            fontFamily: fonts.poppins.medium,
-        },
-        inputWrapper: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 8,
-        },
-        tagWrapper: {
-            alignItems: 'flex-start',
-            gap: 8,
-            paddingBottom: 16,
-        },
-        closeButton: {
-            position: 'absolute',
-            top: 40,
-            right: 16,
-            zIndex: 10,
-        },
-    }),
+const useStyles = () => {
+    const colors = useColors();
+    return {
+        ...globalStyles(colors),
+        ...StyleSheet.create({
+            underlay: {
+                flex: 1,
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+            },
+            wrapper: {
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                bottom: 0,
+                paddingTop: 8,
+                paddingHorizontal: 16,
+                borderTopLeftRadius: 16,
+                borderTopRightRadius: 16,
+                backgroundColor: colors.background,
+                zIndex: 300000,
+            },
+            headingText: {
+                paddingTop: 32,
+                paddingBottom: 16,
+                fontFamily: fonts.poppins.medium,
+            },
+            inputWrapper: {
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 8,
+            },
+            tagWrapper: {
+                alignItems: 'flex-start',
+                gap: 8,
+                paddingBottom: 16,
+            },
+            closeButton: {
+                position: 'absolute',
+                top: 40,
+                right: 16,
+                zIndex: 10,
+            },
+        }),
+    };
 };
 
 type AutocompleteProps = {
@@ -83,6 +87,8 @@ export default function Autocomplete({
     onClose,
     items = [],
 }: AutocompleteProps): ReactElement {
+    const styles = useStyles();
+    const colors = useColors();
     const keyboard = useAnimatedKeyboard();
     const [height, setHeight] = useState(0);
 

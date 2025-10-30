@@ -8,61 +8,67 @@ import Text from '@/components/text';
 import { useHeader } from '@/hooks/use-header';
 import { usePantry } from '@/hooks/use-pantry';
 import { useRecipe } from '@/hooks/use-recipe';
-import globalStyles, { colors, fonts } from '@/styles/global';
+import globalStyles, { fonts } from '@/styles/global';
 import { getAvailableIngredients } from '@/util/recipe';
 import { useRouter } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
 import { Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import SystemIcon from '@/components/system-icon';
+import { useColors } from '@/hooks/use-colors';
 
-const styles = {
-    ...globalStyles,
-    ...StyleSheet.create({
-        onboarding: {
-            alignItems: 'center',
-            marginVertical: 128,
-            gap: 16,
-        },
-        onboardingText: {
-            fontSize: 16,
-            fontFamily: fonts.caprasimo,
-        },
-        tagContainer: {
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            gap: 8,
-            paddingVertical: 16,
-            paddingHorizontal: 16,
-        },
-        deleteAction: {
-            alignContent: 'center',
-            justifyContent: 'center',
-            padding: 16,
-            aspectRatio: 1,
-            height: '100%',
-            backgroundColor: colors.error,
-        },
-        editAction: {
-            alignContent: 'center',
-            justifyContent: 'center',
-            padding: 16,
-            aspectRatio: 1,
-            height: '100%',
-            backgroundColor: colors.primary,
-        },
-        addSearchTerm: {
-            flexDirection: 'row',
-            gap: 4,
-            alignItems: 'center',
-        },
-        addSearchTermText: {
-            color: colors.primary,
-        },
-    }),
+const useStyles = () => {
+    const colors = useColors();
+    return {
+        ...globalStyles(colors),
+        ...StyleSheet.create({
+            onboarding: {
+                alignItems: 'center',
+                marginVertical: 128,
+                gap: 16,
+            },
+            onboardingText: {
+                fontSize: 16,
+                fontFamily: fonts.caprasimo,
+            },
+            tagContainer: {
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                gap: 8,
+                paddingVertical: 16,
+                paddingHorizontal: 16,
+            },
+            deleteAction: {
+                alignContent: 'center',
+                justifyContent: 'center',
+                padding: 16,
+                aspectRatio: 1,
+                height: '100%',
+                backgroundColor: colors.error,
+            },
+            editAction: {
+                alignContent: 'center',
+                justifyContent: 'center',
+                padding: 16,
+                aspectRatio: 1,
+                height: '100%',
+                backgroundColor: colors.primary,
+            },
+            addSearchTerm: {
+                flexDirection: 'row',
+                gap: 4,
+                alignItems: 'center',
+            },
+            addSearchTermText: {
+                color: colors.primary,
+            },
+        }),
+    };
 };
 
 export default function RecipeScreen() {
+    const colors = useColors();
+    const styles = useStyles();
     const router = useRouter();
 
     const {

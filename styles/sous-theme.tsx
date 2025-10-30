@@ -1,28 +1,8 @@
 import type { Theme } from '@react-navigation/native';
 import { Platform } from 'react-native';
-
-const WEB_FONT_STACK =
-    'system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"';
+import { brightness } from '@/styles/global';
 
 export const fonts = Platform.select({
-    web: {
-        regular: {
-            fontFamily: WEB_FONT_STACK,
-            fontWeight: '400',
-        },
-        medium: {
-            fontFamily: WEB_FONT_STACK,
-            fontWeight: '500',
-        },
-        bold: {
-            fontFamily: WEB_FONT_STACK,
-            fontWeight: '600',
-        },
-        heavy: {
-            fontFamily: WEB_FONT_STACK,
-            fontWeight: '700',
-        },
-    },
     ios: {
         regular: {
             fontFamily: 'System',
@@ -61,17 +41,15 @@ export const fonts = Platform.select({
     },
 } as const satisfies Record<string, Theme['fonts']>);
 
-export const SousTheme: Theme = {
+export default (colors: Palette): Theme => ({
     dark: false,
     colors: {
-        primary: 'rgb(0, 122, 255)',
-        background: '#F7F7F7',
-        card: 'rgb(255, 255, 255)',
-        text: 'rgb(28, 28, 30)',
-        border: 'rgb(216, 216, 216)',
-        notification: 'rgb(255, 59, 48)',
+        primary: colors.primary,
+        background: colors.background,
+        card: colors.surface,
+        text: colors.text,
+        border: brightness(colors.background, -10),
+        notification: colors.error,
     },
     fonts,
-};
-
-export default SousTheme;
+});

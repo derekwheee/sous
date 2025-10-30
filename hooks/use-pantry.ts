@@ -35,14 +35,21 @@ export const usePantry = ({ pantryItemId }: { pantryItemId?: number } = {}) => {
                 pantry?.id,
             ]);
 
+            const newItem: PantryItem | null = !!patch.id
+                ? null
+                : { ...(patch as PantryItem), id: Date.now() };
+
             if (prevPantries) {
                 queryClient.setQueryData<Pantry[]>(['pantries'], (old) =>
                     old
                         ? old.map((pantry) => ({
                               ...pantry,
-                              pantryItems: pantry.pantryItems.map((item) =>
-                                  item.id === patch.id ? { ...item, ...patch } : item
-                              ),
+                              pantryItems: [
+                                  ...pantry.pantryItems.map((item) =>
+                                      item.id === patch.id ? { ...item, ...patch } : item
+                                  ),
+                                  ...(newItem ? [newItem] : []),
+                              ],
                           }))
                         : old
                 );
@@ -99,7 +106,7 @@ export const usePantry = ({ pantryItemId }: { pantryItemId?: number } = {}) => {
     );
 
     const deletePantryItem = useCallback(
-        (id: number, cb: Function) => {
+        (id: number, cb?: Function) => {
             Alert.alert('Remove item', 'Do you want to remove this item from your list?', [
                 {
                     text: 'Cancel',

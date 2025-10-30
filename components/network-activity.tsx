@@ -1,5 +1,4 @@
 // components/network-activity-indicator.tsx
-import { colors } from '@/styles/global';
 import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
@@ -10,11 +9,13 @@ import Animated, {
     withRepeat,
     withTiming,
 } from 'react-native-reanimated';
+import { useColors } from '@/hooks/use-colors';
 
 const INDICATOR_ACTIVE_HEIGHT = 16;
 const INDICATOR_IDLE_HEIGHT = 2;
 
 export default function NetworkActivityIndicator() {
+    const colors = useColors();
     const isFetching = useIsFetching();
     const isMutating = useIsMutating();
     const background = useSharedValue(0);

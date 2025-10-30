@@ -2,6 +2,7 @@ import React, { createContext, useCallback, useContext, useState } from 'react';
 import { Animated, Pressable, StyleSheet } from 'react-native';
 import Text from './text';
 import SystemIcon from './system-icon';
+import { useColors } from '@/hooks/use-colors';
 
 type SnackbarConfig = {
     icon: any[];
@@ -9,50 +10,50 @@ type SnackbarConfig = {
     textColor: string;
 };
 
-const snackbarConfigs: Record<string, SnackbarConfig> = {
+interface SnackbarConfigs {
+    [key: string]: SnackbarConfig;
+}
+
+const snackbarConfigs: (colors: Palette) => SnackbarConfigs = (colors) => ({
     success: {
         icon: ['checkmark.circle', 'check-circle'],
         backgroundColor: 'rgb(68, 132, 86)',
-        textColor: '#fff',
+        textColor: colors.surface,
     },
     error: {
         icon: ['exclamationmark.triangle', 'error-circle'],
         backgroundColor: 'rgb(200, 72, 86)',
-        textColor: '#fff',
+        textColor: colors.surface,
     },
     warning: {
         icon: ['info.square', 'warning-amber'],
         backgroundColor: 'rgb(242, 180, 71)',
-        textColor: '#000',
+        textColor: colors.text,
     },
     info: {
         icon: ['info.circle', 'info-outline'],
         backgroundColor: 'rgb(49, 113, 220)',
-        textColor: '#fff',
+        textColor: colors.surface,
     },
-};
+});
 
 type SnackbarContextType = {
-    showSnackbar: ({
-        message,
-        type,
-    }: {
-        message: string;
-        type?: keyof typeof snackbarConfigs;
-    }) => void;
+    showSnackbar: ({ message, type }: { message: string; type?: keyof SnackbarConfigs }) => void;
 };
 
 const SnackbarContext = createContext<SnackbarContextType | undefined>(undefined);
 
 export const SnackbarProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const colors = useColors();
+    const _snackbarConfigs = snackbarConfigs(colors);
     const [message, setMessage] = useState<string>();
-    const [type, setType] = useState<keyof typeof snackbarConfigs>('info');
+    const [type, setType] = useState<keyof SnackbarConfigs>('info');
     const [visible, setVisible] = useState(false);
     const [translate] = useState(new Animated.Value(0));
     const [height, setHeight] = useState(0);
 
     const showSnackbar = useCallback(
-        ({ message, type = 'info' }: { message: string; type?: keyof typeof snackbarConfigs }) => {
+        ({ message, type = 'info' }: { message: string; type?: keyof SnackbarConfigs }) => {
             setMessage(message);
             setType(type);
             setVisible(true);
@@ -102,7 +103,7 @@ export const SnackbarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                                     }),
                                 },
                             ],
-                            backgroundColor: snackbarConfigs[type].backgroundColor,
+                            backgroundColor: _snackbarConfigs[type].backgroundColor,
                         },
                     ]}
                 >
@@ -112,12 +113,12 @@ export const SnackbarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                         onLayout={(e) => setHeight(e.nativeEvent.layout.height)}
                     >
                         <SystemIcon
-                            ios={snackbarConfigs[type].icon[0]}
-                            android={snackbarConfigs[type].icon[1]}
-                            color={snackbarConfigs[type].textColor}
+                            ios={_snackbarConfigs[type].icon[0]}
+                            android={_snackbarConfigs[type].icon[1]}
+                            color={_snackbarConfigs[type].textColor}
                             size={24}
                         />
-                        <Text style={[styles.message, { color: snackbarConfigs[type].textColor }]}>
+                        <Text style={[styles.message, { color: _snackbarConfigs[type].textColor }]}>
                             {message}
                         </Text>
                         <SystemIcon

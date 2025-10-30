@@ -1,5 +1,5 @@
 import { useSSE } from '@/hooks/use-sse';
-import { colors, fonts } from '@/styles/global';
+import { brightness, fonts } from '@/styles/global';
 import { useAuth } from '@clerk/clerk-expo';
 import { Tabs } from 'expo-router/tabs';
 import { StyleSheet } from 'react-native';
@@ -9,19 +9,25 @@ import SystemIcon from './system-icon';
 import { useAI } from '@/hooks/use-ai';
 import { usePantry } from '@/hooks/use-pantry';
 import { useEffect } from 'react';
+import { useColors } from '@/hooks/use-colors';
 
-const styles = StyleSheet.create({
-    tabBar: {
-        backgroundColor: colors.surface,
-        borderTopWidth: 0,
-    },
-    tabLabel: {
-        fontFamily: fonts.poppins.medium,
-        textTransform: 'lowercase',
-    },
-});
+const useStyles = () => {
+    const colors = useColors();
+    return StyleSheet.create({
+        tabBar: {
+            backgroundColor: colors.surface,
+            borderTopWidth: 0,
+        },
+        tabLabel: {
+            fontFamily: fonts.poppins.medium,
+            textTransform: 'lowercase',
+        },
+    });
+};
 
 export default function TabRouter() {
+    const styles = useStyles();
+    const colors = useColors();
     const { isSignedIn = false } = useAuth();
 
     useSSE();
@@ -43,7 +49,7 @@ export default function TabRouter() {
                 tabBarStyle: [styles.tabBar, { display: isSignedIn ? 'flex' : 'none' }],
                 tabBarLabelStyle: styles.tabLabel,
                 tabBarActiveTintColor: colors.primary,
-                tabBarInactiveTintColor: '#888',
+                tabBarInactiveTintColor: brightness(colors.background, -128),
             })}
         >
             <Tabs.Protected guard={isSignedIn}>

@@ -1,10 +1,11 @@
 import SearchBar from '@/components/search-bar';
 import SystemIcon from '@/components/system-icon';
 import Text from '@/components/text';
-import { colors, fonts } from '@/styles/global';
+import { fonts } from '@/styles/global';
 import { useNavigation } from 'expo-router';
 import React, { useLayoutEffect, useState } from 'react';
 import { Platform, Pressable, View } from 'react-native';
+import { useColors } from '@/hooks/use-colors';
 
 export function useHeader({
     gestureEnabled = true,
@@ -14,14 +15,15 @@ export function useHeader({
     onCancelSearch,
     headerItems = [],
 }: UseHeaderParams = {}): UseHeader {
+    const colors = useColors();
     const navigation = useNavigation();
     const { OS, Version } = Platform;
 
     const isLegacyVersion = OS !== 'ios' || Number(Version) < 26;
 
     const platformHeaderItems = isLegacyVersion
-        ? mapLegacyHeaderItems(headerItems)
-        : mapLiquidGlassHeaderItems(headerItems);
+        ? mapLegacyHeaderItems(headerItems, colors)
+        : mapLiquidGlassHeaderItems(headerItems, colors);
 
     const [legacySearchTerm, setLegacySearchTerm] = useState('');
 
@@ -43,6 +45,7 @@ export function useHeader({
             ...platformHeaderItems,
         });
     }, [
+        colors,
         navigation,
         gestureEnabled,
         searchBarRef,
@@ -75,7 +78,10 @@ export function useHeader({
     };
 }
 
-function mapLegacyHeaderItems(headerItems: HeaderItem[]): {
+function mapLegacyHeaderItems(
+    headerItems: HeaderItem[],
+    colors: Palette
+): {
     headerRight: () => React.ReactNode;
 } {
     const nestedItems = headerItems.reduce(
@@ -118,7 +124,7 @@ function mapLegacyHeaderItems(headerItems: HeaderItem[]): {
                                 <Text
                                     style={{
                                         paddingHorizontal: 4,
-                                        color: '#fff',
+                                        color: colors.surface,
                                         fontFamily: fonts.poppins.medium,
                                     }}
                                 >
@@ -141,7 +147,10 @@ function mapLegacyHeaderItems(headerItems: HeaderItem[]): {
     };
 }
 
-function mapLiquidGlassHeaderItems(headerItems: HeaderItem[]): {
+function mapLiquidGlassHeaderItems(
+    headerItems: HeaderItem[],
+    colors: Palette
+): {
     unstable_headerRightItems: () => HeaderItem[];
 } {
     return {
@@ -154,7 +163,7 @@ function mapLiquidGlassHeaderItems(headerItems: HeaderItem[]): {
                     labelStyle: {
                         fontFamily: fonts.poppins.medium,
                         fontSize: 16,
-                        color: '#fff',
+                        color: colors.surface,
                         ...labelStyle,
                     },
                     icon: icon

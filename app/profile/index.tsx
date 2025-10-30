@@ -5,47 +5,53 @@ import Screen from '@/components/screen';
 import SystemIcon from '@/components/system-icon';
 import Text from '@/components/text';
 import { useHeader } from '@/hooks/use-header';
-import globalStyles, { colors, fonts } from '@/styles/global';
+import globalStyles, { brightness, fonts } from '@/styles/global';
 import { useClerk, useUser } from '@clerk/clerk-expo';
 import { useRouter } from 'expo-router';
 import { StyleSheet } from 'react-native';
+import { useColors } from '@/hooks/use-colors';
 
-const styles = {
-    ...globalStyles,
-    ...StyleSheet.create({
-        menuItem: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 16,
-            padding: 16,
-            borderBottomWidth: 1,
-            borderBottomColor: '#ccc',
-        },
-        welcomeText: {
-            marginVertical: 16,
-            paddingHorizontal: 16,
-            fontSize: 24,
-        },
-        userName: {
-            marginTop: -32,
-            paddingHorizontal: 16,
-            fontSize: 56,
-            fontFamily: fonts.poppins.bold,
-        },
-        sectionHeading: {
-            padding: 16,
-            fontSize: 16,
-            fontFamily: fonts.poppins.medium,
-            borderBottomWidth: 1,
-            borderBottomColor: '#ccc',
-        },
-    }),
+const useStyles = () => {
+    const colors = useColors();
+    return {
+        ...globalStyles(colors),
+        ...StyleSheet.create({
+            menuItem: {
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 16,
+                padding: 16,
+                borderBottomWidth: 1,
+                borderBottomColor: brightness(colors.background, -40),
+            },
+            welcomeText: {
+                marginVertical: 16,
+                paddingHorizontal: 16,
+                fontSize: 24,
+            },
+            userName: {
+                marginTop: -32,
+                paddingHorizontal: 16,
+                fontSize: 56,
+                fontFamily: fonts.poppins.bold,
+            },
+            sectionHeading: {
+                padding: 16,
+                fontSize: 16,
+                fontFamily: fonts.poppins.medium,
+                borderBottomWidth: 1,
+                borderBottomColor: brightness(colors.background, -40),
+            },
+        }),
+    };
 };
 
 export default function ProfileScreen() {
     const { signOut } = useClerk();
     const { user } = useUser();
     const router = useRouter();
+    const styles = useStyles();
+    const colors = useColors();
 
     useHeader({
         headerItems: [

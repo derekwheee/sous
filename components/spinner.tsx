@@ -1,8 +1,9 @@
+import { colors } from '@/styles/global';
 import { ActivityIndicator, View, ViewProps } from 'react-native';
 
 export default function Spinner({
     size = 'large',
-    color = '#fff',
+    color = colors.surface,
     ...props
 }: {
     size?: number | 'small' | 'large';

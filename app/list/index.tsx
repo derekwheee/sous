@@ -8,83 +8,58 @@ import Text from '@/components/text';
 import { useCategory } from '@/hooks/use-category';
 import { useHeader } from '@/hooks/use-header';
 import { usePantry } from '@/hooks/use-pantry';
-import globalStyles, { colors, fonts } from '@/styles/global';
+import globalStyles, { brightness, fonts } from '@/styles/global';
 import Feather from '@expo/vector-icons/Feather';
 import { useRouter } from 'expo-router';
-import { useCallback, useRef, useState } from 'react';
-import { Alert, StyleSheet, TextInput, View } from 'react-native';
+import { useRef, useState } from 'react';
+import { StyleSheet, TextInput, View } from 'react-native';
+import { useColors } from '@/hooks/use-colors';
 
-const styles = {
-    ...globalStyles,
-    ...StyleSheet.create({
-        categoryWrapper: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 8,
-            padding: 16,
-            backgroundColor: '#eee',
-        },
-        categoryText: {
-            fontFamily: fonts.poppins.medium,
-            fontSize: 16,
-            color: colors.text,
-            textTransform: 'lowercase',
-        },
-        listItemWrapper: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: 16,
-            borderBottomWidth: 1,
-            borderBottomColor: '#ddd',
-        },
-        listItemText: {
-            textTransform: 'lowercase',
-        },
-        listItemTextDimmed: {
-            color: '#999',
-            textTransform: 'lowercase',
-        },
-        deleteAction: {
-            alignContent: 'center',
-            justifyContent: 'center',
-            padding: 16,
-            aspectRatio: 1,
-            height: '100%',
-            backgroundColor: colors.error,
-        },
-        editAction: {
-            alignContent: 'center',
-            justifyContent: 'center',
-            padding: 16,
-            aspectRatio: 1,
-            height: '100%',
-            backgroundColor: colors.primary,
-        },
-        search: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 8,
-            padding: 14,
-            backgroundColor: colors.primary,
-        },
-        searchInput: {
-            flexGrow: 1,
-            color: 'white',
-        },
-        onboarding: {
-            alignItems: 'center',
-            marginVertical: 128,
-            gap: 16,
-        },
-        onboardingText: {
-            fontSize: 16,
-            fontFamily: fonts.caprasimo,
-        },
-    }),
+const useStyles = () => {
+    const colors = useColors();
+    return {
+        ...globalStyles(colors),
+        ...StyleSheet.create({
+            categoryWrapper: {
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 8,
+                padding: 16,
+                backgroundColor: brightness(colors.background, -10),
+            },
+            categoryText: {
+                fontFamily: fonts.poppins.medium,
+                fontSize: 16,
+                color: colors.text,
+                textTransform: 'lowercase',
+            },
+            search: {
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 8,
+                padding: 14,
+                backgroundColor: colors.primary,
+            },
+            searchInput: {
+                flexGrow: 1,
+                color: colors.surface,
+            },
+            onboarding: {
+                alignItems: 'center',
+                marginVertical: 128,
+                gap: 16,
+            },
+            onboardingText: {
+                fontSize: 16,
+                fontFamily: fonts.caprasimo,
+            },
+        }),
+    };
 };
 
 export default function ListScreen() {
+    const styles = useStyles();
+    const colors = useColors();
     const router = useRouter();
     const [isAddingItems, setIsAddingItems] = useState<boolean>(false);
     const [newItemText, setNewItemText] = useState<string>('');
@@ -107,7 +82,7 @@ export default function ListScreen() {
     const {
         categories: { data: categoryList },
     } = useCategory();
-    const { pantry, savePantryItem } = usePantry();
+    const { pantry, savePantryItem, deletePantryItem } = usePantry();
 
     const categories = pantry?.pantryItems
         ?.reduce<any[]>((acc, item: PantryItem) => {
@@ -135,41 +110,6 @@ export default function ListScreen() {
             return acc;
         }, [])
         .sort((a, b) => (a.sortOrder ?? 999) - (b.sortOrder ?? 999));
-
-    const handleRemoveItem = useCallback(
-        async (id: number) => {
-            await savePantryItem({ id, isInShoppingList: false });
-        },
-        [savePantryItem]
-    );
-
-    const confirmRemoveItem = useCallback(
-        (id: number) =>
-            Alert.alert('Remove item', 'Do you want to remove this item from your list?', [
-                {
-                    text: 'Cancel',
-                    onPress: () => {},
-                    style: 'cancel',
-                },
-                {
-                    text: 'Delete',
-                    onPress: () => handleRemoveItem(id),
-                    style: 'destructive',
-                },
-            ]),
-        [handleRemoveItem]
-    );
-
-    const proposeRemoveItem = useCallback(
-        (id: number, ref?: any) => {
-            if (ref) {
-                ref.close();
-            }
-
-            confirmRemoveItem(id);
-        },
-        [confirmRemoveItem]
-    );
 
     const handleAddItem = async (id: number) => {
         await savePantryItem({ id, isInShoppingList: true });
@@ -255,7 +195,7 @@ export default function ListScreen() {
                                                       color={
                                                           pantryItem.isFavorite
                                                               ? colors.primary
-                                                              : '#ccc'
+                                                              : brightness(colors.background, -40)
                                                       }
                                                   />
                                               )
@@ -280,9 +220,8 @@ export default function ListScreen() {
                                                   {
                                                       icon: 'x',
                                                       color: colors.error,
-                                                      onPress: (ref: React.RefObject<any>) => {
-                                                          proposeRemoveItem(pantryItem.id, ref);
-                                                      },
+                                                      onPress: () =>
+                                                          deletePantryItem(pantryItem.id),
                                                   },
                                               ]
                                             : undefined
