@@ -1,5 +1,5 @@
 import Text from '@/components/text';
-import globalStyles, { brightness } from '@/styles/global';
+import globalStyles from '@/styles/global';
 import { FUZZY_SEARCH_THRESHOLD } from '@/util/constants';
 import Fuse from 'fuse.js';
 import { StyleSheet, View, ViewProps } from 'react-native';
@@ -7,7 +7,7 @@ import SystemIcon from './system-icon';
 import { useColors } from '@/hooks/use-colors';
 
 const useStyles = () => {
-    const colors = useColors();
+    const { colors } = useColors();
     return {
         ...globalStyles(colors),
         ...StyleSheet.create({
@@ -41,7 +41,7 @@ export default function Ingredient({
     ...rest
 }: IngredientProps & ViewProps) {
     const styles = useStyles();
-    const colors = useColors();
+    const { colors, brightness } = useColors();
 
     const fuse = new Fuse(pantry?.pantryItems || [], {
         keys: ['name'],

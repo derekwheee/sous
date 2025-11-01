@@ -1,12 +1,12 @@
 import Screen from '@/components/screen';
 import { useApi } from '@/hooks/use-api';
-import globalStyles, { brightness } from '@/styles/global';
+import globalStyles from '@/styles/global';
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import QRCodeStyled from 'react-native-qrcode-styled';
 import { useColors } from '@/hooks/use-colors';
 
 const useStyles = () => {
-    const colors = useColors();
+    const { colors, brightness } = useColors();
     return {
         ...globalStyles(colors),
         ...StyleSheet.create({
@@ -28,7 +28,7 @@ const useStyles = () => {
 
 export default function ProfileLinkScreen() {
     const styles = useStyles();
-    const colors = useColors();
+    const { colors } = useColors();
     const { user } = useApi();
     const { width } = useWindowDimensions();
 

@@ -1,5 +1,5 @@
 import { useApi } from '@/hooks/use-api';
-import { standardMutation } from '@/util/query';
+import { deleteMember, mutateMember } from '@/util/query';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import { Alert } from 'react-native';
@@ -39,20 +39,21 @@ export const useRecipe = ({
     });
 
     const saveRecipe = useMutation(
-        standardMutation<any, UpsertRecipe, any>(
-            (patch: UpsertRecipe) => upsertRecipe(patch),
+        mutateMember<Recipe>({
+            mutationFn: (patch: Partial<Recipe>) => upsertRecipe(patch),
+            memberQueryKey: recipeId ? ['recipes', recipeId] : [],
+            memberOfQueryKey: ['recipes'],
             queryClient,
-            ['recipes']
-        )
+        })
     );
 
     const deleteMutation = useMutation(
-        standardMutation<any, DeleteRecipe, any>(
-            ({ id }: DeleteRecipe) => apiDeleteRecipe(id),
+        deleteMember<Recipe>({
+            mutationFn: ({ id }: Partial<Recipe>) => apiDeleteRecipe(id!),
             queryClient,
-            ['recipes'],
-            { isDelete: true }
-        )
+            memberQueryKey: recipeId ? ['recipes', recipeId] : [],
+            memberOfQueryKey: ['recipes'],
+        })
     );
 
     const importRecipe = useMutation({

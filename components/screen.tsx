@@ -2,6 +2,7 @@ import HeaderSpacer from '@/components/header-spacer';
 import Loading from '@/components/loading';
 import { KeyboardAvoidingView, Platform, ScrollView, ScrollViewProps, View } from 'react-native';
 import NetworkActivityIndicator from '@/components/network-activity';
+import { useColors } from '@/hooks/use-colors';
 
 export default function Screen({
     withoutScroll = false,
@@ -23,6 +24,7 @@ export default function Screen({
     ref?: React.Ref<any>;
     footerItems?: React.ReactElement[];
 } & ScrollViewProps) {
+    const { colors } = useColors();
     return (
         <>
             <Loading isLoading={isLoading} />
@@ -34,7 +36,7 @@ export default function Screen({
                     <ScrollView
                         {...props}
                         ref={ref}
-                        contentContainerStyle={{ flexGrow: 1 }}
+                        contentContainerStyle={{ flexGrow: 1, backgroundColor: colors.background }}
                         keyboardShouldPersistTaps='handled'
                     >
                         <HeaderSpacer />

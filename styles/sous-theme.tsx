@@ -1,6 +1,5 @@
 import type { Theme } from '@react-navigation/native';
 import { Platform } from 'react-native';
-import { brightness } from '@/styles/global';
 
 export const fonts = Platform.select({
     ios: {
@@ -41,14 +40,14 @@ export const fonts = Platform.select({
     },
 } as const satisfies Record<string, Theme['fonts']>);
 
-export default (colors: Palette): Theme => ({
-    dark: false,
+export default (colors: Palette, theme: 'light' | 'dark'): Theme => ({
+    dark: theme === 'dark',
     colors: {
         primary: colors.primary,
         background: colors.background,
         card: colors.surface,
         text: colors.text,
-        border: brightness(colors.background, -10),
+        border: colors.primary,
         notification: colors.error,
     },
     fonts,

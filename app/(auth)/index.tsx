@@ -3,84 +3,78 @@ import Screen from '@/components/screen';
 import Text from '@/components/text';
 import TextInput from '@/components/text-input';
 import { useApi } from '@/hooks/use-api';
-import globalStyles, { brightness, fonts } from '@/styles/global';
+import { fonts } from '@/styles/global';
 import { useSSO, useSignIn } from '@clerk/clerk-expo';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import * as AuthSession from 'expo-auth-session';
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useCallback, useEffect, useState } from 'react';
-import { Platform, Pressable, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, View } from 'react-native';
 import { XStack, YStack } from 'tamagui';
 import SystemIcon from '@/components/system-icon';
-import { useColors } from '@/hooks/use-colors';
+import { useStyles } from '@/hooks/use-style';
 
-const useStyles = () => {
-    const colors = useColors();
-    return {
-        ...globalStyles(colors),
-        ...StyleSheet.create({
-            wrapper: {
-                flex: 1,
-                justifyContent: 'center',
-                gap: 16,
-                paddingHorizontal: 16,
-            },
-            welcomeText: {
-                fontFamily: fonts.poppins.medium,
-                fontSize: 14,
-                textAlign: 'center',
-                color: colors.primary,
-            },
-            welcomeLogo: {
-                marginBottom: 16,
-                fontFamily: fonts.caprasimo,
-                fontSize: 64,
-                lineHeight: 58,
-                textAlign: 'center',
-            },
-            appleButton: {
-                flexGrow: 1,
-                flexDirection: 'row',
-                justifyContent: 'center',
-                alignItems: 'center',
-                gap: 8,
-                padding: 16,
-                borderRadius: 99,
-                backgroundColor: colors.text,
-            },
-            appleButtonText: {
-                fontFamily: fonts.poppins.medium,
-                color: colors.surface,
-                fontSize: 16,
-            },
-            googleButton: {
-                flexGrow: 1,
-                flexDirection: 'row',
-                justifyContent: 'center',
-                alignItems: 'center',
-                gap: 8,
-                padding: 16,
-                borderRadius: 99,
-                backgroundColor: brightness(colors.background, -20),
-            },
-            googleButtonText: {
-                fontFamily: fonts.poppins.medium,
-                color: colors.text,
-                fontSize: 16,
-            },
-            separator: {
-                flexGrow: 1,
-                height: 1,
-                backgroundColor: brightness(colors.text, 100),
-            },
-            separatorText: {
-                fontFamily: fonts.poppins.regular,
-                color: brightness(colors.text, 100),
-            },
-        }),
-    };
-};
+const moduleStyles: CreateStyleFunc = (colors, brightness) => ({
+    wrapper: {
+        flex: 1,
+        justifyContent: 'center',
+        gap: 16,
+        paddingHorizontal: 16,
+    },
+    welcomeText: {
+        fontFamily: fonts.poppins.medium,
+        fontSize: 14,
+        textAlign: 'center',
+        color: colors.primary,
+    },
+    welcomeLogo: {
+        marginBottom: 16,
+        fontFamily: fonts.caprasimo,
+        fontSize: 64,
+        lineHeight: 58,
+        textAlign: 'center',
+    },
+    appleButton: {
+        flexGrow: 1,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 8,
+        padding: 16,
+        borderRadius: 99,
+        backgroundColor: colors.text,
+    },
+    appleButtonText: {
+        fontFamily: fonts.poppins.medium,
+        color: colors.surface,
+        fontSize: 16,
+    },
+    googleButton: {
+        flexGrow: 1,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 8,
+        padding: 16,
+        borderRadius: 99,
+        backgroundColor: brightness(colors.background, -20),
+    },
+    googleButtonText: {
+        fontFamily: fonts.poppins.medium,
+        color: colors.text,
+        fontSize: 16,
+    },
+    separator: {
+        flexGrow: 1,
+        height: 1,
+        backgroundColor: brightness(colors.text, 100),
+    },
+    separatorText: {
+        fontFamily: fonts.poppins.regular,
+        color: brightness(colors.text, 100),
+    },
+});
 
 export const useWarmUpBrowser = () => {
     useEffect(() => {
@@ -97,8 +91,7 @@ WebBrowser.maybeCompleteAuthSession();
 export default function LoginScreen() {
     useWarmUpBrowser();
 
-    const colors = useColors();
-    const styles = useStyles();
+    const { styles, colors } = useStyles(moduleStyles);
     const { signIn, setActive, isLoaded } = useSignIn();
     const { startSSOFlow } = useSSO();
     const { syncUser } = useApi();

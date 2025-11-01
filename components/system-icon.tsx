@@ -1,7 +1,7 @@
 import { Platform, StyleProp } from 'react-native';
 import { SymbolView } from 'expo-symbols';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { colors } from '@/styles/global';
+import { useColors } from '@/hooks/use-colors';
 
 interface SystemIconProps {
     ios: any;
@@ -16,10 +16,14 @@ export default function SystemIcon({
     ios,
     android,
     size = 24,
-    color = colors.text,
+    color,
     style,
     onPress,
 }: SystemIconProps) {
+    const { colors } = useColors();
+
+    color = color || colors.text;
+
     if (Platform.OS === 'ios') {
         return (
             <SymbolView

@@ -1,5 +1,5 @@
 import Text from '@/components/text';
-import globalStyles, { brightness, fonts } from '@/styles/global';
+import globalStyles, { fonts } from '@/styles/global';
 import {
     TextInput as _TextInput,
     TextInputProps as _TextInputProps,
@@ -11,7 +11,7 @@ import SystemIcon from './system-icon';
 import { useColors } from '@/hooks/use-colors';
 
 const useStyles = () => {
-    const colors = useColors();
+    const { colors, brightness } = useColors();
     return {
         ...globalStyles(colors),
         ...StyleSheet.create({
@@ -72,7 +72,7 @@ export default function TextInput({
     ...rest
 }: TextInputProps & ViewProps & _TextInputProps) {
     const styles = useStyles();
-    const colors = useColors();
+    const { colors, brightness, opacity } = useColors();
 
     return (
         <View style={[styles.wrapper, style]} {...rest}>
@@ -111,7 +111,7 @@ export default function TextInput({
                     style={styles.input}
                     onChangeText={onChangeText}
                     value={value}
-                    placeholderTextColor={brightness(colors.text, -40)}
+                    placeholderTextColor={opacity(colors.text, 0.3)}
                     autoCapitalize='none'
                     {...rest}
                 />

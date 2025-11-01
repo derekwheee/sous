@@ -1,11 +1,11 @@
 import Divider from '@/components/divider';
-import global, { brightness, fonts } from '@/styles/global';
+import global, { fonts } from '@/styles/global';
 import { useLocalSearchParams } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 import { useColors } from '@/hooks/use-colors';
 
 const useStyles = () => {
-    const colors = useColors();
+    const { colors, brightness } = useColors();
     return {
         ...global(colors),
         ...StyleSheet.create({

@@ -3,7 +3,7 @@ import SaveButton from '@/components/save-button';
 import Text from '@/components/text';
 import TextInput from '@/components/text-input';
 import { useCategory } from '@/hooks/use-category';
-import globalStyles, { brightness } from '@/styles/global';
+import globalStyles from '@/styles/global';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -12,7 +12,7 @@ import { Switch, XStack, YStack } from 'tamagui';
 import { useColors } from '@/hooks/use-colors';
 
 const useStyles = () => {
-    const colors = useColors();
+    const { colors, brightness } = useColors();
     return {
         ...globalStyles(colors),
         ...StyleSheet.create({
@@ -60,7 +60,7 @@ export default function EditItemModal() {
         : -1;
 
     const styles = useStyles();
-    const colors = useColors();
+    const { colors, brightness } = useColors();
     const [isDirty, setIsDirty] = useState(false);
     const [name, setName] = useState(category?.name || '');
     const [icon, setIcon] = useState(category?.icon || '❓');
@@ -80,7 +80,7 @@ export default function EditItemModal() {
         }
     }, [categoryId, category, categories, nextSortOrder]);
 
-    const patch: UpsertItemCategory = {
+    const patch: Partial<ItemCategory> = {
         id: category?.id,
         name,
         icon,
@@ -95,7 +95,7 @@ export default function EditItemModal() {
         fn();
     };
 
-    const handleSave = (patch: UpsertItemCategory, cb?: Function) => {
+    const handleSave = (patch: Partial<ItemCategory>, cb?: Function) => {
         saveCategory(patch, {
             // onSuccess: () => {
             //     router.dismiss();

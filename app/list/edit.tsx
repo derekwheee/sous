@@ -5,36 +5,29 @@ import Text from '@/components/text';
 import TextInput from '@/components/text-input';
 import { useCategory } from '@/hooks/use-category';
 import { usePantry } from '@/hooks/use-pantry';
-import globalStyles, { brightness } from '@/styles/global';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { Spinner, Switch, XStack, YStack } from 'tamagui';
-import { useColors } from '@/hooks/use-colors';
+import { useStyles } from '@/hooks/use-style';
 
-const useStyles = () => {
-    const colors = useColors();
-    return {
-        ...globalStyles(colors),
-        ...StyleSheet.create({
-            dialog: {
-                paddingTop: 48,
-                paddingBottom: 32,
-                paddingHorizontal: 16,
-            },
-            categoryTrigger: {
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                borderColor: colors.primary,
-                borderBottomWidth: 2,
-                padding: 16,
-                backgroundColor: brightness(colors.background, -10),
-                marginBottom: 32,
-            },
-        }),
-    };
-};
+const moduleStyles: CreateStyleFunc = (colors, brightness) => ({
+    dialog: {
+        paddingTop: 48,
+        paddingBottom: 32,
+        paddingHorizontal: 16,
+    },
+    categoryTrigger: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        borderColor: colors.primary,
+        borderBottomWidth: 2,
+        padding: 16,
+        backgroundColor: brightness(colors.background, -10),
+        marginBottom: 32,
+    },
+});
 
 const SaveItemButton = ({
     onPressSave,
@@ -49,8 +42,7 @@ const SaveItemButton = ({
     isSaving: boolean;
     props?: React.ComponentProps<typeof Pressable>;
 }) => {
-    const styles = useStyles();
-    const colors = useColors();
+    const { styles, colors } = useStyles(moduleStyles);
 
     return (
         <Pressable
@@ -85,8 +77,7 @@ export default function EditItemModal() {
         pantryItemId: pantryItemId ? Number(pantryItemId) : undefined,
     });
 
-    const styles = useStyles();
-    const colors = useColors();
+    const { styles, colors, brightness } = useStyles(moduleStyles);
     const [isDirty, setIsDirty] = useState(false);
     const [name, setName] = useState(pantryItem?.name || newName || '');
     const [isInStock, setIsInStock] = useState(!!pantryItem?.isInStock);
@@ -118,7 +109,7 @@ export default function EditItemModal() {
         }
     }, [pantryItem]);
 
-    const patch: UpsertPantryItem = {
+    const patch: Partial<PantryItem> = {
         id: pantryItem?.id,
         name,
         isInStock,
@@ -132,7 +123,7 @@ export default function EditItemModal() {
         setIsDirty(true);
     }, []);
 
-    const handleSave = (patch: UpsertPantryItem, cb?: Function) => {
+    const handleSave = (patch: Partial<PantryItem>, cb?: Function) => {
         savePantryItem(patch, {
             onSuccess: () => {
                 router.dismiss();

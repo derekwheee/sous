@@ -8,7 +8,7 @@ import Text from '@/components/text';
 import TextInput from '@/components/text-input';
 import { useHeader } from '@/hooks/use-header';
 import { useRecipe } from '@/hooks/use-recipe';
-import globalStyles, { brightness } from '@/styles/global';
+import globalStyles from '@/styles/global';
 import Feather from '@expo/vector-icons/Feather';
 import * as Clipboard from 'expo-clipboard';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -17,7 +17,7 @@ import { Alert, Animated, Pressable, StyleSheet, View } from 'react-native';
 import { useColors } from '@/hooks/use-colors';
 
 const useStyles = () => {
-    const colors = useColors();
+    const { colors, brightness } = useColors();
     return {
         ...globalStyles(colors),
         ...StyleSheet.create({
@@ -78,7 +78,7 @@ const useStyles = () => {
 
 export default function EditRecipe() {
     const styles = useStyles();
-    const colors = useColors();
+    const { colors } = useColors();
     const params = useLocalSearchParams<{ id: string; newName: string }>();
     const id = params.id ? Number(params.id) : undefined;
     const isNewRecipe = !id;
@@ -163,12 +163,6 @@ export default function EditRecipe() {
     const handleSaveRecipe = async () => {
         setIsSaving(true);
         const res = await saveRecipe.mutateAsync(patched);
-
-        if (res.error) {
-            console.log(res.error);
-            setIsSaving(false);
-            return;
-        }
 
         setIsSaving(false);
 

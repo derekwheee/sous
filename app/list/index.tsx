@@ -8,58 +8,51 @@ import Text from '@/components/text';
 import { useCategory } from '@/hooks/use-category';
 import { useHeader } from '@/hooks/use-header';
 import { usePantry } from '@/hooks/use-pantry';
-import globalStyles, { brightness, fonts } from '@/styles/global';
+import { fonts } from '@/styles/global';
 import Feather from '@expo/vector-icons/Feather';
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
-import { StyleSheet, TextInput, View } from 'react-native';
-import { useColors } from '@/hooks/use-colors';
+import { TextInput, View } from 'react-native';
+import { useStyles } from '@/hooks/use-style';
 
-const useStyles = () => {
-    const colors = useColors();
-    return {
-        ...globalStyles(colors),
-        ...StyleSheet.create({
-            categoryWrapper: {
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 8,
-                padding: 16,
-                backgroundColor: brightness(colors.background, -10),
-            },
-            categoryText: {
-                fontFamily: fonts.poppins.medium,
-                fontSize: 16,
-                color: colors.text,
-                textTransform: 'lowercase',
-            },
-            search: {
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 8,
-                padding: 14,
-                backgroundColor: colors.primary,
-            },
-            searchInput: {
-                flexGrow: 1,
-                color: colors.surface,
-            },
-            onboarding: {
-                alignItems: 'center',
-                marginVertical: 128,
-                gap: 16,
-            },
-            onboardingText: {
-                fontSize: 16,
-                fontFamily: fonts.caprasimo,
-            },
-        }),
-    };
-};
+const moduleStyles: CreateStyleFunc = (colors, brightness) => ({
+    categoryWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        padding: 16,
+        backgroundColor: brightness(colors.background, -10),
+    },
+    categoryText: {
+        fontFamily: fonts.poppins.medium,
+        fontSize: 16,
+        color: colors.text,
+        textTransform: 'lowercase',
+    },
+    search: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        padding: 14,
+        backgroundColor: colors.primary,
+    },
+    searchInput: {
+        flexGrow: 1,
+        color: colors.white,
+    },
+    onboarding: {
+        alignItems: 'center',
+        marginVertical: 128,
+        gap: 16,
+    },
+    onboardingText: {
+        fontSize: 16,
+        fontFamily: fonts.caprasimo,
+    },
+});
 
 export default function ListScreen() {
-    const styles = useStyles();
-    const colors = useColors();
+    const { styles, colors, brightness, opacity } = useStyles(moduleStyles);
     const router = useRouter();
     const [isAddingItems, setIsAddingItems] = useState<boolean>(false);
     const [newItemText, setNewItemText] = useState<string>('');
@@ -136,17 +129,17 @@ export default function ListScreen() {
                         ref={newItemInputRef}
                         style={[styles.searchInput]}
                         placeholder='add new item'
-                        placeholderTextColor='rgba(255, 255, 255, 0.7)'
+                        placeholderTextColor={opacity(colors.white, 0.5)}
                         autoCapitalize='none'
                         clearButtonMode='never'
-                        selectionColor={'white'}
+                        selectionColor={colors.white}
                         value={newItemText}
                         onChangeText={setNewItemText}
                     />
                     <Feather
                         name='plus'
                         size={24}
-                        color={newItemText ? 'white' : 'rgba(255, 255, 255, 0.5)'}
+                        color={newItemText ? colors.white : opacity(colors.white, 0.5)}
                         onPress={() => {
                             handleCreateItem(newItemText);
                         }}
@@ -162,10 +155,10 @@ export default function ListScreen() {
                     <List>
                         {itemCategory.pantryItems
                             .sort((a, b) => a.name.localeCompare(b.name))
-                            .map((pantryItem: any) => (
+                            .map((pantryItem: any, index: number) => (
                                 <ListItem
                                     dimmed={pantryItem.canBeAdded}
-                                    key={pantryItem.id}
+                                    key={pantryItem.id || `new-${index}`}
                                     text={pantryItem.name}
                                     onPress={
                                         pantryItem.canBeAdded

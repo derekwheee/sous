@@ -8,7 +8,7 @@ import SystemIcon from './system-icon';
 import { useColors } from '@/hooks/use-colors';
 
 const useStyles = () => {
-    const colors = useColors();
+    const { colors } = useColors();
     return {
         ...globalStyles(colors),
         ...StyleSheet.create({}),
@@ -27,7 +27,7 @@ export default function SaveButton({
     props?: React.ComponentProps<typeof Pressable>;
 }) {
     const styles = useStyles();
-    const colors = useColors();
+    const { colors } = useColors();
     const [showSuccess, setShowSuccess] = useState(false);
     const previousProps = usePrevious<{ disabled: boolean; isSaving: boolean } | null>({
         disabled,

@@ -1,11 +1,11 @@
 import Text from '@/components/text';
-import globalStyles, { brightness } from '@/styles/global';
+import globalStyles from '@/styles/global';
 import { Pressable, PressableProps, StyleSheet } from 'react-native';
 import SystemIcon from './system-icon';
 import { useColors } from '@/hooks/use-colors';
 
 const useStyles = () => {
-    const colors = useColors();
+    const { colors, brightness } = useColors();
     return {
         ...globalStyles(colors),
         ...StyleSheet.create({
@@ -45,7 +45,7 @@ export default function Pill({
     ...props
 }: PillProps & PressableProps) {
     const styles = useStyles();
-    const colors = useColors();
+    const { colors } = useColors();
 
     tintColor = tintColor || colors.text;
 

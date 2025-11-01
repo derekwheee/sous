@@ -25,6 +25,7 @@ import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { createTamagui, TamaguiProvider } from 'tamagui';
 import { useColors } from '@/hooks/use-colors';
+import { useAppStore } from '@/store/use-app-store';
 
 const queryClient = new QueryClient();
 const config = createTamagui(defaultConfig);
@@ -48,7 +49,7 @@ export default function RootLayout() {
 }
 
 function AppProviders() {
-    const colors = useColors();
+    const { colors, resolvedTheme } = useColors();
     const { isLoaded } = useUser();
     let [fontsLoaded] = useFonts({
         Poppins_300Light,
@@ -58,6 +59,8 @@ function AppProviders() {
         Caprasimo_400Regular,
     });
 
+    const { renderTriggerKey } = useAppStore();
+
     if (!isLoaded) return null;
 
     if (!fontsLoaded) {
@@ -65,11 +68,14 @@ function AppProviders() {
     }
 
     return (
-        <GestureHandlerRootView style={{ flex: 1 }}>
+        <GestureHandlerRootView style={{ flex: 1 }} key={renderTriggerKey}>
             <PortalProvider>
                 <TamaguiProvider config={config}>
                     <QueryClientProvider client={queryClient}>
-                        <ThemeProvider value={Theme(colors)}>
+                        <ThemeProvider
+                            key={resolvedTheme}
+                            value={Theme(colors, resolvedTheme === 'dark' ? 'dark' : 'light')}
+                        >
                             <SnackbarProvider>
                                 <SafeAreaProvider>
                                     <SignedOut>

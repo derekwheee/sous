@@ -15,7 +15,7 @@ export function useHeader({
     onCancelSearch,
     headerItems = [],
 }: UseHeaderParams = {}): UseHeader {
-    const colors = useColors();
+    const { colors } = useColors();
     const navigation = useNavigation();
     const { OS, Version } = Platform;
 
@@ -30,6 +30,7 @@ export function useHeader({
     useLayoutEffect(() => {
         navigation.setOptions({
             gestureEnabled,
+            headerShadowVisible: false,
             headerSearchBarOptions:
                 !searchBarRef || isLegacyVersion
                     ? null
@@ -163,7 +164,7 @@ function mapLiquidGlassHeaderItems(
                     labelStyle: {
                         fontFamily: fonts.poppins.medium,
                         fontSize: 16,
-                        color: colors.surface,
+                        color: colors.white,
                         ...labelStyle,
                     },
                     icon: icon

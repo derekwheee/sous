@@ -2,7 +2,7 @@ import { StyleSheet, View, ViewProps } from 'react-native';
 import { useColors } from '@/hooks/use-colors';
 
 const useStyles = () => {
-    const colors = useColors();
+    const { colors } = useColors();
     return StyleSheet.create({
         wrapper: {
             flexDirection: 'row',
@@ -21,7 +21,7 @@ const useStyles = () => {
 
 export default function DragHandle({ color, ...props }: { color?: string } & ViewProps) {
     const styles = useStyles();
-    const colors = useColors();
+    const { colors } = useColors();
     return (
         <View style={styles.wrapper} {...props}>
             {[...Array(6)].map((_, index) => (

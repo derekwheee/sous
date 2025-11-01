@@ -8,7 +8,7 @@ import { useApi } from '@/hooks/use-api';
 import { useHeader } from '@/hooks/use-header';
 import { usePantry } from '@/hooks/use-pantry';
 import { useRecipe } from '@/hooks/use-recipe';
-import globalStyles, { brightness, fonts } from '@/styles/global';
+import globalStyles, { fonts } from '@/styles/global';
 import { highlightInstructions } from '@/util/highligher';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Fraction } from 'fraction.js';
@@ -18,7 +18,7 @@ import { Slider } from 'tamagui';
 import { useColors } from '@/hooks/use-colors';
 
 const useStyles = () => {
-    const colors = useColors();
+    const { colors } = useColors();
     return {
         ...globalStyles(colors),
         ...StyleSheet.create({
@@ -55,7 +55,7 @@ export default function RecipeDetail() {
         : null;
 
     const styles = useStyles();
-    const colors = useColors();
+    const { colors, brightness } = useColors();
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
     const [scaleValue, setScaleValue] = useState<number | null>(null);
     const [scaledRecipe, setScaledRecipe] = useState<Recipe | null>(null);

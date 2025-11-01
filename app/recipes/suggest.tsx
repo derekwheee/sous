@@ -6,7 +6,7 @@ import Text from '@/components/text';
 import TextInput from '@/components/text-input';
 import TimeLabel from '@/components/time-label';
 import { useApi } from '@/hooks/use-api';
-import globalStyles, { brightness, fonts } from '@/styles/global';
+import globalStyles, { fonts } from '@/styles/global';
 import { useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -14,7 +14,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { useColors } from '@/hooks/use-colors';
 
 const useStyles = () => {
-    const colors = useColors();
+    const { colors, brightness } = useColors();
     return {
         ...globalStyles(colors),
         ...StyleSheet.create({
@@ -76,7 +76,7 @@ const useStyles = () => {
 
 export default function SuggestRecipesModal() {
     const styles = useStyles();
-    const colors = useColors();
+    const { colors } = useColors();
     const router = useRouter();
     const [suggestionState, setSuggestionState] = useState<RecipeSuggestion[] | null>(null);
     const [selectedTags, setSelectedTags] = useState<string[]>([]);

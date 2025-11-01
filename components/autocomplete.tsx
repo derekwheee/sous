@@ -14,7 +14,7 @@ import SystemIcon from './system-icon';
 import { useColors } from '@/hooks/use-colors';
 
 const useStyles = () => {
-    const colors = useColors();
+    const { colors } = useColors();
     return {
         ...globalStyles(colors),
         ...StyleSheet.create({
@@ -88,7 +88,7 @@ export default function Autocomplete({
     items = [],
 }: AutocompleteProps): ReactElement {
     const styles = useStyles();
-    const colors = useColors();
+    const { colors } = useColors();
     const keyboard = useAnimatedKeyboard();
     const [height, setHeight] = useState(0);
 

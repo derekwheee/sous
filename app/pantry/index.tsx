@@ -7,42 +7,35 @@ import SystemIcon from '@/components/system-icon';
 import { useCategory } from '@/hooks/use-category';
 import { useHeader } from '@/hooks/use-header';
 import { usePantry } from '@/hooks/use-pantry';
-import globalStyles, { brightness, fonts } from '@/styles/global';
+import { fonts } from '@/styles/global';
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { useAI } from '@/hooks/use-ai';
-import { useColors } from '@/hooks/use-colors';
+import { useStyles } from '@/hooks/use-style';
 
-const useStyles = () => {
-    const colors = useColors();
-    return {
-        ...globalStyles(colors),
-        ...StyleSheet.create({
-            onboarding: {
-                alignItems: 'center',
-                marginVertical: 128,
-                gap: 16,
-            },
-            onboardingText: {
-                fontSize: 16,
-                fontFamily: fonts.caprasimo,
-            },
-            addSearchTerm: {
-                flexDirection: 'row',
-                gap: 4,
-                alignItems: 'center',
-            },
-            addSearchTermText: {
-                color: colors.primary,
-            },
-        }),
-    };
-};
+const moduleStyles: CreateStyleFunc = (colors) => ({
+    onboarding: {
+        alignItems: 'center',
+        marginVertical: 128,
+        gap: 16,
+    },
+    onboardingText: {
+        fontSize: 16,
+        fontFamily: fonts.caprasimo,
+    },
+    addSearchTerm: {
+        flexDirection: 'row',
+        gap: 4,
+        alignItems: 'center',
+    },
+    addSearchTermText: {
+        color: colors.primary,
+    },
+});
 
 export default function PantryScreen() {
-    const styles = useStyles();
-    const colors = useColors();
+    const { styles, colors, brightness } = useStyles(moduleStyles);
     const router = useRouter();
     const {
         categories: { data: categories },
@@ -75,7 +68,7 @@ export default function PantryScreen() {
 
     const [searchTerm, setSearchTerm] = useState<string>('');
 
-    const handleSaveChanges = (patch: UpsertPantryItem, cb?: Function) => {
+    const handleSaveChanges = (patch: Partial<PantryItem>, cb?: Function) => {
         savePantryItem(patch, {
             onSuccess: () => cb?.(),
         });

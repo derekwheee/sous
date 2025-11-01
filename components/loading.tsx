@@ -6,7 +6,7 @@ import Reanimated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-
 import { useColors } from '@/hooks/use-colors';
 
 const useStyles = () => {
-    const colors = useColors();
+    const { colors } = useColors();
     return {
         ...globalStyles(colors),
         ...StyleSheet.create({

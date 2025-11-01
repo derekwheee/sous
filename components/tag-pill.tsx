@@ -1,10 +1,10 @@
 import Text from '@/components/text';
-import globalStyles, { brightness } from '@/styles/global';
+import globalStyles from '@/styles/global';
 import { Pressable, PressableProps, StyleSheet } from 'react-native';
 import { useColors } from '@/hooks/use-colors';
 
 const useStyles = () => {
-    const colors = useColors();
+    const { colors, brightness } = useColors();
     return {
         ...globalStyles(colors),
         ...StyleSheet.create({

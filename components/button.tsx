@@ -1,11 +1,11 @@
 import Text from '@/components/text';
-import globalStyles, { brightness, fonts } from '@/styles/global';
+import globalStyles, { fonts } from '@/styles/global';
 import { Pressable, PressableProps, StyleSheet } from 'react-native';
 import SystemIcon from './system-icon';
 import { useColors } from '@/hooks/use-colors';
 
 const useStyles = () => {
-    const colors = useColors();
+    const { colors } = useColors();
     return {
         ...globalStyles(colors),
         ...StyleSheet.create({
@@ -84,7 +84,7 @@ export default function Button({
     style?: object;
 } & PressableProps) {
     const styles = useStyles();
-    const colors = useColors();
+    const { colors, brightness } = useColors();
 
     return (
         <Pressable

@@ -1,7 +1,9 @@
 interface User {
     id: number;
+    clerkId: string;
     email: string;
     name: string;
+    themePreference: ColorTheme;
     defaultHouseholdId?: number;
     createdAt: string;
     updatedAt: string;
@@ -39,7 +41,7 @@ interface PantryItem {
     expiresAt?: Date;
     createdAt: Date;
     updatedAt: Date;
-    deleteAt?: Date;
+    deletedAt?: Date;
     pantryId: number;
     categoryId?: number;
     category?: ItemCategory;
@@ -59,21 +61,6 @@ interface CreatePantryItem {
     pantryId: number;
     categoryId?: number;
     category?: ItemCategory;
-}
-
-interface UpsertPantryItem {
-    id?: number;
-    name?: string;
-    isInStock?: boolean;
-    isFavorite?: boolean;
-    isInShoppingList?: boolean;
-    purchasedAt?: Date;
-    expiresAt?: Date;
-    createdAt?: Date;
-    updatedAt?: Date;
-    pantryId?: number;
-    categoryId?: number;
-    deletedAt?: Date;
 }
 
 interface Ingredient {
@@ -188,17 +175,6 @@ interface ItemCategory {
     pantryItems: PantryItem[];
 }
 
-interface UpsertItemCategory {
-    id?: number;
-    name?: string;
-    sortOrder?: number;
-    icon?: string;
-    isNonFood?: boolean;
-    createdAt?: Date;
-    updatedAt?: Date;
-    deletedAt?: Date;
-}
-
 interface RecipeSuggestion {
     name: string;
     description?: string;
@@ -208,4 +184,8 @@ interface RecipeSuggestion {
     ingredients: string[];
     instructions: string[];
     explanation?: string;
+}
+
+interface UserPreferences {
+    colorTheme: ColorTheme;
 }

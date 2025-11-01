@@ -1,4 +1,3 @@
-import { brightness } from '@/styles/global';
 import { StyleSheet, View, ViewProps } from 'react-native';
 import { useColors } from '@/hooks/use-colors';
 
@@ -10,7 +9,7 @@ const styles = StyleSheet.create({
 });
 
 export default function Divider({ color, ...props }: ViewProps & { color?: string }) {
-    const colors = useColors();
+    const { colors, brightness } = useColors();
     return (
         <View
             style={[

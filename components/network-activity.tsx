@@ -15,7 +15,7 @@ const INDICATOR_ACTIVE_HEIGHT = 16;
 const INDICATOR_IDLE_HEIGHT = 2;
 
 export default function NetworkActivityIndicator() {
-    const colors = useColors();
+    const { colors } = useColors();
     const isFetching = useIsFetching();
     const isMutating = useIsMutating();
     const background = useSharedValue(0);

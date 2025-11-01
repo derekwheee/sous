@@ -1,11 +1,11 @@
 import Text from '@/components/text';
-import globalStyles, { brightness, fonts } from '@/styles/global';
+import globalStyles, { fonts } from '@/styles/global';
 import { StyleSheet, View } from 'react-native';
 import { Adapt, Select, Sheet } from 'tamagui';
 import { useColors } from '@/hooks/use-colors';
 
 const useStyles = () => {
-    const colors = useColors();
+    const { colors, brightness } = useColors();
     return {
         ...globalStyles(colors),
         ...StyleSheet.create({

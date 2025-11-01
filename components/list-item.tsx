@@ -9,7 +9,7 @@ import Reanimated, { SharedValue, useAnimatedStyle } from 'react-native-reanimat
 import { useColors } from '@/hooks/use-colors';
 
 const useStyles = () => {
-    const colors = useColors();
+    const { colors } = useColors();
     return {
         ...globalStyles(colors),
         ...StyleSheet.create({
@@ -116,7 +116,7 @@ function ListItemContent({
     onPress,
 }: ListItemProps & PressableProps & { ref?: React.RefObject<any> }) {
     const styles = useStyles();
-    const colors = useColors();
+    const { colors } = useColors();
 
     const Content = () => (
         <>
@@ -215,7 +215,7 @@ interface ActionsProps {
 
 function Actions({ drag, width = 64, swipeRef, actions }: ActionsProps) {
     const styles = useStyles();
-    const colors = useColors();
+    const { colors } = useColors();
     const styleAnimation = useAnimatedStyle(() => {
         return {
             transform: [{ translateX: drag.value + width * actions?.length! }],

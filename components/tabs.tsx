@@ -1,8 +1,7 @@
 import { useSSE } from '@/hooks/use-sse';
-import { brightness, fonts } from '@/styles/global';
+import { fonts } from '@/styles/global';
 import { useAuth } from '@clerk/clerk-expo';
 import { Tabs } from 'expo-router/tabs';
-import { StyleSheet } from 'react-native';
 import 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import SystemIcon from './system-icon';
@@ -10,25 +9,25 @@ import { useAI } from '@/hooks/use-ai';
 import { usePantry } from '@/hooks/use-pantry';
 import { useEffect } from 'react';
 import { useColors } from '@/hooks/use-colors';
+import { useDbUser } from '@/hooks/use-db-user';
+import { useStyles } from '@/hooks/use-style';
 
-const useStyles = () => {
-    const colors = useColors();
-    return StyleSheet.create({
-        tabBar: {
-            backgroundColor: colors.surface,
-            borderTopWidth: 0,
-        },
-        tabLabel: {
-            fontFamily: fonts.poppins.medium,
-            textTransform: 'lowercase',
-        },
-    });
-};
+const moduleStyles: CreateStyleFunc = (colors) => ({
+    tabBar: {
+        backgroundColor: colors.surface,
+        borderTopWidth: 0,
+    },
+    tabLabel: {
+        fontFamily: fonts.poppins.medium,
+        textTransform: 'lowercase',
+    },
+});
 
 export default function TabRouter() {
-    const styles = useStyles();
-    const colors = useColors();
+    const { styles, colors, brightness } = useStyles(moduleStyles);
+    const { updateTheme, resolvedTheme } = useColors();
     const { isSignedIn = false } = useAuth();
+    const { user } = useDbUser();
 
     useSSE();
 
@@ -41,6 +40,12 @@ export default function TabRouter() {
         }
     }, [pantry?.id, fetchExpiringPantryItems]);
 
+    useEffect(() => {
+        if (!!user) {
+            updateTheme(user.themePreference || 'system');
+        }
+    }, [user, updateTheme, resolvedTheme]);
+
     return (
         <Tabs
             initialRouteName={isSignedIn ? 'recipes' : '(auth)'}
@@ -49,7 +54,7 @@ export default function TabRouter() {
                 tabBarStyle: [styles.tabBar, { display: isSignedIn ? 'flex' : 'none' }],
                 tabBarLabelStyle: styles.tabLabel,
                 tabBarActiveTintColor: colors.primary,
-                tabBarInactiveTintColor: brightness(colors.background, -128),
+                tabBarInactiveTintColor: brightness(colors.background, -80),
             })}
         >
             <Tabs.Protected guard={isSignedIn}>
@@ -101,7 +106,7 @@ export default function TabRouter() {
                         tabBarLabel: 'Profile',
                         tabBarIcon: ({ color, size }) => (
                             <SystemIcon
-                                ios='smiley'
+                                ios='person'
                                 android='emoticon-happy-outline'
                                 size={size}
                                 color={color}

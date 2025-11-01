@@ -1,6 +1,6 @@
 import { useApi } from '@/hooks/use-api';
 import { getDefault } from '@/util/pantry';
-import { standardMutation } from '@/util/query';
+import { mutateMember } from '@/util/query';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import { Alert } from 'react-native';
@@ -33,11 +33,12 @@ export const useCategory = ({ categoryId }: { categoryId?: number } = {}) => {
     });
 
     const { mutate: saveCategory, isPending: isCategorySaving } = useMutation(
-        standardMutation<any, UpsertItemCategory, UpsertItemCategory>(
-            (patch: UpsertItemCategory) => upsertCategory(pantry?.id!, patch),
+        mutateMember<Partial<ItemCategory>>({
+            mutationFn: (patch: Partial<ItemCategory>) => upsertCategory(pantry?.id!, patch),
+            memberQueryKey: categoryId ? ['categories', categoryId] : [],
+            memberOfQueryKey: ['categories'],
             queryClient,
-            categoryQueryKey
-        )
+        })
     );
 
     const { mutate: saveSortOrder, isPending: isSortOrderUpdating } = useMutation({

@@ -27,6 +27,7 @@
         "@expo/vector-icons": "^15.0.2",
         "@react-native-async-storage/async-storage": "^2.2.0",
         "@react-native-community/hooks": "^100.1.0",
+        "@react-native-menu/menu": "^2.0.0",
         "@react-navigation/bottom-tabs": "^7.4.0",
         "@react-navigation/drawer": "^7.5.0",
         "@react-navigation/elements": "^2.6.3",
@@ -73,7 +74,8 @@
         "react-native-web": "~0.21.0",
         "react-native-worklets": "0.5.1",
         "tamagui": "^1.135.0",
-        "tslib": "^2.6.2"
+        "tslib": "^2.6.2",
+        "zustand": "^5.0.8"
     },
     "devDependencies": {
         "@tanstack/eslint-plugin-query": "^5.91.0",

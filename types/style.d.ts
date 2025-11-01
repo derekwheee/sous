@@ -1,4 +1,8 @@
+type ColorTheme = 'light' | 'dark' | 'system';
+
 interface Swatch {
+    white: string;
+    black: string;
     blue: string;
     yellow: string;
     purple: string;
@@ -22,3 +26,9 @@ interface Palette extends Swatch {
     indeterminate: string;
     surface: string;
 }
+
+type CreateStyleFunc = (
+    colors: Palette,
+    brightness: (color: string, amount: number) => string,
+    opacity: (color: string, opacity: number) => string
+) => StyleSheet.NamedStyles<any>;

@@ -23,8 +23,8 @@ export const usePantry = ({ pantryItemId }: { pantryItemId?: number } = {}) => {
     });
 
     const { mutate: savePantryItem, isPending: isPantryItemSaving } = useMutation({
-        mutationFn: (patch: UpsertPantryItem) => upsertPantryItem(pantry?.id!, patch),
-        onMutate: async (patch: UpsertPantryItem) => {
+        mutationFn: (patch: Partial<PantryItem>) => upsertPantryItem(pantry?.id!, patch),
+        onMutate: async (patch: Partial<PantryItem>) => {
             await queryClient.cancelQueries({ queryKey: ['pantries'] });
             await queryClient.cancelQueries({ queryKey: ['pantryItem', patch.id, pantry?.id] });
 
@@ -35,9 +35,7 @@ export const usePantry = ({ pantryItemId }: { pantryItemId?: number } = {}) => {
                 pantry?.id,
             ]);
 
-            const newItem: PantryItem | null = !!patch.id
-                ? null
-                : { ...(patch as PantryItem), id: Date.now() };
+            const newItem: Partial<PantryItem> | null = !!patch.id ? null : patch;
 
             if (prevPantries) {
                 queryClient.setQueryData<Pantry[]>(['pantries'], (old) =>
@@ -48,7 +46,7 @@ export const usePantry = ({ pantryItemId }: { pantryItemId?: number } = {}) => {
                                   ...pantry.pantryItems.map((item) =>
                                       item.id === patch.id ? { ...item, ...patch } : item
                                   ),
-                                  ...(newItem ? [newItem] : []),
+                                  ...(newItem ? [newItem as PantryItem] : []),
                               ],
                           }))
                         : old
@@ -73,7 +71,7 @@ export const usePantry = ({ pantryItemId }: { pantryItemId?: number } = {}) => {
             }
         },
         onSettled: (_, __, updatedItem) => {
-            queryClient.invalidateQueries({ queryKey: ['pantry', pantry?.id] });
+            queryClient.invalidateQueries({ queryKey: ['pantries'] });
             queryClient.invalidateQueries({ queryKey: ['pantryItem', updatedItem.id] });
         },
     });

@@ -40,6 +40,8 @@ export function useApi() {
         user,
         // User
         getUser: (keys: Keys = []) => apiClient.get(keys, '/user'),
+        updateUser: (userData: Partial<User>, keys: Keys = ['user']) =>
+            apiClient.post(keys, '/user', userData),
         syncUser: (keys: Keys = ['user']) => apiClient.post(keys, '/user/sync'),
         joinHousehold: (
             { id, joinToken }: { id: string; joinToken: string },
@@ -57,7 +59,7 @@ export function useApi() {
             apiClient.get(keys, `/household/${householdId}/recipes/${id}`),
         createRecipe: (recipe: object, keys: Keys = ['recipes']) =>
             apiClient.post(keys, `/household/${householdId}/recipes`, recipe),
-        upsertRecipe: (recipe: UpsertRecipe, keys: Keys = ['recipes']) =>
+        upsertRecipe: (recipe: Partial<Recipe>, keys: Keys = ['recipes']) =>
             apiClient.post(keys, `/household/${householdId}/recipes`, recipe),
         deleteRecipe: (id: number, keys: Keys = ['recipes']) =>
             apiClient.delete(keys, `/household/${householdId}/recipes/${id}`),
@@ -72,7 +74,7 @@ export function useApi() {
         getPantries: (keys: Keys = []) => apiClient.get(keys, `/household/${householdId}/pantry`),
         upsertPantryItem: (
             pantryId: number,
-            item: UpsertPantryItem,
+            item: Partial<PantryItem>,
             keys: Keys = ['pantry', 'list', 'itemCategories']
         ) => apiClient.post(keys, `/household/${householdId}/pantry/${pantryId}`, item),
         getPantryItems: (pantryId: number, keys: Keys = []) =>
@@ -89,7 +91,7 @@ export function useApi() {
             ),
         upsertCategory: (
             pantryId: number,
-            category: UpsertItemCategory,
+            category: Partial<ItemCategory>,
             keys: Keys = ['categories']
         ) =>
             apiClient.post(keys, `/household/${householdId}/pantry/${pantryId}/category`, category),

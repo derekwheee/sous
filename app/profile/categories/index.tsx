@@ -4,7 +4,6 @@ import Screen from '@/components/screen';
 import SystemIcon from '@/components/system-icon';
 import { useCategory } from '@/hooks/use-category';
 import { useHeader } from '@/hooks/use-header';
-import { brightness } from '@/styles/global';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -16,7 +15,7 @@ import DraggableFlatList, {
 import { useColors } from '@/hooks/use-colors';
 
 const useStyles = () => {
-    const colors = useColors();
+    const { colors } = useColors();
     return StyleSheet.create({
         rowItem: {
             flex: 1,
@@ -50,7 +49,7 @@ type Item = {
 
 export default function CategoriesPage() {
     const styles = useStyles();
-    const colors = useColors();
+    const { colors, brightness } = useColors();
     const router = useRouter();
     const [data, setData] = useState<Item[]>([]);
     const [isDragReady, setIsDragReady] = useState(false);

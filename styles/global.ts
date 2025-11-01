@@ -1,6 +1,8 @@
-import { StyleSheet, Appearance } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 export const lightSwatch: Swatch = {
+    white: '#FFFFFF',
+    black: '#000000',
     blue: '#4051ff',
     yellow: '#ffd541',
     purple: '#4e0250',
@@ -27,6 +29,8 @@ export const lightColors: Palette = {
 };
 
 export const darkSwatch: Swatch = {
+    white: '#FFFFFF',
+    black: '#000000',
     blue: '#5B6FFF',
     yellow: '#FFD85A',
     purple: '#B35BB8',
@@ -164,55 +168,7 @@ export default function (colors: Palette) {
             textTransform: 'lowercase',
         },
         buttonTextDisabled: {
-            color: brightness(colors.text, 128),
+            // color: brightness(colors.text, 128),
         },
     });
-}
-
-export function brightness(color: string, amount: number) {
-    const isHex = color.startsWith('#');
-    const isRgb = color.startsWith('rgb');
-    const rgb = { r: 0, g: 0, b: 0, a: 1 };
-
-    const scheme = Appearance.getColorScheme();
-
-    amount = scheme === 'dark' ? amount * -1 : amount;
-
-    if (isHex) {
-        color = color.slice(1);
-        const num = parseInt(color, 16);
-        rgb.r = (num >> 16) & 0xff;
-        rgb.g = (num >> 8) & 0xff;
-        rgb.b = num & 0xff;
-    }
-
-    if (isRgb) {
-        const [r, g, b, a = 1] = color
-            .replace(/[(rgba?)\(\)]/g, '')
-            .split(/,\s?/)
-            .map(Number);
-        rgb.r = r;
-        rgb.g = g;
-        rgb.b = b;
-        rgb.a = a;
-    }
-
-    const adjustedRgb = {
-        r: Math.min(255, Math.max(0, rgb.r + amount)),
-        g: Math.min(255, Math.max(0, rgb.g + amount)),
-        b: Math.min(255, Math.max(0, rgb.b + amount)),
-        a: rgb.a,
-    };
-
-    return isHex
-        ? rgbToHex(adjustedRgb)
-        : `rgba(${adjustedRgb.r}, ${adjustedRgb.g}, ${adjustedRgb.b}, ${adjustedRgb.a})`;
-}
-
-function rgbToHex(rgb: { r: number; g: number; b: number; a?: number }) {
-    const toHex = (n: number) => {
-        const hex = n.toString(16);
-        return hex.length === 1 ? '0' + hex : hex;
-    };
-    return `#${toHex(rgb.r)}${toHex(rgb.g)}${toHex(rgb.b)}`;
 }

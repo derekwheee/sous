@@ -44,7 +44,7 @@ type SnackbarContextType = {
 const SnackbarContext = createContext<SnackbarContextType | undefined>(undefined);
 
 export const SnackbarProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const colors = useColors();
+    const { colors } = useColors();
     const _snackbarConfigs = snackbarConfigs(colors);
     const [message, setMessage] = useState<string>();
     const [type, setType] = useState<keyof SnackbarConfigs>('info');
