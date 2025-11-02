@@ -51,6 +51,7 @@ export default function TabRouter() {
             initialRouteName={isSignedIn ? 'recipes' : '(auth)'}
             screenOptions={() => ({
                 headerShown: false,
+                headerShadowVisible: false,
                 tabBarStyle: [styles.tabBar, { display: isSignedIn ? 'flex' : 'none' }],
                 tabBarLabelStyle: styles.tabLabel,
                 tabBarActiveTintColor: colors.primary,

@@ -1,6 +1,5 @@
 import { useApi } from '@/hooks/use-api';
-import { SSEMessageType } from '@/util/constants';
-import { subscribe } from '@/util/see';
+import { SSEMessageType, subscribe } from '@/util/sse';
 import { useAuth } from '@clerk/clerk-expo';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
@@ -32,17 +31,22 @@ export function useSSE() {
         const unsubscribe = subscribe(token, householdId, (data: BroadcastMessage) => {
             switch (data.type) {
                 case SSEMessageType.RECIPE_UPDATE:
-                    queryClient?.invalidateQueries({ queryKey: ['recipes'] });
+                    queryClient?.invalidateQueries({ queryKey: ['recipes'], exact: false });
                     break;
                 case SSEMessageType.RECIPE_DELETE:
-                    queryClient?.invalidateQueries({ queryKey: ['recipes'] });
+                    queryClient?.invalidateQueries({ queryKey: ['recipes'], exact: false });
                     break;
                 case SSEMessageType.PANTRY_UPDATE:
-                    queryClient?.invalidateQueries({ queryKey: ['pantry'] });
-                    queryClient?.invalidateQueries({ queryKey: ['pantryItem'] });
+                    queryClient?.invalidateQueries({ queryKey: ['pantry'], exact: false });
+                    queryClient?.invalidateQueries({ queryKey: ['pantryItem'], exact: false });
                     break;
                 case SSEMessageType.CATEGORY_UPDATE:
-                    queryClient?.invalidateQueries({ queryKey: ['categories'] });
+                    queryClient?.invalidateQueries({ queryKey: ['categories'], exact: false });
+                    break;
+                case SSEMessageType.USER_UPDATE:
+                    queryClient?.invalidateQueries({ queryKey: ['users'], exact: false });
+                    break;
+                default:
                     break;
             }
         });

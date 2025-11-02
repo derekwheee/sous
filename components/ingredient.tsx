@@ -6,6 +6,7 @@ import { StyleSheet, View, ViewProps } from 'react-native';
 import SystemIcon from './system-icon';
 import { useColors } from '@/hooks/use-colors';
 
+// TODO: Update this to new pattern
 const useStyles = () => {
     const { colors } = useColors();
     return {

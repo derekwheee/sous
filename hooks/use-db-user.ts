@@ -19,7 +19,7 @@ export const useDbUser = ({
     const { mutate: saveUser, isPending: isUserSaving } = useMutation(
         mutateItem<User>({
             mutationFn: async (patch: Partial<User>) => updateUser(patch),
-            queryKey: ['user', user?.id],
+            queryKey: ['users', user?.id],
             queryClient,
             onSettled: onUserSettled,
         })

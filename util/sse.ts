@@ -13,6 +13,14 @@ type Callback = (data: any) => void;
 const sources: Record<number, EventSource> = {};
 const listeners: Record<number, Callback[]> = {};
 
+export enum SSEMessageType {
+    RECIPE_UPDATE = 'recipe_update',
+    RECIPE_DELETE = 'recipe_delete',
+    PANTRY_UPDATE = 'pantry_update',
+    CATEGORY_UPDATE = 'category_update',
+    USER_UPDATE = 'user_update',
+}
+
 export function subscribe(token: string, householdId: number, cb: Callback) {
     if (!sources[householdId]) {
         const source = new EventSource(`${API_HOST}/events/${householdId}`, {

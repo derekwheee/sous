@@ -5,6 +5,7 @@ import { LayoutChangeEvent, StyleSheet, ViewProps } from 'react-native';
 import Reanimated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useColors } from '@/hooks/use-colors';
 
+// TODO: Update this to new pattern
 const useStyles = () => {
     const { colors } = useColors();
     return {

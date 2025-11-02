@@ -5,6 +5,7 @@ import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import QRCodeStyled from 'react-native-qrcode-styled';
 import { useColors } from '@/hooks/use-colors';
 
+// TODO: Update this to new pattern
 const useStyles = () => {
     const { colors, brightness } = useColors();
     return {

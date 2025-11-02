@@ -7,6 +7,7 @@ import { Spinner } from 'tamagui';
 import SystemIcon from './system-icon';
 import { useColors } from '@/hooks/use-colors';
 
+// TODO: Update this to new pattern
 const useStyles = () => {
     const { colors } = useColors();
     return {

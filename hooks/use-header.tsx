@@ -3,9 +3,10 @@ import SystemIcon from '@/components/system-icon';
 import Text from '@/components/text';
 import { fonts } from '@/styles/global';
 import { useNavigation } from 'expo-router';
-import React, { useLayoutEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { Platform, Pressable, View } from 'react-native';
 import { useColors } from '@/hooks/use-colors';
+import { usePrevious } from '@/hooks/use-previous';
 
 export function useHeader({
     gestureEnabled = true,
@@ -15,7 +16,7 @@ export function useHeader({
     onCancelSearch,
     headerItems = [],
 }: UseHeaderParams = {}): UseHeader {
-    const { colors } = useColors();
+    const { colors, resolvedTheme } = useColors();
     const navigation = useNavigation();
     const { OS, Version } = Platform;
 
@@ -26,13 +27,24 @@ export function useHeader({
         : mapLiquidGlassHeaderItems(headerItems, colors);
 
     const [legacySearchTerm, setLegacySearchTerm] = useState('');
+    const [isSwitchingThemes, setIsSwitchingThemes] = useState(false);
+    const previousResolvedTheme = usePrevious(resolvedTheme);
+
+    useEffect(() => {
+        if (previousResolvedTheme !== resolvedTheme) {
+            setIsSwitchingThemes(true);
+            setTimeout(() => {
+                setIsSwitchingThemes(false);
+            }, 100);
+        }
+    }, [resolvedTheme, previousResolvedTheme]);
 
     useLayoutEffect(() => {
         navigation.setOptions({
             gestureEnabled,
             headerShadowVisible: false,
             headerSearchBarOptions:
-                !searchBarRef || isLegacyVersion
+                isSwitchingThemes || !searchBarRef || isLegacyVersion
                     ? null
                     : {
                           ref: searchBarRef,
@@ -46,6 +58,7 @@ export function useHeader({
             ...platformHeaderItems,
         });
     }, [
+        isSwitchingThemes,
         colors,
         navigation,
         gestureEnabled,

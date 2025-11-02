@@ -2,6 +2,7 @@ import styles, { fonts } from '@/styles/global';
 import { Text as _Text, TextProps as _TextProps } from 'react-native';
 import { useColors } from '@/hooks/use-colors';
 
+// TODO: Update this to new pattern
 const useStyles = () => {
     const { colors } = useColors();
     return styles(colors);

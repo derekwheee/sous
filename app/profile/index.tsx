@@ -9,11 +9,12 @@ import { fonts } from '@/styles/global';
 import { useClerk, useUser } from '@clerk/clerk-expo';
 import { useRouter } from 'expo-router';
 import { Platform } from 'react-native';
-import { MenuView, MenuComponentRef } from '@react-native-menu/menu';
-import { useRef } from 'react';
+import { MenuView, MenuComponentRef, NativeActionEvent } from '@react-native-menu/menu';
+import { useRef, useState } from 'react';
 import { useDbUser } from '@/hooks/use-db-user';
 import { useStyles } from '@/hooks/use-style';
 import { useAppStore } from '@/store/use-app-store';
+import Loading from '@/components/loading';
 
 const moduleStyles: CreateStyleFunc = (colors, brightness) => ({
     menuItem: {
@@ -49,20 +50,24 @@ export default function ProfileScreen() {
     const { user } = useUser();
     const { user: dbUser, saveUser } = useDbUser({
         onUserSettled: () => {
-            console.log('User update settled, triggering re-render');
-            triggerRender(Date.now());
-            router.replace('/recipes' as any);
+            // console.log('User update settled, triggering re-render');
+            // triggerRender(Date.now());
+            // router.replace('/recipes' as any);
         },
     });
     const router = useRouter();
     const { styles, colors } = useStyles(moduleStyles);
     const { triggerRender } = useAppStore();
 
+    const [isSwitchingTheme, setIsSwitchingTheme] = useState(false);
+
     const preferences: UserPreferences = {
         colorTheme: dbUser?.themePreference || 'system',
     };
 
     const menuRef = useRef<MenuComponentRef>(null);
+
+    const isLoading = !dbUser || isSwitchingTheme;
 
     useHeader({
         headerItems: [
@@ -75,6 +80,14 @@ export default function ProfileScreen() {
             },
         ],
     });
+
+    const handleSetTheme = async ({ nativeEvent }: NativeActionEvent) => {
+        setIsSwitchingTheme(true);
+        saveUser({ themePreference: nativeEvent.event as ColorTheme });
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        triggerRender(Date.now());
+        setIsSwitchingTheme(false);
+    };
 
     const handleSignOut = async () => {
         try {
@@ -111,6 +124,7 @@ export default function ProfileScreen() {
 
     return (
         <Screen>
+            <Loading isLoading={isLoading} />
             <Heading title='welcome,' />
             <Text style={styles.userName}>{user?.firstName || 'friend'}</Text>
             <List>
@@ -140,9 +154,7 @@ export default function ProfileScreen() {
             </List>
             <MenuView
                 ref={menuRef}
-                onPressAction={({ nativeEvent }) => {
-                    saveUser({ themePreference: nativeEvent.event as ColorTheme });
-                }}
+                onPressAction={handleSetTheme}
                 actions={[
                     {
                         id: 'system',

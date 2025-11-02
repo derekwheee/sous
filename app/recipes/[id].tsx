@@ -17,6 +17,7 @@ import { RefreshControl, StyleSheet, View } from 'react-native';
 import { Slider } from 'tamagui';
 import { useColors } from '@/hooks/use-colors';
 
+// TODO: Update this to new pattern
 const useStyles = () => {
     const { colors } = useColors();
     return {

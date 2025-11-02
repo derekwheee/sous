@@ -1,6 +1,7 @@
 import { StyleSheet, View, ViewProps } from 'react-native';
 import { useColors } from '@/hooks/use-colors';
 
+// TODO: Update this to new pattern
 const useStyles = () => {
     const { colors } = useColors();
     return StyleSheet.create({

@@ -3,6 +3,7 @@ import Feather from '@expo/vector-icons/Feather';
 import { StyleSheet, TextInput, TextInputProps, View } from 'react-native';
 import { useColors } from '@/hooks/use-colors';
 
+// TODO: Update this to new pattern
 const useStyles = () => {
     const { colors } = useColors();
     return {

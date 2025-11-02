@@ -24,12 +24,10 @@ export default function NetworkActivityIndicator() {
     const active = isFetching > 0 || isMutating > 0;
 
     useEffect(() => {
-        if (active && height.value === INDICATOR_IDLE_HEIGHT) {
-            height.value = withTiming(INDICATOR_ACTIVE_HEIGHT, { duration: 300 });
-        } else if (!active && height.value === INDICATOR_ACTIVE_HEIGHT) {
-            height.value = withTiming(INDICATOR_IDLE_HEIGHT, { duration: 300 });
-        }
-    }, [isFetching, isMutating, active, height]);
+        height.value = active
+            ? withTiming(INDICATOR_ACTIVE_HEIGHT, { duration: 300 })
+            : withTiming(INDICATOR_IDLE_HEIGHT, { duration: 300 });
+    }, [active, height]);
 
     useEffect(() => {
         if (active) {

@@ -11,6 +11,7 @@ import { EmojiPopup } from 'react-native-emoji-popup';
 import { Switch, XStack, YStack } from 'tamagui';
 import { useColors } from '@/hooks/use-colors';
 
+// TODO: Update this to new pattern
 const useStyles = () => {
     const { colors, brightness } = useColors();
     return {
