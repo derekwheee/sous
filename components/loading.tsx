@@ -1,51 +1,39 @@
 import Text from '@/components/text';
-import globalStyles, { fonts } from '@/styles/global';
+import { fonts } from '@/styles/global';
 import React, { useEffect, useState } from 'react';
-import { LayoutChangeEvent, StyleSheet, ViewProps } from 'react-native';
+import { LayoutChangeEvent, ViewProps } from 'react-native';
 import Reanimated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { useColors } from '@/hooks/use-colors';
+import { useStyles } from '@/hooks/use-style';
 
-// TODO: Update this to new pattern
-const useStyles = () => {
-    const { colors } = useColors();
+const moduleStyles: CreateStyleFunc = (colors) => {
     return {
-        ...globalStyles(colors),
-        ...StyleSheet.create({
-            wrapper: {
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                height: '66.7%',
-                backgroundColor: colors.primary,
-                zIndex: 1000,
-                overflowX: 'hidden',
-            },
-            loadingText: {
-                marginBottom: 16,
-                fontSize: 28,
-                fontFamily: fonts.caprasimo,
-                textAlign: 'center',
-                color: 'white',
-                zIndex: 1001,
-            },
-            longWaitText: {
-                fontSize: 16,
-                fontFamily: fonts.poppins.medium,
-                textAlign: 'center',
-                color: 'white',
-                zIndex: 1001,
-            },
-            circle: {
-                width: '150%',
-                aspectRatio: 1,
-                borderRadius: 9999,
-                backgroundColor: colors.primary,
-                position: 'absolute',
-                left: '-25%',
-                bottom: '-30%',
-            },
-        }),
+        wrapper: {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 16,
+            backgroundColor: colors.primary,
+            zIndex: 1000,
+        },
+        loadingText: {
+            marginBottom: 16,
+            fontSize: 28,
+            fontFamily: fonts.caprasimo,
+            textAlign: 'center',
+            color: 'white',
+            zIndex: 1001,
+        },
+        longWaitText: {
+            fontSize: 16,
+            fontFamily: fonts.poppins.medium,
+            textAlign: 'center',
+            color: 'white',
+            zIndex: 1001,
+        },
     };
 };
 
@@ -55,7 +43,7 @@ type Props = ViewProps & {
 };
 
 export default function LoadingOverlay({ isLoading = false, duration = 300, ...rest }: Props) {
-    const styles = useStyles();
+    const { styles } = useStyles(moduleStyles);
     const [measuredHeight, setMeasuredHeight] = useState(0);
     const [showLongWaitMessage, setShowLongWaitMessage] = useState(false);
     const translateY = useSharedValue(0);
@@ -91,7 +79,6 @@ export default function LoadingOverlay({ isLoading = false, duration = 300, ...r
 
     return (
         <Reanimated.View style={[styles.wrapper, animatedStyle]} onLayout={onLayout} {...rest}>
-            <Reanimated.View style={styles.circle} />
             <Reanimated.View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                 <Text style={styles.loadingText}>let me get that for you...</Text>
                 <Text style={[styles.longWaitText, { opacity: showLongWaitMessage ? 1 : 0 }]}>
