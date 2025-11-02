@@ -151,65 +151,65 @@ export default function ProfileScreen() {
                         }
                     />
                 ))}
+                <MenuView
+                    ref={menuRef}
+                    onPressAction={handleSetTheme}
+                    actions={[
+                        {
+                            id: 'system',
+                            title: 'System',
+                            image: Platform.select({
+                                ios: 'iphone',
+                                android: 'ic_menu_add',
+                            }),
+                            imageColor: colors.primary,
+                            state: preferences.colorTheme === 'system' ? 'on' : 'off',
+                        },
+                        {
+                            id: 'dark',
+                            title: 'Dark',
+                            image: Platform.select({
+                                ios: 'moon',
+                                android: 'ic_menu_add',
+                            }),
+                            imageColor: colors.primary,
+                            state: preferences.colorTheme === 'dark' ? 'on' : 'off',
+                        },
+                        {
+                            id: 'light',
+                            title: 'Light',
+                            image: Platform.select({
+                                ios: 'sun.max',
+                                android: 'ic_menu_add',
+                            }),
+                            imageColor: colors.primary,
+                            state: preferences.colorTheme === 'light' ? 'on' : 'off',
+                        },
+                    ]}
+                    shouldOpenOnLongPress={false}
+                >
+                    <ListItem
+                        key={'color-theme'}
+                        text='color theme'
+                        leftAdornment={
+                            <SystemIcon
+                                ios={'sun.righthalf.filled'}
+                                android={listItems[0].icon[1]}
+                                size={24}
+                                color={colors.text}
+                            />
+                        }
+                        rightAdornment={
+                            <SystemIcon
+                                ios='chevron.right'
+                                android='chevron-right'
+                                size={16}
+                                color={colors.text}
+                            />
+                        }
+                    />
+                </MenuView>
             </List>
-            <MenuView
-                ref={menuRef}
-                onPressAction={handleSetTheme}
-                actions={[
-                    {
-                        id: 'system',
-                        title: 'System',
-                        image: Platform.select({
-                            ios: 'iphone',
-                            android: 'ic_menu_add',
-                        }),
-                        imageColor: colors.primary,
-                        state: preferences.colorTheme === 'system' ? 'on' : 'off',
-                    },
-                    {
-                        id: 'dark',
-                        title: 'Dark',
-                        image: Platform.select({
-                            ios: 'moon',
-                            android: 'ic_menu_add',
-                        }),
-                        imageColor: colors.primary,
-                        state: preferences.colorTheme === 'dark' ? 'on' : 'off',
-                    },
-                    {
-                        id: 'light',
-                        title: 'Light',
-                        image: Platform.select({
-                            ios: 'sun.max',
-                            android: 'ic_menu_add',
-                        }),
-                        imageColor: colors.primary,
-                        state: preferences.colorTheme === 'light' ? 'on' : 'off',
-                    },
-                ]}
-                shouldOpenOnLongPress={false}
-            >
-                <ListItem
-                    key={'color-theme'}
-                    text='color theme'
-                    leftAdornment={
-                        <SystemIcon
-                            ios={'sun.righthalf.filled'}
-                            android={listItems[0].icon[1]}
-                            size={24}
-                            color={colors.text}
-                        />
-                    }
-                    rightAdornment={
-                        <SystemIcon
-                            ios='chevron.right'
-                            android='chevron-right'
-                            size={16}
-                            color={colors.text}
-                        />
-                    }
-                />
-            </MenuView>
         </Screen>
     );
 }
