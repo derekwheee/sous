@@ -11,6 +11,7 @@ import { useEffect } from 'react';
 import { useColors } from '@/hooks/use-colors';
 import { useDbUser } from '@/hooks/use-db-user';
 import { useStyles } from '@/hooks/use-style';
+import { useSegments } from 'expo-router';
 
 const moduleStyles: CreateStyleFunc = (colors) => ({
     tabBar: {
@@ -28,6 +29,7 @@ export default function TabRouter() {
     const { updateTheme, resolvedTheme } = useColors();
     const { isSignedIn = false } = useAuth();
     const { user } = useDbUser();
+    const segment: string[] = useSegments();
 
     useSSE();
 
@@ -46,8 +48,11 @@ export default function TabRouter() {
         }
     }, [user, updateTheme, resolvedTheme]);
 
+    const hideTabBar = segment.includes('recipes') && segment.includes('cook');
+
     return (
         <Tabs
+            tabBar={hideTabBar ? () => null : undefined}
             initialRouteName={isSignedIn ? 'recipes' : '(auth)'}
             screenOptions={() => ({
                 headerShown: false,

@@ -54,6 +54,7 @@ export function useHeader({
                           tintColor: colors.primary,
                           onChangeText: onChangeSearch,
                           onCancelButtonPress: onCancelSearch,
+                          cancelButtonText: 'add',
                       },
             ...platformHeaderItems,
         });
@@ -170,7 +171,7 @@ function mapLiquidGlassHeaderItems(
     return {
         unstable_headerRightItems: () =>
             headerItems.map((item) => {
-                const { labelStyle = {}, icon, ...rest } = item;
+                const { labelStyle = {}, icon, menu, ...rest } = item;
 
                 return {
                     type: 'button',
@@ -189,6 +190,22 @@ function mapLiquidGlassHeaderItems(
                         : undefined,
                     variant: 'prominent',
                     tintColor: colors.primary,
+                    menu: menu?.items
+                        ? {
+                              items: menu.items.map((item: HeaderMenuItem) => ({
+                                  ...item,
+                                  icon: item.icon
+                                      ? {
+                                            type: 'sfSymbol',
+                                            name:
+                                                item.icon.name && Array.isArray(item.icon.name)
+                                                    ? item.icon.name[0]
+                                                    : item.icon.name,
+                                        }
+                                      : undefined,
+                              })),
+                          }
+                        : undefined,
                     ...rest,
                 };
             }),

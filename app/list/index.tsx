@@ -12,7 +12,7 @@ import { fonts } from '@/styles/global';
 import Feather from '@expo/vector-icons/Feather';
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
-import { TextInput, View } from 'react-native';
+import { View } from 'react-native';
 import { useStyles } from '@/hooks/use-style';
 
 const moduleStyles: CreateStyleFunc = (colors, brightness) => ({
@@ -52,22 +52,32 @@ const moduleStyles: CreateStyleFunc = (colors, brightness) => ({
 });
 
 export default function ListScreen() {
-    const { styles, colors, brightness, opacity } = useStyles(moduleStyles);
+    const { styles, colors, brightness } = useStyles(moduleStyles);
     const router = useRouter();
-    const [isAddingItems, setIsAddingItems] = useState<boolean>(false);
-    const [newItemText, setNewItemText] = useState<string>('');
-    const newItemInputRef = useRef<TextInput>(null);
+    const [showAllItems, setShowAllItems] = useState<boolean>(false);
+    const [searchTerm, setSearchTerm] = useState<string>('');
+    const searchBarRef = useRef<any>(null);
 
     useHeader({
+        searchBarRef: searchBarRef,
+        searchPlaceholder: 'search list...',
+        onChangeSearch: (event: any) => setSearchTerm(event.nativeEvent.text),
+        onCancelSearch: () => setSearchTerm(''),
         headerItems: [
             {
-                label: isAddingItems ? 'done' : 'new item',
-                icon: isAddingItems
-                    ? undefined
-                    : {
-                          name: ['plus', 'plus'],
-                      },
-                onPress: () => setIsAddingItems(!isAddingItems),
+                label: 'new item',
+                icon: {
+                    name: ['list.bullet', 'list'],
+                },
+                onPress: () => setShowAllItems(!showAllItems),
+                selected: showAllItems,
+            },
+            {
+                label: 'new item',
+                icon: {
+                    name: ['plus', 'plus'],
+                },
+                onPress: () => router.push('/list/edit'),
             },
         ],
     });
@@ -77,13 +87,19 @@ export default function ListScreen() {
     } = useCategory();
     const { pantry, savePantryItem, deletePantryItem } = usePantry();
 
-    const categories = pantry?.pantryItems
+    const filteredPantryItems = pantry?.pantryItems.filter((item: PantryItem) =>
+        item.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const categories = filteredPantryItems
         ?.reduce<any[]>((acc, item: PantryItem) => {
-            const shouldInclude = isAddingItems ? true : item.isInShoppingList;
+            const shouldInclude = showAllItems || !!searchTerm ? true : item.isInShoppingList;
             if (!shouldInclude) return acc;
 
             const entryItem =
-                isAddingItems && !item.isInShoppingList ? { ...item, canBeAdded: true } : item;
+                (showAllItems || !!searchTerm) && !item.isInShoppingList
+                    ? { ...item, canBeAdded: true }
+                    : item;
 
             if (!item.category) {
                 item.category = categoryList?.find((cat) => cat.name.toLowerCase() === 'other');
@@ -108,44 +124,11 @@ export default function ListScreen() {
         await savePantryItem({ id, isInShoppingList: true });
     };
 
-    const handleCreateItem = async (name: string, categoryId?: number) => {
-        if (!categoryId) {
-            categoryId = categoryList?.find((cat) => cat.name.toLowerCase() === 'other')?.id;
-        }
-
-        await savePantryItem({ name, isInShoppingList: true, categoryId });
-
-        setNewItemText('');
-    };
-
     const isLoading = !categoryList || !pantry;
 
     return (
         <Screen isLoading={isLoading}>
             <Heading title='Shopping List' />
-            {isAddingItems && (
-                <View style={styles.search}>
-                    <TextInput
-                        ref={newItemInputRef}
-                        style={[styles.searchInput]}
-                        placeholder='add new item'
-                        placeholderTextColor={opacity(colors.white, 0.5)}
-                        autoCapitalize='none'
-                        clearButtonMode='never'
-                        selectionColor={colors.white}
-                        value={newItemText}
-                        onChangeText={setNewItemText}
-                    />
-                    <Feather
-                        name='plus'
-                        size={24}
-                        color={newItemText ? colors.white : opacity(colors.white, 0.5)}
-                        onPress={() => {
-                            handleCreateItem(newItemText);
-                        }}
-                    />
-                </View>
-            )}
             {categories?.map((itemCategory: ItemCategory) => (
                 <View key={itemCategory.id}>
                     <View style={styles.categoryWrapper}>
@@ -229,7 +212,7 @@ export default function ListScreen() {
                     <Text style={styles.onboardingText}>
                         you don&apos;t have anything in your shopping list
                     </Text>
-                    <Button text='add your first item' onPress={() => setIsAddingItems(true)} />
+                    <Button text='add your first item' onPress={() => {}} />
                     <Text style={styles.onboardingText}>or</Text>
                     <Button text='join a household' onPress={() => router.push('/profile/join')} />
                 </View>

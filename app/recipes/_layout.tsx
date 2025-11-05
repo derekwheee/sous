@@ -42,6 +42,13 @@ export default function RecipesLayout() {
                 }}
             />
             <Stack.Screen
+                name='cook/[id]'
+                options={{
+                    title: 'Cook Recipe',
+                    headerShown: true,
+                }}
+            />
+            <Stack.Screen
                 name='suggest'
                 options={{
                     title: 'Suggest Recipes',

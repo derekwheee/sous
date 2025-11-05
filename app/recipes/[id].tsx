@@ -112,6 +112,14 @@ export default function RecipeDetail() {
                           items: [
                               {
                                   type: 'action',
+                                  label: "Let's cook!",
+                                  icon: {
+                                      name: ['frying.pan', 'check'],
+                                  },
+                                  onPress: () => router.push(`/recipes/cook/${id}`),
+                              },
+                              {
+                                  type: 'action',
                                   label: 'I made this',
                                   icon: {
                                       name: ['checkmark', 'check'],
@@ -120,7 +128,7 @@ export default function RecipeDetail() {
                               },
                               {
                                   type: 'action',
-                                  label: 'edit recipe',
+                                  label: 'Edit Recipe',
                                   icon: {
                                       name: ['pencil', 'pencil'],
                                   },
@@ -129,7 +137,7 @@ export default function RecipeDetail() {
                               {
                                   destructive: true,
                                   type: 'action',
-                                  label: 'delete recipe',
+                                  label: 'Delete Recipe',
                                   icon: {
                                       name: ['trash', 'trash-can-outline'],
                                   },

@@ -1,36 +1,30 @@
 import Divider from '@/components/divider';
-import global, { fonts } from '@/styles/global';
+import { fonts } from '@/styles/global';
 import { useLocalSearchParams } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
-import { useColors } from '@/hooks/use-colors';
+import { Text, View } from 'react-native';
+import { useStyles } from '@/hooks/use-style';
 
 // TODO: Update this to new pattern
-const useStyles = () => {
-    const { colors, brightness } = useColors();
-    return {
-        ...global(colors),
-        ...StyleSheet.create({
-            container: {
-                flex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: colors.background,
-            },
-            text: {
-                fontFamily: fonts.poppins.regular,
-                color: colors.text,
-            },
-            divider: {
-                backgroundColor: brightness(colors.background, -40),
-            },
-        }),
-    };
-};
+const moduleStyles: CreateStyleFunc = (colors, brightness, opacity) => ({
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: colors.background,
+    },
+    text: {
+        fontFamily: fonts.poppins.regular,
+        color: colors.text,
+    },
+    divider: {
+        backgroundColor: brightness(colors.background, -40),
+    },
+});
 
 export default function NewScreen() {
     const { someParam } = useLocalSearchParams<{ someParam: string }>();
 
-    const styles = useStyles();
+    const { styles } = useStyles(moduleStyles);
 
     return (
         <View style={styles.container}>
