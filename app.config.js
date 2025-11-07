@@ -14,6 +14,7 @@ export default ({ config }) => ({
         infoPlist: {
             NSCameraUsageDescription: 'This app needs access to your camera to scan a QR code.',
             ITSAppUsesNonExemptEncryption: false,
+            UIBackgroundModes: ['audio'],
         },
     },
     android: {
@@ -50,6 +51,12 @@ export default ({ config }) => ({
             'expo-camera',
             {
                 cameraPermission: 'Allow $(PRODUCT_NAME) to access your camera',
+            },
+        ],
+        [
+            'expo-audio',
+            {
+                microphonePermission: 'Allow $(PRODUCT_NAME) to access your microphone.',
             },
         ],
     ],

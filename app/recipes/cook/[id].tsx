@@ -1,13 +1,18 @@
 import Text from '@/components/text';
 import { useRecipe } from '@/hooks/use-recipe';
 import { fonts } from '@/styles/global';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
+import { useState, useEffect } from 'react';
+import { Pressable, ScrollView, View } from 'react-native';
 import { useStyles } from '@/hooks/use-style';
-import { useHeader } from '@/hooks/use-header';
 import PagerView from 'react-native-pager-view';
 import Instruction from '@/components/instruction';
+import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
+import { SymbolView } from 'expo-symbols';
+import { usePrevious } from '@/hooks/use-previous';
+
+const AUDIO_SOURCE = require('@/assets/alarm.mp3');
+const TIMER_ENDING_THRESHOLD = 60; // seconds
 
 const moduleStyles: CreateStyleFunc = (colors, brightness, opacity) => {
     return {
@@ -54,6 +59,32 @@ const moduleStyles: CreateStyleFunc = (colors, brightness, opacity) => {
             fontSize: 32,
             color: colors.white,
         },
+        timer: {
+            position: 'absolute',
+            top: 72,
+            right: -48,
+            transform: [{ translateX: '-50%' }, { translateY: '-50%' }],
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 8,
+            paddingVertical: 8,
+            paddingHorizontal: 16,
+            borderRadius: 99,
+            backgroundColor: colors.sous,
+            zIndex: 1000,
+        },
+        timerText: {
+            fontFamily: 'ui-monospace',
+            fontWeight: 'bold',
+            fontSize: 24,
+            color: colors.black,
+        },
+        timerEnding: {
+            backgroundColor: colors.error,
+        },
+        timerEndingText: {
+            color: colors.white,
+        },
     };
 };
 
@@ -63,45 +94,65 @@ export default function RecipeCookMode() {
 
     const { styles, colors } = useStyles(moduleStyles);
     const [activeInstructionIndex, setActiveInstructionIndex] = useState<number>(0);
+    const [timer, setTimer] = useState<number>(0);
+    const [showTimer, setShowTimer] = useState<boolean>(false);
+    const prevTimer = usePrevious(timer);
 
     const { recipe } = useRecipe({ recipeId: id });
-    const router = useRouter();
+    const player = useAudioPlayer(AUDIO_SOURCE);
+    const status = useAudioPlayerStatus(player);
+    player.loop = true;
 
-    useHeader({
-        headerItems: [
-            activeInstructionIndex > 0
-                ? {
-                      label: 'back',
-                      icon: {
-                          name: ['chevron.left', 'logout'],
-                      },
-                      onPress: () => {
-                          setActiveInstructionIndex((index) => Math.max(0, index - 1));
-                      },
-                  }
-                : null,
-            activeInstructionIndex < (recipe?.instructions.length || 1) - 1 && {
-                label: 'next',
-                icon: {
-                    name: ['chevron.right', 'logout'],
-                },
-                onPress: () => {
-                    setActiveInstructionIndex((index) =>
-                        Math.min(index + 1, (recipe?.instructions.length || 1) - 1)
-                    );
-                },
-            },
-            activeInstructionIndex === (recipe?.instructions.length || 1) - 1 && {
-                label: 'done',
-                icon: {
-                    name: ['checkmark', 'logout'],
-                },
-                onPress: () => {
-                    router.replace(`/recipes/${id}` as any);
-                },
-            },
-        ].filter(Boolean) as HeaderItem[],
-    });
+    useEffect(() => {
+        if (timer > 0) {
+            const interval = setInterval(() => {
+                setTimer((t) => t - 1);
+            }, 1000);
+            return () => clearInterval(interval);
+        }
+
+        if (prevTimer && prevTimer > 0 && timer === 0) {
+            player.play();
+        }
+    }, [timer, prevTimer, player, status.playing]);
+
+    const startTimer = (seconds: number) => {
+        setTimer(seconds);
+    };
+
+    const stopTimer = () => {
+        setTimer(0);
+        player.pause();
+    };
+
+    const parseTime = (duration: number, unit: string) => {
+        if (unit.startsWith('sec')) {
+            return duration;
+        } else if (unit.startsWith('min')) {
+            return duration * 60;
+        } else if (unit.startsWith('hour')) {
+            return duration * 3600;
+        }
+        return duration;
+    };
+
+    const formatTime = (totalSeconds: number) => {
+        const hours = Math.floor(totalSeconds / 3600);
+        if (hours > 0) {
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        return `${minutes}:${String(seconds).padStart(2, '0')}`;
+    };
+
+    const handleStartTimer = (duration: number, unit: string) => {
+        const seconds = parseTime(duration, unit);
+        startTimer(seconds);
+        setShowTimer(true);
+    };
 
     return (
         <View style={{ flex: 1, backgroundColor: colors.primary }}>
@@ -121,6 +172,7 @@ export default function RecipeCookMode() {
                             instruction={instruction}
                             style={styles.instructionText}
                             highlightedStyle={{ textDecorationLine: 'underline' }}
+                            onStartTimer={handleStartTimer}
                         />
                         <View style={{ height: 120 }} />
                     </ScrollView>
@@ -137,6 +189,29 @@ export default function RecipeCookMode() {
                     />
                 ))}
             </View>
+            {showTimer && (
+                <Pressable
+                    style={[styles.timer, timer < TIMER_ENDING_THRESHOLD && styles.timerEnding]}
+                    onPress={() => {
+                        stopTimer();
+                        setShowTimer(false);
+                    }}
+                >
+                    <SymbolView
+                        name='timer'
+                        size={20}
+                        tintColor={timer < TIMER_ENDING_THRESHOLD ? colors.white : colors.black}
+                    />
+                    <Text
+                        style={[
+                            styles.timerText,
+                            timer < TIMER_ENDING_THRESHOLD && styles.timerEndingText,
+                        ]}
+                    >
+                        {formatTime(timer)}
+                    </Text>
+                </Pressable>
+            )}
         </View>
     );
 }

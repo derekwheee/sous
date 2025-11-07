@@ -67,7 +67,6 @@ export function useColors() {
     );
 
     const opacity = useCallback((color: string, opacity: number): string => {
-        console.log('Adjusting opacity for', color, 'to', opacity);
         const rgb = getMutableColor(color);
 
         const adjustedRgb = {

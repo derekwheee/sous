@@ -5,10 +5,11 @@ import globalStyles from '@/styles/global';
 
 export function useStyles(styles: CreateStyleFunc) {
     const { colors, brightness, opacity } = useColors();
+
     const stylesSheet = useMemo(
         () =>
             StyleSheet.create({
-                ...globalStyles,
+                ...globalStyles(colors),
                 ...styles(colors, brightness, opacity),
             }),
         [colors, brightness, opacity, styles]

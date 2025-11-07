@@ -1,5 +1,4 @@
 import { useSnackbar } from '@/components/snackbar';
-import { useInvalidateQueries } from '@/hooks/use-invalidate-queries';
 import { useAuth } from '@clerk/clerk-expo';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Constants from 'expo-constants';
@@ -12,17 +11,14 @@ if (!API_HOST) {
     throw new Error('API_HOST is not defined');
 }
 
-type Keys = string[] | string[][];
-
 export function useApi() {
     const { getToken, userId, isSignedIn } = useAuth();
-    const invalidateQueries = useInvalidateQueries();
     const queryClient = useQueryClient();
     const { showSnackbar } = useSnackbar();
 
     const { data: user } = useQuery({
         queryKey: ['user'],
-        queryFn: () => apiClient.get([], '/user'),
+        queryFn: () => apiClient.get('/user'),
         enabled: !!userId,
     });
 
@@ -34,88 +30,65 @@ export function useApi() {
         }
     }, [isSignedIn, queryClient]);
 
-    const apiClient = createClient(invalidateQueries, getToken, showSnackbar);
+    const apiClient = createClient(getToken, showSnackbar);
 
     return {
         user,
         // User
-        getUser: (keys: Keys = []) => apiClient.get(keys, '/user'),
-        updateUser: (userData: Partial<User>, keys: Keys = ['user']) =>
-            apiClient.post(keys, '/user', userData),
-        syncUser: (keys: Keys = ['user']) => apiClient.post(keys, '/user/sync'),
-        joinHousehold: (
-            { id, joinToken }: { id: string; joinToken: string },
-            keys: Keys = ['user']
-        ) => apiClient.post(keys, `/household/${id}/join`, { joinToken }),
+        getUser: () => apiClient.get('/user'),
+        updateUser: (userData: Partial<User>) => apiClient.post('/user', userData),
+        syncUser: () => apiClient.post('/user/sync'),
+        joinHousehold: ({ id, joinToken }: { id: string; joinToken: string }) =>
+            apiClient.post(`/household/${id}/join`, { joinToken }),
         // Recipes
-        getRecipes: (keys: Keys = [], keywords?: string) => {
+        getRecipes: (keywords?: string) => {
             let url = `/household/${householdId}/recipes`;
             if (keywords) {
                 url += `?keywords=${encodeURIComponent(keywords)}`;
             }
-            return apiClient.get(keys, url);
+            return apiClient.get(url);
         },
-        getRecipe: (id: number, keys: Keys = []) =>
-            apiClient.get(keys, `/household/${householdId}/recipes/${id}`),
-        createRecipe: (recipe: object, keys: Keys = ['recipes']) =>
-            apiClient.post(keys, `/household/${householdId}/recipes`, recipe),
-        upsertRecipe: (recipe: Partial<Recipe>, keys: Keys = ['recipes']) =>
-            apiClient.post(keys, `/household/${householdId}/recipes`, recipe),
-        deleteRecipe: (id: number, keys: Keys = ['recipes']) =>
-            apiClient.delete(keys, `/household/${householdId}/recipes/${id}`),
-        importRecipe: (url: string, keys: Keys = []) =>
+        getRecipe: (id: number) => apiClient.get(`/household/${householdId}/recipes/${id}`),
+        createRecipe: (recipe: object) =>
+            apiClient.post(`/household/${householdId}/recipes`, recipe),
+        upsertRecipe: (recipe: Partial<Recipe>) =>
+            apiClient.post(`/household/${householdId}/recipes`, recipe),
+        deleteRecipe: (id: number) => apiClient.delete(`/household/${householdId}/recipes/${id}`),
+        importRecipe: (url: string) =>
             apiClient.get(
-                keys,
                 `/household/${householdId}/recipes/scrape?url=` + encodeURIComponent(url)
             ),
-        getAllRecipeTags: (keys: Keys = []) =>
-            apiClient.get(keys, `/household/${householdId}/recipes/tags`),
+        getAllRecipeTags: () => apiClient.get(`/household/${householdId}/recipes/tags`),
         // Pantry
-        getPantries: (keys: Keys = []) => apiClient.get(keys, `/household/${householdId}/pantry`),
-        upsertPantryItem: (
-            pantryId: number,
-            item: Partial<PantryItem>,
-            keys: Keys = ['pantry', 'list', 'itemCategories']
-        ) => apiClient.post(keys, `/household/${householdId}/pantry/${pantryId}`, item),
-        getPantryItems: (pantryId: number, keys: Keys = []) =>
-            apiClient.get(keys, `/household/${householdId}/pantry/${pantryId}/items`),
-        getPantryItem: (id: number, pantryId: number, keys: Keys = []) =>
-            apiClient.get(keys, `/household/${householdId}/pantry/${pantryId}/items/${id}`),
+        getPantries: () => apiClient.get(`/household/${householdId}/pantry`),
+        upsertPantryItem: (pantryId: number, item: Partial<PantryItem>) =>
+            apiClient.post(`/household/${householdId}/pantry/${pantryId}`, item),
+        getPantryItems: (pantryId: number) =>
+            apiClient.get(`/household/${householdId}/pantry/${pantryId}/items`),
+        getPantryItem: (id: number, pantryId: number) =>
+            apiClient.get(`/household/${householdId}/pantry/${pantryId}/items/${id}`),
         // ItemCategories
-        getCategories: (pantryId: number, keys: Keys = []) =>
-            apiClient.get(keys, `/household/${householdId}/pantry/${pantryId}/category`),
-        getCategory: (pantryId: number, categoryId: number, keys: Keys = []) =>
-            apiClient.get(
-                keys,
-                `/household/${householdId}/pantry/${pantryId}/category/${categoryId}`
-            ),
-        upsertCategory: (
-            pantryId: number,
-            category: Partial<ItemCategory>,
-            keys: Keys = ['categories']
-        ) =>
-            apiClient.post(keys, `/household/${householdId}/pantry/${pantryId}/category`, category),
-        updateSortOrder: (pantryId: number, sortedIds: number[], keys: Keys = ['categories']) =>
+        getCategories: (pantryId: number) =>
+            apiClient.get(`/household/${householdId}/pantry/${pantryId}/category`),
+        getCategory: (pantryId: number, categoryId: number) =>
+            apiClient.get(`/household/${householdId}/pantry/${pantryId}/category/${categoryId}`),
+        upsertCategory: (pantryId: number, category: Partial<ItemCategory>) =>
+            apiClient.post(`/household/${householdId}/pantry/${pantryId}/category`, category),
+        updateSortOrder: (pantryId: number, sortedIds: number[]) =>
             apiClient.post(
-                keys,
                 `/household/${householdId}/pantry/${pantryId}/category/sort-order`,
                 sortedIds
             ),
         // AI
-        getRecipeSuggestions: (
-            pantryId: number,
-            tags: string[],
-            keywords: string,
-            keys: Keys = []
-        ) =>
-            apiClient.get(keys, `/ai/suggestions/${pantryId}`, {
+        getRecipeSuggestions: (pantryId: number, tags: string[], keywords: string) =>
+            apiClient.get(`/ai/suggestions/${pantryId}`, {
                 query: {
                     tags,
                     keywords,
                 },
             }),
-        getExpiringPantryItems: (pantryId: number, keys: Keys = []) =>
-            apiClient.get(keys, `/ai/expiring-items/${pantryId}`),
+        getExpiringPantryItems: (pantryId: number) =>
+            apiClient.get(`/ai/expiring-items/${pantryId}`),
     };
 }
 
@@ -183,45 +156,23 @@ async function makeRequest(
     }
 }
 
-function requestAndInvalidate<T, Args extends any[]>(
-    apiCall: (...args: Args) => Promise<T>,
-    invalidateQueries: (keys: Keys) => void
-): (keys: Keys, ...args: Args) => Promise<T> {
-    return (keys, ...args: Args) =>
-        apiCall(...args).then((result) => {
-            if (keys) {
-                invalidateQueries(keys);
-            }
-            return result;
-        });
-}
-
-function createClient(invalidateQueries: (keys: Keys) => void, getToken: any, showSnackbar: any) {
+function createClient(getToken: any, showSnackbar: any) {
     return {
-        get: requestAndInvalidate(
-            (url: string, options: { query?: object } & RequestInit = {}) =>
-                makeRequest(url, { method: 'GET', ...options }, getToken, showSnackbar),
-            invalidateQueries
-        ),
-        post: requestAndInvalidate(
-            (url: string, body?: object) =>
-                makeRequest(
-                    url,
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: body ? JSON.stringify(body) : null,
+        get: (url: string, options: { query?: object } & RequestInit = {}) =>
+            makeRequest(url, { method: 'GET', ...options }, getToken, showSnackbar),
+        post: (url: string, body?: object) =>
+            makeRequest(
+                url,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
                     },
-                    getToken,
-                    showSnackbar
-                ),
-            invalidateQueries
-        ),
-        delete: requestAndInvalidate(
-            (url: string) => makeRequest(url, { method: 'DELETE' }, getToken, showSnackbar),
-            invalidateQueries
-        ),
+                    body: body ? JSON.stringify(body) : null,
+                },
+                getToken,
+                showSnackbar
+            ),
+        delete: (url: string) => makeRequest(url, { method: 'DELETE' }, getToken, showSnackbar),
     };
 }

@@ -8,45 +8,38 @@ import { useApi } from '@/hooks/use-api';
 import { useHeader } from '@/hooks/use-header';
 import { usePantry } from '@/hooks/use-pantry';
 import { useRecipe } from '@/hooks/use-recipe';
-import globalStyles, { fonts } from '@/styles/global';
-import { highlightInstructions } from '@/util/highligher';
+import { fonts } from '@/styles/global';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Fraction } from 'fraction.js';
 import { useEffect, useState } from 'react';
-import { RefreshControl, StyleSheet, View } from 'react-native';
+import { RefreshControl, View } from 'react-native';
 import { Slider } from 'tamagui';
-import { useColors } from '@/hooks/use-colors';
+import Instruction from '@/components/instruction';
+import { useStyles } from '@/hooks/use-style';
 
-// TODO: Update this to new pattern
-const useStyles = () => {
-    const { colors } = useColors();
-    return {
-        ...globalStyles(colors),
-        ...StyleSheet.create({
-            timeLabels: {
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                marginBottom: 16,
-            },
-            instructionContainer: {
-                flex: 1,
-                flexDirection: 'row',
-                marginBottom: 16,
-            },
-            instructionIndex: {
-                position: 'relative',
-                top: -8,
-                width: 48,
-                fontFamily: fonts.poppins.bold,
-                fontSize: 32,
-            },
-            instructionText: {
-                flexShrink: 1,
-                fontSize: 14,
-            },
-        }),
-    };
-};
+const moduleStyles: CreateStyleFunc = () => ({
+    timeLabels: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 16,
+    },
+    instructionContainer: {
+        flex: 1,
+        flexDirection: 'row',
+        marginBottom: 16,
+    },
+    instructionIndex: {
+        position: 'relative',
+        top: -4,
+        width: 32,
+        fontFamily: fonts.poppins.bold,
+        fontSize: 32,
+    },
+    instructionText: {
+        flexShrink: 1,
+        paddingRight: 32,
+    },
+});
 
 export default function RecipeDetail() {
     const params = useLocalSearchParams<{ id: string; suggestion: string }>();
@@ -55,8 +48,7 @@ export default function RecipeDetail() {
         ? JSON.parse(params.suggestion)
         : null;
 
-    const styles = useStyles();
-    const { colors, brightness } = useColors();
+    const { styles, colors, brightness } = useStyles(moduleStyles);
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
     const [scaleValue, setScaleValue] = useState<number | null>(null);
     const [scaledRecipe, setScaledRecipe] = useState<Recipe | null>(null);
@@ -166,15 +158,12 @@ export default function RecipeDetail() {
         if (renderRecipe) {
             const toScale = { ...renderRecipe };
             const scaledIngredients = toScale.ingredients.map((ingredient) =>
-                scaleIngredientSentence(ingredient, scaleValue)
+                scaleIngredientSentence({ ...ingredient }, scaleValue)
             );
             toScale.ingredients = scaledIngredients;
-            setScaledRecipe(toScale);
+            setScaledRecipe({ ...toScale });
         }
     }, [scaleValue, renderRecipe]);
-
-    const highlight = (instruction: string) =>
-        highlightInstructions(recipe?.ingredients.map((i) => i.item || '') || [], instruction);
 
     return (
         <Screen
@@ -300,35 +289,12 @@ export default function RecipeDetail() {
                     {scaledRecipe?.instructions?.map((instruction, i) => (
                         <View key={i} style={styles.instructionContainer}>
                             <Text style={styles.instructionIndex}>{i + 1}</Text>
-                            <Text style={styles.instructionText}>
-                                {highlight(instruction).map(
-                                    ({ text, isHighlighted, match }, key) => {
-                                        return (
-                                            <Text
-                                                key={key}
-                                                style={
-                                                    isHighlighted ? { color: colors.primary } : {}
-                                                }
-                                                {...(isHighlighted
-                                                    ? {
-                                                          onPress: () => {
-                                                              console.log(
-                                                                  text,
-                                                                  match,
-                                                                  scaledRecipe?.ingredients[
-                                                                      match.refIndex
-                                                                  ]?.sentence
-                                                              );
-                                                          },
-                                                      }
-                                                    : {})}
-                                            >
-                                                {text}
-                                            </Text>
-                                        );
-                                    }
-                                )}
-                            </Text>
+                            <Instruction
+                                recipe={scaledRecipe}
+                                instruction={instruction}
+                                style={styles.instructionText}
+                                highlightedStyle={{ color: colors.primary }}
+                            />
                         </View>
                     ))}
                 </View>
@@ -376,6 +342,10 @@ function decimalToFraction(decimal: number): string {
 }
 
 function scaleIngredientSentence(ingredient: Ingredient, scaleValue: number | null): Ingredient {
+    if (!scaleValue) {
+        return ingredient;
+    }
+
     const amount = ingredient.json.amount[0];
 
     if (!amount) {
@@ -390,13 +360,16 @@ function scaleIngredientSentence(ingredient: Ingredient, scaleValue: number | nu
           )}`
         : `${decimalToFraction(amount.quantity * factor)}`;
 
-    const [, , fragment, rest] = ingredient.sentence?.split(/(\d)\s([A-z])/) || [];
+    const [, g, withoutAmount] =
+        /(?:[\u00BC-\u00BE\u2150-\u215E0-9-\/ ]+(?:\s?(?:-|to)\s?[\u00BC-\u00BE\u2150-\u215E0-9-\/ ]+)?)(g?)\s(.+)/.exec(
+            ingredient.sentence || ''
+        ) || [];
 
-    if (!fragment || !rest) {
+    if (!withoutAmount) {
         return ingredient;
     }
 
-    ingredient.sentence = `${scaledAmount} ${fragment}${rest}`;
+    ingredient.sentence = `${scaledAmount}${g} ${withoutAmount}`;
 
     return ingredient;
 }
